@@ -240,7 +240,7 @@ export default function App({ guardianConfig = {} }) {
         collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={hidden}
         elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
         flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} />}
-      {status === 'playing' && !paused && <button className="absolute right-4 top-24 z-20 rounded-lg border border-white/30 bg-slate-950/80 px-4 py-2 font-semibold text-white" onClick={pauseGame}>Pause</button>}
+      {status === 'playing' && !paused && <button className="forest-pause absolute right-4 top-24 z-20 px-4 py-2 font-semibold" onClick={pauseGame}>Pause</button>}
       {status === 'playing' && !paused && isTouch && <MobileControls inputRef={touchInput}
         flashlightOn={flashlightOn} onToggleFlashlight={toggleFlashlight} />}
       {status === 'catching' && <div className="caught-vignette pointer-events-none absolute inset-0" aria-hidden="true" />}

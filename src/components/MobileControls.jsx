@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 
-const buttonClass = 'pointer-events-auto flex h-14 min-w-14 select-none items-center justify-center rounded-full border border-white/40 bg-slate-950/70 px-3 text-xs font-bold text-white active:bg-indigo-600'
+const buttonClass = 'pointer-events-auto flex h-14 min-w-14 select-none items-center justify-center rounded-full border border-[#87936b]/60 bg-[#10221d]/90 px-3 text-xs font-bold text-[#e1e4d6] active:bg-[#526647]'
 
 export default function MobileControls({ inputRef, flashlightOn, onToggleFlashlight }) {
   const stickRef = useRef(null)

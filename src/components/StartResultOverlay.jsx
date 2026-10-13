@@ -10,8 +10,9 @@ export default function StartResultOverlay({
   useEffect(() => headingRef.current?.focus(), [status])
   const resultTitle = status === 'won' ? 'You reached the forest!' : status === 'lost' ? 'The guardian caught you!' : level.name
   const currentBest = bestTimes[bestTimeKey(level.id, difficulty)]
-  return <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="game-dialog-title">
-    <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-7 text-center text-slate-100 shadow-xl">
+  return <div className="forest-menu absolute inset-0 z-20 flex items-center justify-center overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="game-dialog-title">
+    <div className={`forest-panel w-full max-w-md p-7 text-center ${status === 'lost' ? 'forest-panel--lost' : ''}`}>
+      <p className="forest-kicker">{status === 'won' ? 'Beyond the treeline' : status === 'lost' ? 'Lost in the woods' : 'After dark · Forest trails'}</p>
       <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
       {status === 'ready' ? <>
         <p className="mt-3">Collect every required key, open the seals, and escape the guardian.</p>
@@ -29,12 +30,12 @@ export default function StartResultOverlay({
           <p className="font-semibold">Best times · {difficulty}</p>
           {levels.slice(0, unlockedLevel + 1).map(item => <p key={item.id} className="mt-1 flex justify-between"><span>{item.name}</span><span className="tabular-nums">{formatTime(bestTimes[bestTimeKey(item.id, difficulty)])}</span></p>)}
         </div>
-        <button className="mt-5 rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500" onClick={onStart}>Start game</button>
+        <button className="forest-primary mt-5 px-6 py-3 font-semibold" onClick={onStart}>Enter the forest</button>
         <p className="mt-3 text-sm text-slate-400">Desktop: click the scene to capture your mouse.</p>
       </> : <>
         <p className="mt-3">{status === 'won' ? `Escaped in ${formatTime(elapsed)}. Best: ${formatTime(currentBest)}.` : 'Keep moving and use turns to escape the guardian.'}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          {status === 'won' && levelIndex < levels.length - 1 && <button className="rounded-lg bg-indigo-600 px-5 py-3 text-white" onClick={onNext}>Next maze</button>}
+          {status === 'won' && levelIndex < levels.length - 1 && <button className="forest-primary px-5 py-3" onClick={onNext}>Next trail</button>}
           <button className="rounded-lg border border-slate-300 px-5 py-3" onClick={onRestart}>Play again / Menu</button>
         </div>
       </>}

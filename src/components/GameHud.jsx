@@ -14,7 +14,7 @@ export default function GameHud({
   const missingNames = level.doors
     .filter(door => required.includes(door.id) && !openedDoors.includes(door.id))
     .map(door => door.name)
-  return <>
+  return <div className="forest-hud pointer-events-none absolute inset-0">
     <div className="pointer-events-none absolute left-4 top-4 max-w-sm rounded-lg border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow">
       <p className="font-bold">{level.name} · Level {levelIndex + 1} / {levelCount}</p>
       <p className="text-lg font-bold tabular-nums" aria-label={`Elapsed time ${formatTime(elapsed)}`}>{formatTime(elapsed)}</p>
@@ -57,5 +57,5 @@ export default function GameHud({
         <p className="font-bold">{notice.name} key collected!</p>
       </div>}
     </div>
-  </>
+  </div>
 }
