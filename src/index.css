@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.guardian-caught canvas {
+  animation: caught-camera 0.12s ease-in-out 4 alternate;
+  filter: saturate(0.7) contrast(1.08);
+}
+
+.caught-vignette {
+  background: radial-gradient(circle, transparent 30%, rgba(70, 0, 8, 0.58) 100%);
+  animation: caught-vignette 0.85s ease-out forwards;
+}
+
+@keyframes caught-camera {
+  from { transform: translate3d(-2px, 1px, 0) scale(1.006); }
+  to { transform: translate3d(2px, -1px, 0) scale(1.01); }
+}
+
+@keyframes caught-vignette {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guardian-caught canvas,
+  .caught-vignette {
+    animation: none;
+  }
+}
+
+.reduce-motion .guardian-caught canvas,
+.reduce-motion .caught-vignette {
+  animation: none;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 3px;
+}
