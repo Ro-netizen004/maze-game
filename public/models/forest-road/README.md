@@ -17,3 +17,7 @@ collision and a dedicated playable layout.
 Original preserved at `src/a_forest_3_with_a_road_at_night_for_game.glb`.
 Rebuild with Blender background mode and `export-forest-road.py`.
 Development preview: `/forest-road-preview.html`.
+
+Performance update (October 2026): simplified to 67,231 triangles and 10,188,096 bytes.
+Detailed scenery is loaded only within 9 world units of the exit. Original source
+remains under src; this static backdrop does not change maze collision.

@@ -116,3 +116,15 @@ input:focus-visible,
 .forest-pause { background: #10221deb; color: #e1e4d6; border: 1px solid #78866388; border-radius: 3px; }
 .forest-pause:hover { background: #304431; }
 @media (prefers-reduced-motion: reduce) { .forest-menu button { transition: none; } }
+/* White type over the forest, with lightweight translucent controls. */
+.forest-menu { color: #fff; background: radial-gradient(ellipse at center, #07120e18, #07120e80); }
+.forest-panel { background: #07120e66; border: 0; border-radius: 0; box-shadow: none; text-shadow: 0 2px 5px #000b; }
+.forest-panel::before { display: none; }
+.forest-menu h1 { font-family: Arial, sans-serif; font-weight: 800; color: #fff; letter-spacing: 0.04em; text-transform: uppercase; }
+.forest-kicker, .forest-menu label, .forest-menu .text-slate-400, .forest-panel--lost h1 { color: #fff; }
+.forest-menu select { background: #ffffff12; color: #fff; border-color: #ffffff55; }
+.forest-menu option { background: #14231c; color: #fff; }
+.forest-menu button, .forest-menu .forest-primary { background: #ffffff16; color: #fff; border-color: #ffffff88; }
+.forest-menu button:hover, .forest-menu .forest-primary:hover { background: #ffffff30; border-color: #fff; }
+.forest-menu [class*='bg-slate-950'] { background: #0002; border: 0; color: #fff; }
+.forest-menu a:hover { color: #fff; }

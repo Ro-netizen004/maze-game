@@ -14,7 +14,7 @@ export default function MazeAtmosphere({ level, mobile }) {
   const warm = level.theme === 'temple' ? '#8be1df' : '#ffcf8b'
   return <group>
     <directionalLight position={[8, 14, -6]} color="#a0bed0" intensity={0.65} castShadow
-      shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
+      shadow-mapSize={[mobile ? 512 : 1024, mobile ? 512 : 1024]}
       shadow-camera-left={-17} shadow-camera-right={17} shadow-camera-top={17} shadow-camera-bottom={-17}
       shadow-camera-far={45} shadow-normalBias={0.035} shadow-bias={-0.0001} />
     {fixtures.map(({ cell, side }, index) => {
@@ -25,7 +25,7 @@ export default function MazeAtmosphere({ level, mobile }) {
         <mesh><boxGeometry args={[0.19, 0.23, 0.19]} /><meshStandardMaterial color={warm} emissive={warm} emissiveIntensity={2} /></mesh>
         {[0.17, -0.17].map(y => <mesh key={y} position={[0, y, 0]}><boxGeometry args={[0.26, 0.06, 0.26]} /><meshStandardMaterial color="#33454b" metalness={0.65} roughness={0.4} /></mesh>)}
         {index < 2 && <pointLight position={[-side[1] * 0.15, 0, -side[0] * 0.15]} color={warm} intensity={7} distance={5} decay={2}
-          castShadow shadow-mapSize={[256, 256]} shadow-normalBias={0.035} />}
+          />}
       </group>
     })}
     {level.grid.flatMap((row, r) => row.map((cell, c) => {

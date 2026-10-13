@@ -31,7 +31,7 @@ export default function StartResultOverlay({
           {levels.slice(0, unlockedLevel + 1).map(item => <p key={item.id} className="mt-1 flex justify-between"><span>{item.name}</span><span className="tabular-nums">{formatTime(bestTimes[bestTimeKey(item.id, difficulty)])}</span></p>)}
         </div>
         <button className="forest-primary mt-5 px-6 py-3 font-semibold" onClick={onStart}>Enter the forest</button>
-        <p className="mt-3 text-sm text-slate-400">Desktop: click the scene to capture your mouse.</p>
+        <p className="mt-3 text-sm text-slate-400">WASD to move · Shift to run · Space to jump<br />Click the scene to capture your mouse.</p>
       </> : <>
         <p className="mt-3">{status === 'won' ? `Escaped in ${formatTime(elapsed)}. Best: ${formatTime(currentBest)}.` : 'Keep moving and use turns to escape the guardian.'}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">

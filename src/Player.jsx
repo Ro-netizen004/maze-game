@@ -179,7 +179,7 @@ export default function Player({
     const moving = Math.hypot(vertical, horizontal) > 0
     const sprinting = input.sprint && moving && player.stamina > 0 && !player.hiddenIn
     player.sprinting = sprinting
-    const drain = level.mechanics.sprintDrain
+    const drain = level.mechanics.sprintDrain * 0.55
     const regen = level.mechanics.staminaRegen
     player.stamina = Math.max(0, Math.min(100, player.stamina + (sprinting ? -drain : regen) * elapsed))
     const roundedStamina = Math.round(player.stamina)
@@ -188,7 +188,7 @@ export default function Player({
       onStaminaChange(roundedStamina)
     }
     player.trapSlow = Math.max(0, player.trapSlow - elapsed)
-    const moveSpeed = speed * (sprinting ? 1.55 : 1) * (player.trapSlow > 0 ? 0.45 : 1)
+    const moveSpeed = speed * (sprinting ? 1.8 : 1) * (player.trapSlow > 0 ? 0.45 : 1)
     const dx = player.hiddenIn ? 0 : (forward.current.x * vertical + right.current.x * horizontal) / length * moveSpeed
     const dz = player.hiddenIn ? 0 : (forward.current.z * vertical + right.current.z * horizontal) / length * moveSpeed
 
@@ -199,7 +199,7 @@ export default function Player({
     player.jump = false
 
     for (let i = 0; i < steps; i++) {
-      const [nextX, nextZ] = movePlayer(level, camera.position.x, camera.position.z, dx * dt, dz * dt, openedDoors)
+      const [nextX, nextZ] = movePlayer(level, camera.position.x, camera.position.z, dx * dt, dz * dt, openedDoors, 0.3, 0.18)
       camera.position.set(nextX, camera.position.y, nextZ)
 
       player.velocityY -= 14 * dt

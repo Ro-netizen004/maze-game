@@ -53,9 +53,10 @@ export function createCustomMonsterRig(source) {
   }
   const head = joint('head', 'sloping neck', [...parts.keys()].filter(name => /cranium|cheek|eye|gum|jaw|needle|maw|antenna|lure/.test(name)), upper)
   const lure = joint('lure', 'angler antenna', ['angler antenna', 'luminous lure bulb'], head)
+  const jaw = joint('jaw', 'lower jaw rim l', [...parts.keys()].filter(name => /lower jaw|lower needle/.test(name)), head, 0.06)
   let time = 0, blend = 0
   return {
-    group: root, joints: { legs, arms, head, lure, upper },
+    group: root, joints: { legs, arms, head, lure, upper, jaw },
     update(delta, moving, chasing, attacking = false) {
       time += delta * (chasing ? 8 : 5)
       blend += ((moving ? 1 : 0) - blend) * (1 - Math.exp(-delta * 8))
@@ -79,6 +80,7 @@ export function createCustomMonsterRig(source) {
       head.rotation.z = -Math.sin(time * 0.5 - 0.35) * 0.06 * blend
       head.rotation.x = Math.sin(time * 0.6) * 0.025 - (attacking ? 0.12 : 0)
       lure.rotation.z = Math.sin(time * 0.5 - 0.8) * (0.1 + 0.08 * blend)
+      jaw.rotation.x = 0.035 + (Math.sin(time * 0.65) + 1) * (chasing ? 0.055 : 0.025) + (attacking ? 0.15 : 0)
     },
     dispose() { materials.forEach(material => material.dispose()) },
   }

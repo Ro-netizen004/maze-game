@@ -189,11 +189,11 @@ export default function App({ guardianConfig = {} }) {
   }
   return (
     <div className={`relative h-screen w-full ${status === 'catching' ? 'guardian-caught' : ''}`}>
-      <Canvas shadows dpr={isTouch ? [1, 1.25] : [1, 1.75]}
+      <Canvas shadows dpr={isTouch ? [1, 1] : [1, 1.25]}
         gl={{ antialias: !isTouch, powerPreference: isTouch ? 'low-power' : 'high-performance' }}
-        camera={{ position: [-6, 1.6, -8], fov: 75, near: 0.03 }}>
-        <color attach="background" args={[activatedShrines.length ? '#101d29' : '#0b1821']} />
-        <fog attach="fog" args={['#203536', 4, 18 + activatedShrines.length * (level.mechanics.shrineVisibilityBoost || 0)]} />
+        camera={{ position: [-6, 1.6, -8], fov: 75, near: 0.03, far: 22 }}>
+        <color attach="background" args={['#203536']} />
+        <fog attach="fog" args={['#203536', 3, 14 + Math.min(activatedShrines.length * (level.mechanics.shrineVisibilityBoost || 0), 4)]} />
         <hemisphereLight args={['#91afc2', '#26372f', 0.48]} />
         <MazeAtmosphere level={level} mobile={isTouch} />
         <EnvironmentalDust mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />

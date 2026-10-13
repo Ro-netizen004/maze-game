@@ -69,7 +69,7 @@ export default function Flashlight({
       shadow-mapSize={[mobile ? 512 : 1024, mobile ? 512 : 1024]} shadow-camera-near={0.05} shadow-camera-far={20}
       shadow-bias={-0.0001} shadow-normalBias={0.015} />
     <spotLight ref={spill} position={[0.25, -0.25, -0.9]} target={target} color="#d9e9ee" intensity={available ? intensity * 0.38 : 0}
-      distance={14} angle={1.05} penumbra={1} decay={2} castShadow
+      distance={14} angle={1.05} penumbra={1} decay={2}
       shadow-mapSize={[256, 256]} shadow-camera-near={0.05} shadow-camera-far={14}
       shadow-bias={-0.0001} shadow-normalBias={0.025} />
   </primitive>

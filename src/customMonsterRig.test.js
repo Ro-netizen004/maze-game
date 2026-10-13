@@ -18,16 +18,19 @@ test('custom GLB joints animate and preserve source geometry across restarts', a
     assert.ok(rig.joints.legs.every(leg => leg.hip.children.length > 1 && leg.knee.children.length > 1))
     const poses = new Set()
     const leans = []
+    const mouthPoses = new Set()
     for (let frame = 0; frame < 300; frame++) {
       rig.update(1 / 60, true, frame > 60)
       poses.add(rig.joints.legs[0].hip.rotation.x.toFixed(3))
       leans.push(rig.joints.upper.rotation.z)
+      mouthPoses.add(rig.joints.jaw.rotation.x.toFixed(3))
       const box = new Box3().setFromObject(rig.group)
       assert.ok(Number.isFinite(box.max.y) && box.max.y < 3)
       assert.ok(box.max.x - box.min.x < 1.5, 'sway must fit inside corridor clearance')
       assert.ok(box.min.y > -0.2, `foot below floor: ${box.min.y}`)
     }
     assert.ok(poses.size > 30)
+    assert.ok(rig.joints.jaw.children.length > 1 && mouthPoses.size > 20, 'lower teeth must move with the breathing jaw')
     assert.ok(Math.min(...leans) < -0.07 && Math.max(...leans) > 0.07, 'torso must hang in both directions')
     rig.update(1 / 60, false, false, true)
     assert.ok(rig.joints.arms[0].shoulder.rotation.x < -0.4)

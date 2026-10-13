@@ -103,3 +103,20 @@ test('repeated small steps stay outside every map wall', () => {
     }
   }
 })
+
+test('forest shoulders allow wider movement but cannot bypass gates or wall rows', () => {
+  const level = { grid: [[1, 1, 1], [1, 0, 1], [1, 0, 1]], doors: [] }
+  let position = [0, 0]
+  for (let step = 0; step < 100; step++) position = movePlayer(level, ...position, 0.02, 0, [], playerRadius, 0.18)
+  assert.ok(position[0] > 0.8 && position[0] < 0.9, 'shoulder expands the passage')
+  for (const map of levels) {
+    for (const door of map.doors) {
+      const [x, z] = doorPosition(map, door)
+      for (const side of [-1, 1]) {
+        let p = door.axis === 'x' ? [x - 0.8, z + side * 0.95] : [x + side * 0.95, z - 0.8]
+        for (let step = 0; step < 80; step++) p = movePlayer(map, ...p, door.axis === 'x' ? 0.025 : 0, door.axis === 'z' ? 0.025 : 0, [], playerRadius, 0.18)
+        assert.ok(door.axis === 'x' ? p[0] < x : p[1] < z, `${map.name}: no shoulder bypass of ${door.id}`)
+      }
+    }
+  }
+})

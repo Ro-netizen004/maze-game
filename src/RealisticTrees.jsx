@@ -23,7 +23,7 @@ export default function RealisticTrees({ trees, bushes }) {
           const height = bush ? item.scale[1] * 1.4 : item.scale[1]
           transform.position.set(item.position[0], 0, item.position[2])
           transform.rotation.set(0, (index * 2.399 + item.position[0]) % (Math.PI * 2), 0)
-          transform.scale.set(bush ? 0.7 : height * 0.5, height, bush ? 0.7 : height * 0.5)
+          transform.scale.set(bush ? 0.55 : height * 0.5, height, bush ? 0.55 : height * 0.5)
           transform.updateMatrix()
           mesh.setMatrixAt(index, transform.matrix)
         })
