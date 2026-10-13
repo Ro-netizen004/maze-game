@@ -50,7 +50,7 @@ function Grass({ items, reducedMotion }) {
   </Instances>
 }
 
-function GroundMist({ level }) {
+export function GroundMist({ level }) {
   const texture = useMemo(() => {
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = 64

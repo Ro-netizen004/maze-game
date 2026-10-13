@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import ForestMaze from './ForestMaze'
+import FirstForest from './FirstForest'
 import Player from './Player'
 import { levelTemplates } from './levels'
 import { createSeededLevel } from './levelRuntime'
@@ -197,8 +198,9 @@ export default function App({ guardianConfig = {} }) {
         <hemisphereLight args={['#91afc2', '#26372f', 0.48]} />
         <MazeAtmosphere level={level} mobile={isTouch} />
         <EnvironmentalDust mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
-        <ForestMaze level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />
-        <ForestExit level={level} />
+        {levelIndex === 0 ? <FirstForest level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />
+          : <ForestMaze level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />}
+        {levelIndex !== 0 && <ForestExit level={level} />}
         <Monster
           key={`monster-${levelIndex}-${attempt}`}
           level={level}
