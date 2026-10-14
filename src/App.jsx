@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import ForestAmbience from './ForestAmbience.jsx'
 import { graphicsPreset } from './graphics.js'
+import { canActivateShrine } from './objectives.js'
 import ForestMaze from './ForestMaze'
 import Player from './Player'
 import { levelTemplates } from './levels'
@@ -238,7 +239,10 @@ export default function App({ guardianConfig = {} }) {
           onPromptChange={setPrompt} onStaminaChange={setStamina} onHiddenChange={setHidden}
           onNoise={noise => { playerNoise.current = { ...noise, id: ++noiseId.current } }}
           onTriggerTrap={id => setTriggeredTraps(items => items.includes(id) ? items : [...items, id])}
-          onActivateShrine={id => setActivatedShrines(items => items.includes(id) ? items : [...items, id])}
+          onActivateShrine={id => setActivatedShrines(items => {
+            const shrine=level.shrines.find(s=>s.id===id)
+            return !shrine || items.includes(id) || !canActivateShrine(shrine,openedDoors,items) ? items : [...items,id]
+          })}
           onOpenDoor={id => setOpenedDoors(items => items.includes(id) ? items : [...items, id])}
           onWin={handleWin} />}
         <Flashlight intensity={settings.flashlightIntensity} battery={flashlightBattery} on={flashlightOn}

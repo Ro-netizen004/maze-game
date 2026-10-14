@@ -1,3 +1,4 @@
+import { canActivateShrine } from './objectives.js'
 const cellId = cell => cell.join(',')
 
 export function hashSeed(seed) {
@@ -78,6 +79,7 @@ export function canOpenDoor(level, door, collectedKeys = [], openedDoors = [], a
   if (door.id === 'exit') {
     const required = level.mechanics?.requiredDoors || level.doors.filter(item => item.id !== 'exit' && item.kind !== 'shortcut').map(item => item.id)
     return required.every(id => openedDoors.includes(id))
+      && (level.mechanics?.requiredShrines||[]).every(id=>activatedShrines.includes(id))
   }
   if (door.kind === 'shortcut') {
     return (door.requiresKeys || []).every(id => collectedKeys.includes(id))
@@ -89,6 +91,7 @@ export function canOpenDoor(level, door, collectedKeys = [], openedDoors = [], a
 export function isLevelSolvable(level) {
   const keys = new Set()
   const opened = new Set()
+  const activated = new Set()
   let changed = true
   while (changed) {
     changed = false
@@ -100,12 +103,18 @@ export function isLevelSolvable(level) {
       }
     }
     for (const door of level.doors) {
-      if (door.kind === 'shortcut' || opened.has(door.id) || !canOpenDoor(level, door, [...keys], [...opened])) continue
+      if (door.kind === 'shortcut' || opened.has(door.id) || !canOpenDoor(level, door, [...keys], [...opened], [...activated])) continue
       const [row, column] = door.cell
       const adjacent = [[row + 1, column], [row - 1, column], [row, column + 1], [row, column - 1]]
       if (adjacent.some(cell => reachable.has(cellId(cell)))) {
         opened.add(door.id)
         changed = true
+      }
+    }
+    for(const shrine of level.shrines||[]) {
+      if(!activated.has(shrine.id) && reachable.has(cellId(shrine.cell)) && canActivateShrine(shrine,[...opened],[...activated])) {
+        activated.add(shrine.id)
+        changed=true
       }
     }
   }

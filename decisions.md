@@ -245,3 +245,11 @@ Use the supplied shooter lobby reference for layout: centered title/play action,
 ## 23. Foreground flashlight and entrance shelter
 
 Render the held flashlight in a small foreground scene after clearing world depth, so hedges cannot occlude or cut through it. Keep its fixed camera-relative position and render its beams in the world as before. Add one guaranteed hedge hiding pocket beside the outside entrance step on each maze, in addition to the roughly 30% optional recesses. Keep it isolated from adjacent pockets and retain gate progression.
+
+## 24. Recognizable hiding markers
+
+Mark every usable hiding spot with the same small wooden sign: a pale green crouching figure behind cover and HIDE lettering. Place hedge signs beside the pocket entrance without occupying its walking center. A softly emissive painted face remains readable at night without new lights or animation. Reuse one generated texture for all signs and explain the cue in the existing guide. Preserve E interaction and hiding mechanics.
+
+## 25. Connected escape objectives
+
+Ruby's key opens its seal, which awakens Dawn. Sapphire's key opens its seal, which awakens Moon. Lit Dawn and Moon enable Watcher; all three runes plus both inner seals are required to open the exit. The HUD names the next step, locked rune prompts explain missing dependencies, and the solvability checker simulates ritual progress. Preserve the original maps, hiding and guardian behavior. Multiplayer remains a proposal in MULTIPLAYER_DESIGN.md: shared clues, paired mechanisms, ritual channeling and group evacuation/rescue; do not imply networking is implemented.

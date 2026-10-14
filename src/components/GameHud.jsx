@@ -1,4 +1,5 @@
 import { formatTime } from '../runTimer'
+import { nextObjective } from '../objectives.js'
 import { FLASHLIGHT_LOW_THRESHOLD, flashlightBatteryStatus } from '../flashlightBattery'
 
 function KeyIcon() {
@@ -11,16 +12,13 @@ export default function GameHud({
 }) {
   const required = level.mechanics.requiredDoors || []
   const openedRequired = required.filter(id => openedDoors.includes(id)).length
-  const missingNames = level.doors
-    .filter(door => required.includes(door.id) && !openedDoors.includes(door.id))
-    .map(door => door.name)
   return <>
     <div className="pointer-events-none absolute left-4 top-4 max-w-sm rounded-lg border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow">
       <p className="font-bold">{level.name} · Level {levelIndex + 1} / {levelCount}</p>
       <p className="text-lg font-bold tabular-nums" aria-label={`Elapsed time ${formatTime(elapsed)}`}>{formatTime(elapsed)}</p>
       <p>Keys {collectedKeys.length} / {level.keys.length} · Inner doors {openedRequired} / {required.length}</p>
-      <p className="text-emerald-300">Runes lit {activatedShrines.length} / {level.shrines.length} · Explore the side clearings</p>
-      <p>{openedDoors.includes('exit') ? 'Exit open — reach the finish!' : missingNames.length ? `Find keys and clear: ${missingNames.join(', ')}.` : 'All seals cleared — approach the exit door.'}</p>
+      <p className="text-emerald-300">Runes lit {activatedShrines.length} / {level.shrines.length} · Required for escape</p>
+      <p className="mt-1 font-semibold">{nextObjective(level,collectedKeys,openedDoors,activatedShrines)}</p>
       <p>{isTouch ? 'Use the virtual controls to move and look.' : 'WASD · Mouse look (drag if capture is unavailable) · Shift sprint · F flashlight · Space jump · E interact · Esc pause'}</p>
       <p>Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>
       <p className={`font-semibold ${guardianAlert === 'chase' ? 'text-red-400' : guardianAlert === 'investigate' || guardianAlert === 'search' ? 'text-amber-300' : 'text-emerald-300'}`}>

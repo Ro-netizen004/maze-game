@@ -6,6 +6,7 @@ import { cellSize, cellPosition, doorPosition, canOpenDoor } from './levels'
 import { movePlayer } from './collision'
 import { readInput } from './input'
 import { worldCell } from './navigation'
+import { canActivateShrine, shrineRequirement } from './objectives.js'
 import PlayerAvatar from './PlayerAvatar'
 
 const eyeHeight = 1.6
@@ -232,7 +233,7 @@ export default function Player({
         const [doorX, doorZ] = doorPosition(level, door)
         if (openedDoors.includes(door.id) || Math.hypot(camera.position.x - doorX, camera.position.z - doorZ) >= interactionDistance) continue
         const available = canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines)
-        interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : `${door.name} door is locked` }
+        interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : door.id==='exit' ? 'Exit needs both inner seals and all three runes' : `${door.name} door is locked` }
         break
       }
     }
@@ -240,7 +241,8 @@ export default function Player({
       for (const shrine of level.shrines) {
         const [x, z] = cellPosition(level, shrine.cell)
         if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < (shrine.type==='rune'?3:interactionDistance)) {
-          interaction = { type: 'shrine', id: shrine.id, label: shrine.type==='rune'?`Light the ${shrine.name} rune`:'Activate shrine' }
+          const available=canActivateShrine(shrine,openedDoors,activatedShrines)
+          interaction = { type: 'shrine', id: shrine.id, available, label: available ? shrine.type==='rune'?`Light the ${shrine.name} rune`:'Activate shrine' : shrineRequirement(level,shrine,openedDoors,activatedShrines) }
           break
         }
       }
@@ -260,7 +262,7 @@ export default function Player({
         onOpenDoor(interaction.id)
         onNoise({ cell: worldCell(level, camera.position.x, camera.position.z), intensity: 6, source: 'door' })
       }
-      if (interaction.type === 'shrine') onActivateShrine(interaction.id)
+      if (interaction.type === 'shrine' && interaction.available) onActivateShrine(interaction.id)
       if (interaction.type === 'hiding') {
         const spot=level.hidingSpots.find(item=>item.id===interaction.id)
         if(spot.type==='shrub') {

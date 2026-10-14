@@ -23,7 +23,7 @@ test('three rune gardens attach without changing any original interior corridor'
     }
     assert.ok(isLevelSolvable(level))
     assert.equal(canOpenDoor(level,level.doors.find(d=>d.id==='exit'),[],[]),false)
-    assert.equal(canOpenDoor(level,level.doors.find(d=>d.id==='exit'),level.keys.map(k=>k.id),level.mechanics.requiredDoors),true)
+    assert.equal(canOpenDoor(level,level.doors.find(d=>d.id==='exit'),level.keys.map(k=>k.id),level.mechanics.requiredDoors,['dawn','moon','watch']),true)
   }
 })
 

@@ -1,5 +1,6 @@
 import { cellPosition } from './levels'
 import RitualCircle from './RitualCircle.jsx'
+import HidingSpotMarkers from './HidingSpotMarkers.jsx'
 
 function Marker({ cell, level, children }) {
   const [x, z] = cellPosition(level, cell)
@@ -9,6 +10,7 @@ function Marker({ cell, level, children }) {
 export default function MechanicObjects({ level, triggeredTraps = [], activatedShrines = [] }) {
   return (
     <group>
+      <HidingSpotMarkers level={level} />
       {level.hidingSpots.filter(spot=>spot.type!=='shrub').map(spot => (
         <Marker key={spot.id} level={level} cell={spot.cell}>
           <mesh castShadow position={[0, 0.75, 0]}>

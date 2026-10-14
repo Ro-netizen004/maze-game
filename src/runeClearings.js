@@ -28,6 +28,10 @@ export function addRuneClearings(level) {
     keys:level.keys.map(move),doors:level.doors.map(move),
     keySpawnPools:Object.fromEntries(Object.entries(level.keySpawnPools).map(([id,pool])=>[id,pool.map(shift)])),
     hidingSpots:level.hidingSpots.map(move),traps:level.traps.map(move),noisyZones:level.noisyZones.map(move),
-    shrines:clearings.map(clearing=>({...clearing,type:'rune'})),
+    mechanics:{...level.mechanics,requiredShrines:['dawn','moon','watch']},
+    shrines:clearings.map(clearing=>({...clearing,type:'rune',
+      requiresDoors:clearing.id==='dawn'?['ruby']:clearing.id==='moon'?['sapphire']:[],
+      requiresShrines:clearing.id==='watch'?['dawn','moon']:[],
+    })),
   }
 }
