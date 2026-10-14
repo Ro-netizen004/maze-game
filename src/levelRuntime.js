@@ -41,6 +41,7 @@ export function createSeededLevel(template, seed = template.id || template.name)
     shrines: (template.shrines || []).map(item => ({ ...item, cell: [...item.cell] })),
     noisyZones: (template.noisyZones || []).map(item => ({ ...item, cell: [...item.cell] })),
     mechanics: { ...template.mechanics },
+    clues: (template.clues || []).map(clue => ({ ...clue, cell: [...clue.cell] })),
   }
 }
 
@@ -74,10 +75,10 @@ export function reachableCells(level, start = level.start, openedDoors = []) {
   return visited
 }
 
-export function canOpenDoor(level, door, collectedKeys = [], openedDoors = [], activatedShrines = []) {
+export function canOpenDoor(level, door, collectedKeys = [], openedDoors = [], activatedShrines = [], collectedClues = []) {
   if (door.id === 'exit') {
     const required = level.mechanics?.requiredDoors || level.doors.filter(item => item.id !== 'exit' && item.kind !== 'shortcut').map(item => item.id)
-    return required.every(id => openedDoors.includes(id))
+    return required.every(id => openedDoors.includes(id)) && (level.mechanics?.requiredClues || []).every(id => collectedClues.includes(id))
   }
   if (door.kind === 'shortcut') {
     return (door.requiresKeys || []).every(id => collectedKeys.includes(id))
@@ -89,6 +90,7 @@ export function canOpenDoor(level, door, collectedKeys = [], openedDoors = [], a
 export function isLevelSolvable(level) {
   const keys = new Set()
   const opened = new Set()
+  const clues = new Set()
   let changed = true
   while (changed) {
     changed = false
@@ -99,8 +101,11 @@ export function isLevelSolvable(level) {
         changed = true
       }
     }
+    for (const clue of level.clues || []) {
+      if (reachable.has(cellId(clue.cell)) && !clues.has(clue.id)) { clues.add(clue.id); changed = true }
+    }
     for (const door of level.doors) {
-      if (door.kind === 'shortcut' || opened.has(door.id) || !canOpenDoor(level, door, [...keys], [...opened])) continue
+      if (door.kind === 'shortcut' || opened.has(door.id) || !canOpenDoor(level, door, [...keys], [...opened], [], [...clues])) continue
       const [row, column] = door.cell
       const adjacent = [[row + 1, column], [row - 1, column], [row, column + 1], [row, column - 1]]
       if (adjacent.some(cell => reachable.has(cellId(cell)))) {

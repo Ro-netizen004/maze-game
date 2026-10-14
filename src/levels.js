@@ -2,16 +2,20 @@ import { canOpenDoor as canOpenRuntimeDoor, createSeededLevel } from './levelRun
 
 export const cellSize = 2
 const layouts = [
-  { name: 'Stonegate', color: '#526777', rows: ['#.#######', '#...#...#', '###.#.#.#', '#.....#.#', '#.#####.#', '#...#...#', '###.#.###', '#.......#', '#######.#'] },
+  { name: 'Stonegate', color: '#526777', rows: ['#.###########', '#...#########', '###.#########', '#.....#.....#', '#.##..#..##.#', '#...........#', '#.##....#.###', '#.....#.#..##', '#.#.##..#..##', '#.#..#..#####', '#..##.....###', '#...........#', '###########.#'] },
   { name: 'Amber Halls', color: '#aa753c', rows: ['#.#########', '#...#.....#', '###.#.###.#', '#...#.#...#', '#.###.#.###', '#.....#...#', '#.#######.#', '#...#.....#', '###.#.###.#', '#.....#...#', '#########.#'] },
   { name: 'Twilight Labyrinth', color: '#75618e', rows: ['#.###########', '#...#.......#', '###.#.#####.#', '#...#...#...#', '#.#####.#.###', '#.......#...#', '#.#########.#', '#...#.......#', '###.#.#####.#', '#...#.#.....#', '#.###.#.###.#', '#.....#...#.#', '###########.#'] },
 ]
 const runtimeConfig = {
   Stonegate: {
-    keySpawnPools: { ruby: [[1, 2], [1, 3]], sapphire: [[5, 1], [5, 2], [5, 3]] },
-    hidingSpots: [{ id: 'stone-alcove-1', type: 'alcove', cell: [3, 1] }, { id: 'stone-alcove-2', type: 'alcove', cell: [7, 3] }],
+    keySpawnPools: { ruby: [[1, 3]], sapphire: [[3, 11]], emerald: [[5, 5]], amber: [[9, 7]] },
+    hidingSpots: [{ id: 'stone-alcove-1', type: 'alcove', cell: [3, 1] }, { id: 'stone-alcove-2', type: 'alcove', cell: [7, 1] }],
     traps: [{ id: 'stone-plate-1', type: 'pressure', cell: [3, 2] }, { id: 'stone-plate-2', type: 'pressure', cell: [7, 4] }],
-    mechanics: { requiredDoors: ['ruby', 'sapphire'], sprintDrain: 30, staminaRegen: 20, trapSlowSeconds: 1.5 },
+    mechanics: { requiredDoors: ['ruby', 'emerald', 'amber', 'sapphire'], requiredClues: ['dawn-note', 'dusk-note'], sprintDrain: 30, staminaRegen: 20, trapSlowSeconds: 1.5 },
+    clues: [
+      { id: 'dawn-note', name: 'Dawn journal', cell: [7, 10], text: 'The keeper hid the Amber key at FALLEN ARCH. Follow the southern loop, then return to the Amber door by MOON TURN.' },
+      { id: 'dusk-note', name: 'Dusk journal', cell: [9, 4], text: 'The Sapphire key waits at MOON HOLLOW, in the northeast grove. Clear all four seals and take both journals to the exit.' },
+    ],
   },
   'Amber Halls': {
     keySpawnPools: { ruby: [[1, 2], [1, 3]], sapphire: [[5, 2], [5, 3], [5, 4]] },
@@ -37,15 +41,24 @@ export const levelTemplates = layouts.map(({ rows, ...level }) => {
   theme: { Stonegate: 'stone', 'Amber Halls': 'timber', 'Twilight Labyrinth': 'temple' }[level.name],
   start: [0, 1],
   monster: { Stonegate: [[5, 1], [3, 5]], 'Amber Halls': [[5, 1], [3, 1]], 'Twilight Labyrinth': [[5, 1], [5, 5]] }[level.name],
-  keys: [
+  keys: level.name === 'Stonegate' ? [
+    { id: 'ruby', keyId: 'ruby', name: 'Ruby', color: '#ff5b68', cell: [1, 3] },
+    { id: 'sapphire', keyId: 'sapphire', name: 'Sapphire', color: '#4dbbff', cell: [3, 11] },
+    { id: 'emerald', keyId: 'emerald', name: 'Emerald', color: '#8ddca0', cell: [5, 5] },
+    { id: 'amber', keyId: 'amber', name: 'Amber', color: '#ffd18b', cell: [9, 7] },
+  ] : [
     { id: 'ruby', keyId: 'ruby', name: 'Ruby', color: '#ff5b68', cell: [1, 3] },
     { id: 'sapphire', keyId: 'sapphire', name: 'Sapphire', color: '#4dbbff', cell: { Stonegate: [5, 1], 'Amber Halls': [5, 3], 'Twilight Labyrinth': [5, 5] }[level.name] },
   ],
   doors: [
     { id: 'ruby', keyId: 'ruby', name: 'Ruby', color: '#ff5b68', cell: [2, 3], axis: 'z' },
-    { id: 'sapphire', keyId: 'sapphire', name: 'Sapphire', color: '#4dbbff', cell: { Stonegate: [7, 6], 'Amber Halls': [8, 9], 'Twilight Labyrinth': [8, 11] }[level.name], axis: level.name === 'Stonegate' ? 'x' : 'z' },
+    { id: 'sapphire', keyId: 'sapphire', name: 'Sapphire', color: '#4dbbff', cell: { Stonegate: [11, 10], 'Amber Halls': [8, 9], 'Twilight Labyrinth': [8, 11] }[level.name], axis: level.name === 'Stonegate' ? 'x' : 'z' },
     { id: 'exit', name: 'Exit', color: '#ffd75b', cell: [rows.length - 1, rows[0].length - 2], axis: 'z', offset: -0.7 },
     ...(config.shortcut ? [config.shortcut] : []),
+    ...(level.name === 'Stonegate' ? [
+      { id: 'emerald', keyId: 'emerald', name: 'Emerald', color: '#8ddca0', cell: [6, 9], axis: 'z' },
+      { id: 'amber', keyId: 'amber', name: 'Amber', color: '#ffd18b', cell: [8, 3], axis: 'z' },
+    ] : []),
   ],
   end: [rows.length - 1, rows[0].length - 2],
   grid: rows.map(row => [...row].map(cell => cell === '#' ? 1 : 0)),
@@ -55,6 +68,7 @@ export const levelTemplates = layouts.map(({ rows, ...level }) => {
   shrines: config.shrines || [],
   noisyZones: config.noisyZones || [],
   mechanics: config.mechanics,
+  clues: config.clues || [],
 }})
 export const levels = levelTemplates.map(level => createSeededLevel(level, level.id))
 export function cellPosition(level, [row, column]) {
@@ -71,6 +85,6 @@ export function doorBounds(level, door = level.doors.find(item => item.id === 'e
     ? { left: x - 0.15, right: x + 0.15, front: z - 1, back: z + 1 }
     : { left: x - 1, right: x + 1, front: z - 0.15, back: z + 0.15 }
 }
-export function canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines = []) {
-  return canOpenRuntimeDoor(level, door, collectedKeys, openedDoors, activatedShrines)
+export function canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines = [], collectedClues = []) {
+  return canOpenRuntimeDoor(level, door, collectedKeys, openedDoors, activatedShrines, collectedClues)
 }

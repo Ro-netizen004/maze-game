@@ -18,10 +18,17 @@ function Key({ position, color }) {
   )
 }
 
-export default function QuestObjects({ level, collectedKeys, openedDoors }) {
+export default function QuestObjects({ level, collectedKeys, collectedClues = [], openedDoors }) {
   return (
     <group>
       {level.keys.filter(key => !collectedKeys.includes(key.id)).map(key => <Key key={key.id} position={cellPosition(level, key.cell)} color={key.color} />)}
+      {(level.clues || []).filter(clue => !collectedClues.includes(clue.id)).map(clue => {
+        const [x, z] = cellPosition(level, clue.cell)
+        return <group key={clue.id} position={[x, 0, z]}>
+          <mesh position={[0, 0.35, 0]} castShadow><cylinderGeometry args={[0.28, 0.38, 0.7, 7]} /><meshStandardMaterial color="#584837" /></mesh>
+          <mesh position={[0, 0.73, 0]} rotation={[-0.08, 0.3, 0]}><boxGeometry args={[0.42, 0.06, 0.3]} /><meshStandardMaterial color="#e2cf9e" emissive="#8e6b31" emissiveIntensity={0.35} /></mesh>
+        </group>
+      })}
       {level.doors.map(door => {
         const [x, z] = doorPosition(level, door)
         return <group key={door.id} position={[x, 0, z]} rotation={[0, door.axis === 'x' ? Math.PI / 2 : 0, 0]}>

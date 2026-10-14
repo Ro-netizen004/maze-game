@@ -15,7 +15,7 @@ export default function StartResultOverlay({
       <p className="forest-kicker">{status === 'won' ? 'Beyond the treeline' : status === 'lost' ? 'Lost in the woods' : 'After dark · Forest trails'}</p>
       <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
       {status === 'ready' ? <>
-        <p className="mt-3">Collect every required key, open the seals, and escape the guardian.</p>
+        <p className="mt-3">{level.clues?.length ? 'Recover four keys and the keeper’s two journals. Follow landmark clues, open every seal, and escape through the forest loops.' : 'Collect every required key, open the seals, and escape the guardian.'}</p>
         <label className="mt-5 block text-left text-sm font-semibold" htmlFor="level">Choose a maze</label>
         <select id="level" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={levelIndex} onChange={event => onChooseLevel(Number(event.target.value))}>
           {levels.map((item, index) => <option key={item.id} value={index} disabled={index > unlockedLevel}>

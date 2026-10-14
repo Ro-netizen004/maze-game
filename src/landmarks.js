@@ -2,8 +2,8 @@ const palettes = ['#e9b85b', '#74d4ca', '#f18b9d', '#b8a0ef', '#9aca6b', '#7db6e
 const symbols = ['sun', 'eye', 'diamond', 'moon', 'star', 'mountain']
 const definitions = {
   Stonegate: [
-    ['CROWN GATE', [1, 1]], ['OWL WATCH', [3, 3]], ['ROSE COURT', [5, 1]],
-    ['MOON TURN', [7, 3]], ['LAST BASTION', [7, 7]],
+    ['CROWN GATE', [1, 1]], ['OWL WATCH', [4, 5]], ['MOON HOLLOW', [3, 11]],
+    ['MOON TURN', [7, 3]], ['FALLEN ARCH', [9, 7]], ['LAST BASTION', [11, 9]],
   ],
   'Amber Halls': [
     ['SUN PORCH', [1, 1]], ['OWL CORNER', [3, 1]], ['COPPER MILL', [5, 3]],

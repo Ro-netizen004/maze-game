@@ -40,3 +40,9 @@ Original models are preserved in `src`; browser-ready copies live in
 `public/models`. The optional Blender export scripts regenerate those copies.
 Portable tools, dependencies, build output, and local review screenshots are
 excluded from Git.
+
+Stonegate forest quest: explore the larger looping trails, recover Ruby, Emerald,
+Amber and Sapphire keys, and read the Dawn and Dusk journals with E. The journal
+panel gives the next objective and landmark hint. All four inner seals and both
+journals are required before the exit opens. Wider clearings allow movement around
+the guardian, with grass along trail shoulders. Shift runs; Space jumps.

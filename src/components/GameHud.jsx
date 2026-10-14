@@ -1,5 +1,6 @@
 import { formatTime } from '../runTimer'
 import { FLASHLIGHT_LOW_THRESHOLD, flashlightBatteryStatus } from '../flashlightBattery'
+import { forestObjective } from '../forestQuest'
 
 function KeyIcon() {
   return <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="8" cy="8" r="5" /><path d="m12 12 9 9m-4-4 3-3m-6 0 3-3" /></svg>
@@ -7,13 +8,15 @@ function KeyIcon() {
 
 export default function GameHud({
   level, levelIndex, levelCount, collectedKeys, openedDoors, stamina, hidden, elapsed, prompt, notice, isTouch,
-  flashlightBattery, flashlightOn, guardianAlert,
+  flashlightBattery, flashlightOn, guardianAlert, collectedClues = [],
 }) {
   const required = level.mechanics.requiredDoors || []
   const openedRequired = required.filter(id => openedDoors.includes(id)).length
   const missingNames = level.doors
     .filter(door => required.includes(door.id) && !openedDoors.includes(door.id))
     .map(door => door.name)
+  const quest = level.clues?.length ? forestObjective(collectedKeys, openedDoors, collectedClues) : null
+  const journal = level.clues?.find(clue => clue.id === collectedClues.at(-1))
   return <div className="forest-hud pointer-events-none absolute inset-0">
     <div className="pointer-events-none absolute left-4 top-4 max-w-sm rounded-lg border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow">
       <p className="font-bold">{level.name} · Level {levelIndex + 1} / {levelCount}</p>
@@ -37,7 +40,7 @@ export default function GameHud({
     </div>
     <div className="pointer-events-none absolute bottom-4 left-4 hidden rounded-xl bg-slate-950/90 p-4 text-white shadow-lg sm:block">
       <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-300">Key inventory</p>
-      <div className="flex gap-3">
+      <div className="flex max-w-lg flex-wrap gap-3">
         {level.keys.map(key => {
           const owned = collectedKeys.includes(key.id)
           return <div key={key.id} className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${owned ? 'border-white/30 bg-white/10' : 'border-white/10 opacity-50'}`} style={{ color: owned ? key.color : '#cbd5e1' }}>
@@ -47,6 +50,12 @@ export default function GameHud({
         })}
       </div>
     </div>
+    {quest && <div className="absolute bottom-52 left-4 right-4 rounded-lg bg-slate-950/90 p-3 text-xs text-white sm:bottom-auto sm:left-auto sm:top-40 sm:w-80 sm:text-sm" aria-live="polite">
+      <p className="text-xs font-bold uppercase tracking-widest">The keeper’s journals · {collectedClues.length}/2</p>
+      <p className="mt-2 font-bold">{quest.title}</p>
+      <p className="mt-1 text-slate-300">{quest.hint}</p>
+      {journal && <p className="mt-3 hidden border-t border-white/20 pt-2 text-xs sm:block"><strong>{journal.name}:</strong> {journal.text}</p>}
+    </div>}
     {prompt && <div className="pointer-events-none absolute bottom-32 left-1/2 -translate-x-1/2 rounded-xl bg-slate-950/90 px-5 py-3 text-center text-white shadow-lg">
       {!isTouch && <span className="mr-3 inline-block rounded border border-white/40 px-2 py-1 font-bold">E</span>}
       <span className={prompt.available === false ? 'text-slate-400' : 'font-bold'}>{prompt.label}</span>

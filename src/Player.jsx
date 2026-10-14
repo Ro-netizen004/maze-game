@@ -22,6 +22,7 @@ export default function Player({
   invertY = false,
   onPointerUnlock = () => {},
   onCollectKey, onOpenDoor, onNearbyKey = () => {}, onPromptChange = () => {}, onStaminaChange = () => {},
+  collectedClues = [], onCollectClue = () => {},
   onHiddenChange = () => {}, onTriggerTrap = () => {}, onActivateShrine = () => {}, onNoise = () => {},
 }) {
   const { camera, gl } = useThree()
@@ -231,9 +232,18 @@ export default function Player({
       for (const door of level.doors) {
         const [doorX, doorZ] = doorPosition(level, door)
         if (openedDoors.includes(door.id) || Math.hypot(camera.position.x - doorX, camera.position.z - doorZ) >= interactionDistance) continue
-        const available = canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines)
+        const available = canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines, collectedClues)
         interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : `${door.name} door is locked` }
         break
+      }
+    }
+    if (!interaction) {
+      for (const clue of level.clues || []) {
+        const [x, z] = cellPosition(level, clue.cell)
+        if (!collectedClues.includes(clue.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < interactionDistance) {
+          interaction = { type: 'clue', id: clue.id, label: `Read and collect ${clue.name}` }
+          break
+        }
       }
     }
     if (!interaction) {
@@ -256,6 +266,7 @@ export default function Player({
     }
     if (interaction && player.interact) {
       if (interaction.type === 'key') { onCollectKey(interaction.id); nearby = null }
+      if (interaction.type === 'clue') onCollectClue(interaction.id)
       if (interaction.type === 'door' && interaction.available) {
         onOpenDoor(interaction.id)
         onNoise({ cell: worldCell(level, camera.position.x, camera.position.z), intensity: 6, source: 'door' })

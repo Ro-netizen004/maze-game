@@ -61,7 +61,7 @@ test('keys and doors enforce a solvable sequence on every map', () => {
     const exit = level.doors.find(door => door.id === 'exit')
     assert.equal(canOpenDoor(level, exit, ['ruby', 'sapphire'], ['ruby']), false)
     assert.equal(canOpenDoor(level, exit, [], ['sapphire']), false)
-    assert.equal(canOpenDoor(level, exit, [], ['ruby', 'sapphire']), true)
+    assert.equal(canOpenDoor(level, exit, [], level.mechanics.requiredDoors, [], level.mechanics.requiredClues || []), true)
     assert.equal(canOpenDoor(level, level.doors[0], ['sapphire'], []), false)
     assert.equal(canOpenDoor(level, level.doors[0], ['ruby'], []), true)
   }

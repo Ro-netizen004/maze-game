@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import ForestMaze from './ForestMaze'
-import FirstForest from './FirstForest'
 import Player from './Player'
 import { levelTemplates } from './levels'
 import { createSeededLevel } from './levelRuntime'
@@ -27,6 +26,7 @@ export default function App({ guardianConfig = {} }) {
   const [paused, setPaused] = useState(false)
   const [attempt, setAttempt] = useState(0)
   const [collectedKeys, setCollectedKeys] = useState([])
+  const [collectedClues, setCollectedClues] = useState([])
   const [openedDoors, setOpenedDoors] = useState([])
   const [activatedShrines, setActivatedShrines] = useState([])
   const [triggeredTraps, setTriggeredTraps] = useState([])
@@ -119,6 +119,7 @@ export default function App({ guardianConfig = {} }) {
   function restart() {
     setNotice(null)
     setCollectedKeys([])
+    setCollectedClues([])
     setOpenedDoors([])
     setActivatedShrines([])
     setTriggeredTraps([])
@@ -198,9 +199,8 @@ export default function App({ guardianConfig = {} }) {
         <hemisphereLight args={['#91afc2', '#26372f', 0.48]} />
         <MazeAtmosphere level={level} mobile={isTouch} />
         <EnvironmentalDust mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
-        {levelIndex === 0 ? <FirstForest level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />
-          : <ForestMaze level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />}
-        {levelIndex !== 0 && <ForestExit level={level} />}
+        <ForestMaze level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />
+        <ForestExit level={level} />
         <Monster
           key={`monster-${levelIndex}-${attempt}`}
           level={level}
@@ -219,9 +219,10 @@ export default function App({ guardianConfig = {} }) {
             setStatus(current => current === 'catching' ? 'lost' : current)
           }}
         />
-        <QuestObjects level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} />
+        <QuestObjects level={level} collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} />
         <MechanicObjects level={level} triggeredTraps={triggeredTraps} activatedShrines={activatedShrines} />
         {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
+          collectedClues={collectedClues} onCollectClue={id => setCollectedClues(items => items.includes(id) ? items : [...items, id])}
           active={status === 'playing' && !paused}
           mobile={isTouch} touchInput={touchInput}
           reducedMotion={settings.reducedMotion}
@@ -239,7 +240,7 @@ export default function App({ guardianConfig = {} }) {
       </Canvas>
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.22) 100%)' }} />
       {(status === 'playing' || status === 'catching') && <GameHud level={level} levelIndex={levelIndex} levelCount={levelTemplates.length}
-        collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={hidden}
+        collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} stamina={stamina} hidden={hidden}
         elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
         flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} />}
       {status === 'playing' && !paused && <button className="forest-pause absolute right-4 top-24 z-20 px-4 py-2 font-semibold" onClick={pauseGame}>Pause</button>}
