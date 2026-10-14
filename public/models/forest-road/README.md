@@ -15,7 +15,7 @@ is at the maze exit; walking through this hilly scene would need terrain
 collision and a dedicated playable layout.
 
 Original preserved at `src/a_forest_3_with_a_road_at_night_for_game.glb`.
-Rebuild with Blender background mode and `export-forest-road.py`.
+Rebuild with Blender background mode and `scripts/assets/export-forest-road.py`.
 Development preview: `/forest-road-preview.html`.
 
 Performance update (October 2026): simplified to 67,231 triangles and 10,188,096 bytes.

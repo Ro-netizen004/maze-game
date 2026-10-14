@@ -56,6 +56,14 @@ The blocky player avatar, mist, and maze forest layout are original game code.
 Performance editions preserve the original assets alongside `*-lite.glb` copies.
 Tree and grass geometry was simplified for browser rendering. The Book Prop’s
 mesh parts were merged by material without removing faces. Book textures were
-resized to at most 1024 pixels. `export-performance-assets.py` regenerates these
+resized to at most 1024 pixels. `scripts/assets/export-performance-assets.py` regenerates these
 copies with Blender. Ground textures, footpath/moss decals, camping props, moon,
 and the lightweight road continuation are original game code.
+
+## Hooded Figure Statue
+
+"Hooded Figure Statue" (https://skfb.ly/pyB9M) by llussun7 is licensed under
+Creative Commons Attribution (https://creativecommons.org/licenses/by/4.0/).
+Original source: `src/hooded-figure-statue`. Browser asset:
+`public/models/hooded-statue/statue.glb`. Adaptations: scaled to 2.4 meters tall
+and arranged as eight shared copies facing the center of the forest clearing.

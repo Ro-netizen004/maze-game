@@ -11,4 +11,4 @@ alpha cutouts and instancing. The game grounds, scales, rotates, and adds
 gentle wind movement to the clumps. Reduced Motion stops the wind animation.
 
 Original source preserved at `src/grass.glb`.
-Rebuild with Blender background mode and `export-grass.py`.
+Rebuild with Blender background mode and `scripts/assets/export-grass.py`.

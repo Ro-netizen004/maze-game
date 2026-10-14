@@ -3,7 +3,8 @@
 A first-person nighttime forest exploration game built with React, Three.js,
 React Three Fiber, Vite, and Tailwind. Recover five journals, learn the keeper’s
 story, avoid the guardian, and escape along the Old Road. There are no maze
-corridors, keys, or locked gates in the active game.
+corridors made of box walls, keys, or locked gates in the active game. The active
+layout is a tree labyrinth with broken rings and winding corridors.
 
 ## Run locally
 
@@ -44,10 +45,24 @@ Original models are preserved in `src`; browser-ready copies live in
 Portable tools, dependencies, build output, and local review screenshots are
 excluded from Git.
 
-Explore one open 50-meter forest with scattered tree/rock groves and six landmark
-signs. Player movement is free across the interior, including scenery cells; a low
-post-and-rope perimeter marks the 50-by-50-meter movement boundary. The player
-stays inside it while walking, sprinting, or jumping and can slide along its edges.
+## Code organization
+
+Gameplay modules live in `src/game`, grouped by world, player, guardian, quest,
+environment, lighting, state, rendering, and UI. The session controller is separate
+from scene composition. Regression tests live in `tests`, preview entry points in
+`src/previews`, and model preparation tools in `scripts/assets`. Run those tools
+from the repository root. Dormant maze code is isolated in `src/legacy`.
+
+See [architecture](docs/architecture.md) for module ownership and
+[decisions](decisions.md) for current, superseded, and pending major choices.
+
+Explore one 50-meter forest labyrinth with six landmark signs. Dense tree rows
+form solid barriers around broken circular groves and hooked corridors inspired
+by the supplied sketch. Player and guardian follow connected passages inside a
+low post-and-rope perimeter; the guardian's sight is blocked by tree rows.
+See [the actual layout](docs/layout/forest-layout.png). Regenerate the map with
+`node scripts/layout/export-layout.mjs` and render it with
+`python scripts/layout/render-layout.py` (requires Pillow), from the repo root.
 The five journals can be found in any order; each contains original lore
 and a clue to another location. Collecting one opens a reader and pauses the
 guardian, player, timer, and flashlight battery. Reopen recovered books using J
@@ -63,13 +78,13 @@ The journal prop uses the supplied **Book Prop by Sofkin**, licensed under CC BY
 remain in `src/book-prop`; the browser copy is in `public/models/book-prop`.
 
 Ritual circles use **Occult Ritual Circle – Stylized Prop by ARTEL_3D**, licensed
-under CC BY 4.0. `export-ritual-circle.py` creates a 12,000-triangle browser copy
+under CC BY 4.0. `scripts/assets/export-ritual-circle.py` creates a 12,000-triangle browser copy
 with 1024-pixel textures from the preserved supplied source asset.
 The flashlight now lasts five minutes per full charge and recharges fully in
 50 seconds while switched off. Reading or pausing does not drain its battery.
 
-Old gated maps are kept only in `src/mazeFixtures.js` for navigation/collision
-regression tests; the game imports its open-forest definition from `src/levels.js`.
+Old gated maps are kept only in `tests/fixtures/mazeLevels.js` for navigation/collision
+regression tests; the game imports its open-forest definition from `src/game/world/levels.js`.
 
 Graphics defaults to Balanced. In Pause → Settings choose Performance for slower
 devices or High for a sharper image. Touch devices always use the smaller budget.
@@ -81,7 +96,7 @@ and shared instanced batches. The Old Road continuation avoids loading a second
 large forest scene during play.
 
 Regenerate the simplified assets with Blender:
-`blender --background --python export-performance-assets.py`.
+`blender --background --python scripts/assets/export-performance-assets.py`.
 For local profiling, visit `/?profile`; the console reports frame and draw budgets.
 
 The hunt escalates with each lit rune. Ritual activation is heard across the forest

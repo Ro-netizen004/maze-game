@@ -11,4 +11,4 @@ scaled/positioned in a first-person view without hands. The game's beam
 and battery behavior are controlled separately.
 
 The original `.blend` and textures remain in `src/flashlight`.
-Rebuild using portable Blender in background mode with `export-flashlight.py`.
+Rebuild using portable Blender in background mode with `scripts/assets/export-flashlight.py`.

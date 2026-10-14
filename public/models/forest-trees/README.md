@@ -11,4 +11,4 @@ tree bases are centered/grounded, plants are scaled, foliage uses alpha cutouts,
 and repeated plants share instanced geometry and materials.
 
 Original GLB: `src/realistic_trees_collection.glb`, preserved unchanged.
-Rebuild with Blender in background mode and `export-trees.py`.
+Rebuild with Blender in background mode and `scripts/assets/export-trees.py`.
