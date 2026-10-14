@@ -2,7 +2,7 @@ name: Deploy game to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [codex/original-maze-maps]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/codex/original-maze-maps'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

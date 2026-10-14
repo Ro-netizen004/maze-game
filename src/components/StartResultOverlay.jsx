@@ -38,6 +38,7 @@ export default function StartResultOverlay({
           <button className="rounded-lg border border-slate-300 px-5 py-3" onClick={onRestart}>Play again / Menu</button>
         </div>
       </>}
+      <p className="mt-1 text-xs text-slate-400">Shrub tiles pack by <a className="underline" href="https://skfb.ly/pOyYY" target="_blank" rel="noreferrer">LOLIPOP</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · extracted, resized, and tiled for the maze</p>
       <p className="mt-4 text-xs text-slate-400">Flashlight by <a className="underline" href="https://skfb.ly/o8H9O" target="_blank" rel="noreferrer">MAR.COS.</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
       <p className="mt-1 text-xs text-slate-400">Trees by <a className="underline" href="https://skfb.ly/pDzJR" target="_blank" rel="noreferrer">Jungle Jim</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
       <p className="mt-1 text-xs text-slate-400">Forest road by <a className="underline" href="https://skfb.ly/pMHKA" target="_blank" rel="noreferrer">dasy444</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>

@@ -34,3 +34,11 @@
   scaled/instanced plants along paths, and added gentle wind motion.
 
 The blocky player avatar, mist, and maze forest layout are original game code.
+## Shrub tiles pack (3 vars, seamless)
+
+"Shrub tiles pack (3 vars, seamless)" (https://skfb.ly/pOyYY) by LOLIPOP is licensed
+under Creative Commons Attribution (https://creativecommons.org/licenses/by/4.0/).
+Source: `src/shrub_tiles_pack_3_vars_seamless.glb`. Adaptations: extracted the three
+tile examples, resized textures to 512 pixels, normalized each to a 2 × 2 meter
+footprint and 2.4-meter height with its base on the floor, and instanced the tiles
+along the original maze walls. Browser asset: `public/models/shrub-tiles/shrubs.glb`.

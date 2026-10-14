@@ -2,7 +2,7 @@
 
 ## Current branch: original maze maps
 
-Branch: `codex/original-maze-maps`. The game source is restored exactly from
+Branch: `codex/original-maze-maps`. The maze maps are restored from
 `69f2491` (the initial maze game), with Stonegate, Amber Halls, and Twilight
 Labyrinth. Keys, gates, and original progression are restored. The later forest,
 journal, ritual-circle, custom-layout, and Longleat changes remain on main.
@@ -201,3 +201,17 @@ alone also left visually open gaps beneath their canopies, so add dense evergree
 saplings along the same barrier grid. Use shared low-poly geometry, three
 instanced batches, and no additional shadows to make the walls visible at player
 height without multiplying imported tree costs. Keep the existing layout intact.
+## 19. Shrub tiles for the original maps; deploy this branch — 2026-10-14
+
+Use the supplied Shrub tiles pack (3 vars, seamless) by LOLIPOP, CC BY 4.0, as
+the visible walls of Stonegate, Amber Halls, and Twilight Labyrinth. Preserve
+their original grids, keys, gates, and progression. Extract all three tile
+examples from the showcase; normalize their footprints to 2 × 2 meters and
+height to 2.4 meters, with the base at zero. Instance shared assets and resize
+textures to 512 pixels to keep the browser model small. Gate cells stay clear.
+Include creator/license attribution in the game menu and CREDITS.
+
+The user explicitly selected codex/original-maze-maps as the website deployment
+branch. Its workflow triggers on this branch and rejects dispatches from other
+branches. Restrict the github-pages deployment environment to this branch so
+future main pushes cannot replace this website. Keep main's game source intact.

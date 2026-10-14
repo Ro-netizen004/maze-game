@@ -4,13 +4,14 @@ import { CanvasTexture, Color, DoubleSide, Object3D } from 'three'
 import { cellPosition, cellSize } from './levels'
 import Landmarks from './Landmarks.jsx'
 import { createTexture } from './textures'
-import RealisticTrees from './RealisticTrees'
+import ShrubWalls from './ShrubWalls.jsx'
 import AssetGrass from './AssetGrass'
 import AssetBoundary from './MonsterAssetBoundary'
 
 function Instances({ items, children, shadows = true }) {
   const mesh = useRef(null)
   useLayoutEffect(() => {
+    if (!items.length || !mesh.current) return
     const transform = new Object3D(), color = new Color()
     items.forEach((item, index) => {
       transform.position.set(...item.position)
@@ -24,6 +25,7 @@ function Instances({ items, children, shadows = true }) {
     mesh.current.instanceColor.needsUpdate = true
     mesh.current.computeBoundingSphere()
   }, [items])
+  if (!items.length) return null
   return <instancedMesh ref={mesh} args={[null, null, items.length]} castShadow={shadows} receiveShadow>{children}</instancedMesh>
 }
 
@@ -77,20 +79,13 @@ export default function ForestMaze({ level, mobile, reducedMotion }) {
   const soil = useMemo(() => createTexture('soil'), [])
   useEffect(() => () => soil.dispose(), [soil])
   const layout = useMemo(() => {
-    const trunks = [], crowns = [], shrubs = [], rocks = [], grass = []
+    const tiles = [], grass = []
     let seed = 391
     const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
     level.grid.forEach((row, r) => row.forEach((cell, c) => {
       const [x, z] = cellPosition(level, [r, c])
       if (cell && !level.doors.some(door => door.cell[0] === r && door.cell[1] === c)) {
-        for (let i = 0; i < ((r + c) % (mobile ? 3 : 2) === 0 ? 1 : 0); i++) {
-          const tx = x, tz = z
-          const height = 4.5 + random() * 2.5
-          trunks.push({ position: [tx, height / 2, tz], scale: [0.16, height, 0.16], color: '#5b6250' })
-          crowns.push({ position: [tx, height - 0.2, tz], scale: [1.1, 1.6, 1.1], color: level.theme === 'temple' ? '#274942' : '#304a34' })
-        }
-        for (let i = 0; i < 4; i++) shrubs.push({ position: [x + (i % 2 ? 0.34 : -0.34), 0.9, z + (i < 2 ? -0.34 : 0.34)], scale: [0.65, 1.15 + random() * 0.25, 0.65], color: '#294333' })
-        rocks.push({ position: [x, 0.35, z], scale: [0.92, 0.6, 0.92], rotation: [0.1, random() * 6, 0.1], color: '#5b6762' })
+        tiles.push({ position: [x, 0, z], rotation: ((r + c) % 4) * Math.PI / 2 })
       } else if (!cell) {
         for (const [dr, dc] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
           if (level.grid[r + dr]?.[c + dc] !== 1) continue
@@ -102,7 +97,7 @@ export default function ForestMaze({ level, mobile, reducedMotion }) {
         }
       }
     }))
-    return { trunks, crowns, shrubs, rocks, grass }
+    return { tiles, grass }
   }, [level, mobile])
   const width = level.grid[0].length * cellSize, depth = level.grid.length * cellSize
   return <group>
@@ -114,10 +109,9 @@ export default function ForestMaze({ level, mobile, reducedMotion }) {
         <planeGeometry args={[2, 2]} /><meshStandardMaterial map={soil} bumpMap={soil} bumpScale={0.035} color="#b4ae90" roughness={0.78} />
       </mesh>
     }))}
-    <AssetBoundary fallback={<Instances items={layout.crowns}><icosahedronGeometry args={[1, 1]} /><meshStandardMaterial roughness={1} /></Instances>}>
-      <Suspense fallback={null}><RealisticTrees trees={layout.trunks} bushes={layout.shrubs} /></Suspense>
+    <AssetBoundary fallback={null}>
+      <Suspense fallback={null}><ShrubWalls tiles={layout.tiles} /></Suspense>
     </AssetBoundary>
-    <Instances items={layout.rocks}><dodecahedronGeometry args={[1, 0]} /><meshStandardMaterial roughness={0.8} /></Instances>
     <AssetBoundary fallback={<Grass items={layout.grass} reducedMotion={reducedMotion} />}>
       <Suspense fallback={<Grass items={layout.grass} reducedMotion={reducedMotion} />}><AssetGrass items={layout.grass} reducedMotion={reducedMotion} /></Suspense>
     </AssetBoundary>
