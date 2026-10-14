@@ -2,9 +2,12 @@ import { Suspense } from 'react'
 import { cellPosition } from './levels'
 import BookModel from './BookModel'
 import AssetBoundary from './MonsterAssetBoundary'
+import RitualCircle from './RitualCircle'
 
-export default function QuestObjects({ level, collectedClues = [] }) {
-  return <group>{level.clues.filter(item => !collectedClues.includes(item.id)).map(item => {
+export default function QuestObjects({ level, collectedClues = [], activatedRituals = [] }) {
+  return <group>
+    {(level.rituals || []).map(ritual => <RitualCircle key={ritual.id} level={level} ritual={ritual} active={activatedRituals.includes(ritual.id)} />)}
+    {level.clues.filter(item => !collectedClues.includes(item.id)).map(item => {
     const [x, z] = cellPosition(level, item.cell)
     return <group key={item.id} position={[x, 0, z]}>
       <mesh position={[0, 0.35, 0]} castShadow><cylinderGeometry args={[0.35, 0.43, 0.7, 9]} /><meshStandardMaterial color="#584837" roughness={1} /></mesh>

@@ -2,8 +2,9 @@ import { canOpenDoor as canOpenRuntimeDoor, createSeededLevel } from './levelRun
 import { forestJournals } from './journals.js'
 export const cellSize = 2
 const grid = Array.from({ length: 25 }, () => Array(25).fill(0))
+const rituals = forestJournals.map(journal => ({ id: `ritual-${journal.id}`, journalId: journal.id, name: `${journal.name} rune`, cell: [journal.cell[0] + 2, journal.cell[1]], color: journal.color }))
 // Isolated tree/rock islands with open space on every side, not corridor walls.
-const reserved = [[2, 3], [23, 21], [13, 13], [7, 19], [20, 16], [17, 5], [9, 19], [20, 5], ...forestJournals.map(item => item.cell)]
+const reserved = [[2, 3], [23, 21], [13, 13], [7, 19], [20, 16], [17, 5], [9, 19], [20, 5], ...forestJournals.map(item => item.cell), ...rituals.map(item => item.cell)]
 for (let r = 2; r < 23; r += 3) {
   for (let c = 2 + r % 3; c < 23; c += 4) {
     if (!reserved.some(([rr, cc]) => Math.hypot(rr - r, cc - c) < 2.5)) grid[r][c] = 1
@@ -11,11 +12,13 @@ for (let r = 2; r < 23; r += 3) {
 }
 export const levelTemplates = [{
   id: 'keepers-forest', name: 'The Keeper’s Forest', theme: 'stone', openForest: true,
+  movementBounds: { left: -25, right: 25, front: -25, back: 25 },
   grid, start: [2, 3], end: [23, 21], monster: [[13, 13], [7, 19], [20, 16], [17, 5]],
   keys: [], doors: [], clues: forestJournals, keySpawnPools: {},
   hidingSpots: [{ id: 'hollow-shelter', type: 'alcove', cell: [9, 19] }, { id: 'arch-shelter', type: 'alcove', cell: [20, 5] }],
   traps: [], shrines: [], noisyZones: [],
-  mechanics: { requiredDoors: [], requiredClues: forestJournals.map(item => item.id), sprintDrain: 30, staminaRegen: 20 },
+  rituals,
+  mechanics: { requiredDoors: [], requiredClues: forestJournals.map(item => item.id), requiredRituals: rituals.map(item => item.id), sprintDrain: 30, staminaRegen: 20 },
   landmarks: [
     { name: 'CROWN CAMP', cell: [3, 5], symbol: 'sun', color: '#e9b85b' },
     { name: 'OWL WATCH', cell: [7, 17], symbol: 'eye', color: '#74d4ca' },

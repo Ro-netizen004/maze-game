@@ -39,6 +39,7 @@ export function createSeededLevel(template, seed = template.id || template.name)
     hidingSpots: (template.hidingSpots || []).map(item => ({ ...item, cell: [...item.cell] })),
     traps: (template.traps || []).map(item => ({ ...item, cell: [...item.cell] })),
     shrines: (template.shrines || []).map(item => ({ ...item, cell: [...item.cell] })),
+    rituals: (template.rituals || []).map(item => ({ ...item, cell: [...item.cell] })),
     noisyZones: (template.noisyZones || []).map(item => ({ ...item, cell: [...item.cell] })),
     mechanics: { ...template.mechanics },
     clues: (template.clues || []).map(clue => ({ ...clue, cell: [...clue.cell] })),

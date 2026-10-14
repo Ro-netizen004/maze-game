@@ -15,7 +15,7 @@ export default function StartResultOverlay({
       <p className="forest-kicker">{status === 'won' ? 'Beyond the treeline' : status === 'lost' ? 'Lost in the woods' : 'After dark · Forest trails'}</p>
       <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
       {status === 'ready' ? <>
-        <p className="mt-3">Five journals. One forgotten keeper. Explore an open forest, recover the records in any order, and follow their clues to the Old Road. The guardian is still keeping watch.</p>
+        <p className="mt-3">Five journals. Five ritual circles. Recover the records, press E near each glowing rune to activate it, then escape along the Old Road. The guardian is still keeping watch.</p>
         <label className="mt-4 block text-left text-sm font-semibold" htmlFor="difficulty">Difficulty</label>
         <select id="difficulty" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={difficulty} onChange={event => onDifficulty(event.target.value)}>
           <option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option>
@@ -33,6 +33,7 @@ export default function StartResultOverlay({
           <button className="rounded-lg border border-slate-300 px-5 py-3" onClick={onRestart}>Play again / Menu</button>
         </div>
       </>}
+      <p className="mt-4 text-xs text-slate-400">Ritual Circle by <a className="underline" href="https://skfb.ly/pBDOJ" target="_blank" rel="noreferrer">ARTEL_3D</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · optimized and adapted</p>
       <p className="mt-4 text-xs text-slate-400">Book Prop by <a className="underline" href="https://skfb.ly/oGZut" target="_blank" rel="noreferrer">Sofkin</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · scaled for the game</p>
       <p className="mt-4 text-xs text-slate-400">Flashlight by <a className="underline" href="https://skfb.ly/o8H9O" target="_blank" rel="noreferrer">MAR.COS.</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
       <p className="mt-1 text-xs text-slate-400">Trees by <a className="underline" href="https://skfb.ly/pDzJR" target="_blank" rel="noreferrer">Jungle Jim</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>

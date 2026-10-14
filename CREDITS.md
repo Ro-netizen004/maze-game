@@ -1,5 +1,14 @@
 # Asset credits
 
+**Occult Ritual Circle – Stylized Prop** by **ARTEL_3D**
+
+- Original model: https://skfb.ly/pBDOJ
+- License: Creative Commons Attribution 4.0 International
+  https://creativecommons.org/licenses/by/4.0/
+- Game adaptation: reduced geometry and textures for five shared browser copies;
+  scaled and flattened for walkable ritual pads, with original glow glyphs,
+  floating interaction markers, and activation effects controlled by the game.
+
 **Book Prop** by **Sofkin**
 
 - Original model: https://skfb.ly/oGZut

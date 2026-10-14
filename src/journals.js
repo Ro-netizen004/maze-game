@@ -13,12 +13,13 @@ export const forestJournals = [
     hint: 'Go north and slightly west from Fallen Arch to Last Watch on the western side of the forest. Collect the final book beneath the diamond sign. You can discover the journals in any order.' },
   { id: 'departure', name: 'The Last Watch', subtitle: 'Journal V · A witness can leave', cell: [12, 4], color: '#f18b9d',
     text: 'If you are reading this, I am no longer keeping watch. The creature may still patrol, but the promise belongs to the books now. Take every record to the road in the southeast, beneath the mountain sign. The lantern there will remember you. Do not wait for a gate to open; there was never a gate. There was only the belief that we could not leave. Carry the truth past the treeline. Listen for the birds.',
-    hint: 'With all five journals recovered, head southeast to Old Road, marked by a mountain sign and a tall lantern. Walk into the glowing clearing to escape. Use J or the archive button to reread any recovered clue.' },
+    hint: 'Recover all five journals and activate all five ritual circles beside their sites. Then head southeast to Old Road, marked by a mountain sign and a tall lantern. Walk into the glowing clearing to escape. Use J or the archive button to reread any recovered clue.' },
 ]
 export function journalCollection(level, collectedKeys = [], collectedClues = []) {
   const collected = new Set([...collectedKeys, ...collectedClues])
   return [...level.keys, ...(level.clues || [])].filter(item => collected.has(item.id))
 }
-export function canEscapeForest(level, collectedClues) {
+export function canEscapeForest(level, collectedClues, activatedRituals = []) {
   return level.mechanics.requiredClues.every(id => collectedClues.includes(id))
+    && (level.mechanics.requiredRituals || []).every(id => activatedRituals.includes(id))
 }

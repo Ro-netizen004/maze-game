@@ -3,11 +3,12 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js'
 import { Euler, Vector3 } from 'three'
 import { cellSize, cellPosition, doorPosition, canOpenDoor } from './levels'
-import { movePlayer } from './collision'
+import { movePlayer, moveWithinBoundary } from './collision'
 import { readInput } from './input'
 import { worldCell } from './navigation'
 import PlayerAvatar from './PlayerAvatar'
 import { canEscapeForest } from './journals'
+import { nearbyRitual } from './rituals'
 
 const eyeHeight = 1.6
 const speed = 4
@@ -204,7 +205,9 @@ export default function Player({
     player.jump = false
 
     for (let i = 0; i < steps; i++) {
-      const [nextX, nextZ] = movePlayer(level, camera.position.x, camera.position.z, dx * dt, dz * dt, openedDoors, 0.3, 0.18)
+      const [nextX, nextZ] = level.openForest
+        ? moveWithinBoundary(level, camera.position.x, camera.position.z, dx * dt, dz * dt)
+        : movePlayer(level, camera.position.x, camera.position.z, dx * dt, dz * dt, openedDoors, 0.3, 0.18)
       camera.position.set(nextX, camera.position.y, nextZ)
 
       player.velocityY -= 14 * dt
@@ -222,7 +225,7 @@ export default function Player({
     pose.current.moving = moving && !player.hiddenIn
     pose.current.sprinting = sprinting
     const [endX, endZ] = cellPosition(level, level.end)
-    const escapeReady = level.openForest ? canEscapeForest(level, collectedClues) : openedDoors.includes('exit')
+    const escapeReady = level.openForest ? canEscapeForest(level, collectedClues, activatedShrines) : openedDoors.includes('exit')
     let nearby = null
     let interaction = null
     for (const key of level.keys) {
@@ -252,6 +255,10 @@ export default function Player({
       }
     }
     if (!interaction) {
+      const ritual = nearbyRitual(level, camera.position.x, camera.position.z, activatedShrines)
+      if (ritual) interaction = { type: 'ritual', id: ritual.id, label: `Activate ${ritual.name}` }
+    }
+    if (!interaction) {
       for (const shrine of level.shrines) {
         const [x, z] = cellPosition(level, shrine.cell)
         if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < interactionDistance) {
@@ -270,7 +277,7 @@ export default function Player({
       }
     }
     if (!interaction && level.openForest && !escapeReady && Math.hypot(camera.position.x - endX, camera.position.z - endZ) < 2.2) {
-      interaction = { type: 'exit', id: 'road', available: false, label: `Recover all five journals before leaving (${collectedClues.length}/5)` }
+      interaction = { type: 'exit', id: 'road', available: false, label: `Journals ${collectedClues.length}/5 · Runes ${activatedShrines.length}/5 required to escape` }
     }
     if (interaction && player.interact) {
       if (interaction.type === 'key') { onCollectKey(interaction.id); nearby = null }
@@ -280,6 +287,7 @@ export default function Player({
         onNoise({ cell: worldCell(level, camera.position.x, camera.position.z), intensity: 6, source: 'door' })
       }
       if (interaction.type === 'shrine') onActivateShrine(interaction.id)
+      if (interaction.type === 'ritual') onActivateShrine(interaction.id)
       if (interaction.type === 'hiding') {
         player.hiddenIn = player.hiddenIn ? null : interaction.id
         onHiddenChange(Boolean(player.hiddenIn))

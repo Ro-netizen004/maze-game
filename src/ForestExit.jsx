@@ -3,9 +3,9 @@ import { cellPosition, cellSize } from './levels'
 import { canEscapeForest } from './journals'
 import { Instances } from './ForestMaze'
 
-function ForestExit({ level, collectedClues = [] }) {
+function ForestExit({ level, collectedClues = [], activatedRituals = [] }) {
   const [exitX, exitZ] = cellPosition(level, level.end)
-  const ready = canEscapeForest(level, collectedClues)
+  const ready = canEscapeForest(level, collectedClues, activatedRituals)
   const edge = level.grid.length * cellSize / 2
   const foliage = useMemo(() => Array.from({ length: 24 }, (_, i) => ({
     position: [exitX + (i % 2 ? 1 : -1) * (2.2 + i % 3 * 0.5), 0.55, edge + 1 + Math.floor(i / 2) * 1.2],

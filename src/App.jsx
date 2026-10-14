@@ -154,7 +154,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
   function collectClue(id) {
     setCollectedClues(items => items.includes(id) ? items : [...items, id])
     const journal = level.clues.find(item => item.id === id)
-    setNotice({ name: journal.name, color: journal.color })
+    setNotice({ name: `${journal.name} recovered`, color: journal.color })
     openJournal(id)
   }
   function restart() {
@@ -237,7 +237,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
         <MazeAtmosphere level={level} mobile={isTouch} />
         <EnvironmentalDust mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
         <OpenForest level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} graphics={graphics} />
-        <ForestExit level={level} collectedClues={collectedClues} />
+        <ForestExit level={level} collectedClues={collectedClues} activatedRituals={activatedShrines} />
         <Monster
           key={`monster-${levelIndex}-${attempt}`}
           level={level}
@@ -256,7 +256,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
             setStatus(current => current === 'catching' ? 'lost' : current)
           }}
         />
-        <QuestObjects level={level} collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} />
+        <QuestObjects level={level} collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} activatedRituals={activatedShrines} />
         <MechanicObjects level={level} triggeredTraps={triggeredTraps} activatedShrines={activatedShrines} />
         {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
           collectedClues={collectedClues} onCollectClue={collectClue}
@@ -270,7 +270,11 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
           onHeadingChange={setHeading}
           onNoise={noise => { playerNoise.current = { ...noise, id: ++noiseId.current } }}
           onTriggerTrap={id => setTriggeredTraps(items => items.includes(id) ? items : [...items, id])}
-          onActivateShrine={id => setActivatedShrines(items => items.includes(id) ? items : [...items, id])}
+          onActivateShrine={id => {
+            setActivatedShrines(items => items.includes(id) ? items : [...items, id])
+            const ritual = level.rituals?.find(item => item.id === id)
+            if (ritual) setNotice({ name: `${ritual.name} activated`, color: ritual.color })
+          }}
           onOpenDoor={id => setOpenedDoors(items => items.includes(id) ? items : [...items, id])}
           onWin={handleWin} />}
         <Flashlight intensity={settings.flashlightIntensity} battery={flashlightBattery} on={flashlightOn}
@@ -280,7 +284,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
       {(status === 'playing' || status === 'catching') && <GameHud level={level} levelIndex={levelIndex} levelCount={levelTemplates.length}
         collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} stamina={stamina} hidden={hidden}
         elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
-        flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert}
+        flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} activatedRituals={activatedShrines}
         onReadJournal={openJournal} canRead={status === 'playing' && !paused} heading={heading} />}
       {status === 'playing' && !paused && <button className="forest-pause absolute right-4 top-24 z-20 px-4 py-2 font-semibold" onClick={pauseGame}>Pause</button>}
       {status === 'playing' && !paused && isTouch && <MobileControls inputRef={touchInput}

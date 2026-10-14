@@ -4,6 +4,15 @@ import { getLockedDoors } from './levelRuntime.js'
 export const playerRadius = 0.3
 const obstacleCache = new WeakMap()
 
+// Free roaming uses only the outer boundary; scenery cells never block the player.
+export function moveWithinBoundary(level, x, z, dx, dz, radius = playerRadius) {
+  const bounds = level.movementBounds
+  return [
+    Math.max(bounds.left + radius, Math.min(bounds.right - radius, x + dx)),
+    Math.max(bounds.front + radius, Math.min(bounds.back - radius, z + dz)),
+  ]
+}
+
 // Resolve a small movement step by pushing the circle out along wall normals.
 // Unlike rejecting X and Z separately, this also slides around rounded corners.
 export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = playerRadius, forestInset = 0) {

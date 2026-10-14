@@ -29,6 +29,7 @@ export default function JournalReader({ journals, selectedId, onSelect, onClose 
           <h2 id="journal-title">{journal.name}</h2>
           <p className="journal-story">{journal.text}</p>
           <aside className="journal-clue"><h3>Trail notes</h3><p>{journal.hint}</p></aside>
+          <p className="journal-footnote">At this site, find the ritual circle just south of the stump. Approach its floating marker and press E or Interact to light it. All five circles must be activated before you leave.</p>
           <p className="journal-footnote">The forest is paused while you read. Press J or Escape to return.</p>
         </article>
       </div>

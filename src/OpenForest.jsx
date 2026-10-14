@@ -8,6 +8,7 @@ import AssetGrass from './AssetGrass'
 import AssetBoundary from './MonsterAssetBoundary'
 import Landmarks from './Landmarks.jsx'
 import { createTexture } from './textures'
+import ForestBoundary from './ForestBoundary'
 
 function OpenForest({ level, mobile, reducedMotion, graphics }) {
   const soil = useMemo(() => {
@@ -82,13 +83,15 @@ function OpenForest({ level, mobile, reducedMotion, graphics }) {
       for (let i = 0; i < (mobile ? 4 : 8); i++) {
         const angle = i * 2.399, radius = 2 + random()
         const height = 0.4 + random() * 0.35
-        for (const yaw of [angle, angle + Math.PI / 2]) ferns.push({ position: [x + Math.cos(angle) * radius, height / 2, z + Math.sin(angle) * radius], scale: [0.7 + random() * 0.4, height, 1], rotation: [0, yaw, 0], color: i % 2 ? '#819d67' : '#5f8058' })
+        const fx = x + Math.cos(angle) * radius, fz = z + Math.sin(angle) * radius
+        if (level.rituals.some(ritual => { const [rx, rz] = cellPosition(level, ritual.cell); return Math.hypot(fx - rx, fz - rz) < 2 })) continue
+        for (const yaw of [angle, angle + Math.PI / 2]) ferns.push({ position: [fx, height / 2, fz], scale: [0.7 + random() * 0.4, height, 1], rotation: [0, yaw, 0], color: i % 2 ? '#819d67' : '#5f8058' })
       }
     }
     for (const tree of trees.slice(0, 8)) branches.push({ position: [tree.position[0] + 1.3, 0.16, tree.position[2] + 0.8], scale: [0.13, 1.8, 0.13], rotation: [Math.PI / 2, 0, random() * Math.PI], color: '#544736' })
     for (let i = 0; i < (mobile ? 300 : 650); i++) {
       const x = (random() - 0.5) * size, z = (random() - 0.5) * size
-      if ([level.start, level.end, ...level.clues.map(item => item.cell)].some(cell => {
+      if ([level.start, level.end, ...level.clues.map(item => item.cell), ...level.rituals.map(item => item.cell)].some(cell => {
         const [cx, cz] = cellPosition(level, cell)
         return Math.hypot(x - cx, z - cz) < 1.8
       })) continue
@@ -101,6 +104,7 @@ function OpenForest({ level, mobile, reducedMotion, graphics }) {
   const importedGrass = useMemo(() => layout.grass.filter((_, i) => i % 5 === 0).slice(0, graphics.grassClumps), [layout, graphics.grassClumps])
   const width = level.grid[0].length * cellSize
   return <group>
+    <ForestBoundary bounds={level.movementBounds} />
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[width + 35, width + 35]} /><meshStandardMaterial color="#849077" map={soil} roughness={1} /></mesh>
     <Instances items={layout.paths} shadows={false}><planeGeometry args={[2, 2]} /><meshBasicMaterial map={trailFade} transparent opacity={0.35} depthWrite={false} /></Instances>
     <Instances items={layout.moss} shadows={false}><planeGeometry args={[2, 2]} /><meshBasicMaterial map={trailFade} transparent opacity={0.3} depthWrite={false} /></Instances>
