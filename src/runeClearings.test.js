@@ -9,7 +9,10 @@ test('three rune gardens attach without changing any original interior corridor'
     assert.equal(level.clearings.length,3)
     assert.equal(level.shrines.length,3)
     const offset=level.mapOffset, old=level.originalGrid
-    for(let r=1;r<old.length-1;r++)for(let c=1;c<old[r].length-1;c++)assert.equal(level.grid[r+offset][c+offset],old[r][c])
+    for(let r=1;r<old.length-1;r++)for(let c=1;c<old[r].length-1;c++) {
+      if(level.hedgePockets.some(({cell})=>cell[0]===r+offset && cell[1]===c+offset)) continue
+      assert.equal(level.grid[r+offset][c+offset],old[r][c])
+    }
     const accessible=reachableCells(level,level.start,level.doors.map(d=>d.id))
     for(const clearing of level.clearings){
       assert.ok(accessible.has(clearing.cell.join(',')))

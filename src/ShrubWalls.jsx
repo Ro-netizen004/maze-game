@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { useLoader } from '@react-three/fiber'
-import { Group, InstancedMesh, Object3D } from 'three'
+import { BoxGeometry, Group, InstancedMesh, Object3D } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 
 export default function ShrubWalls({ tiles }) {
@@ -10,9 +10,23 @@ export default function ShrubWalls({ tiles }) {
   useLayoutEffect(()=>{
     const parent=container.current, group=new Group(), materials=[]
     const transform=new Object3D()
+    // Dense textured foliage beneath the loose leaf cards closes see-through
+    // seams. It occupies exactly the same footprint as the collision wall.
+    let foliage
+    variants[0]?.traverse(part=>{if(part.isMesh && part.material.map && !foliage) foliage=part.material.clone()})
+    if(!foliage) throw new Error('Missing shrub foliage texture')
+    foliage.transparent=false;foliage.alphaTest=0;foliage.color.set('#40563b');foliage.roughness=1
+    materials.push(foliage)
+    const coreGeometry=new BoxGeometry(2,1.9,2)
+    const cores=new InstancedMesh(coreGeometry,foliage,tiles.length)
+    tiles.forEach((tile,index)=>{
+      transform.position.set(tile.position[0],0.95,tile.position[2]);transform.rotation.set(0,0,0);transform.scale.setScalar(1)
+      transform.updateMatrix();cores.setMatrixAt(index,transform.matrix)
+    })
+    cores.instanceMatrix.needsUpdate=true;cores.computeBoundingSphere();group.add(cores)
     variants.forEach((variant,index)=>{
       if(!variant)throw new Error('Missing shrub tile variant')
-      const items=tiles.filter((_,i)=>i%variants.length===index)
+      const items=tiles.filter((_,i)=>i%variants.length===index).flatMap(tile=>[0,Math.PI/2].map(turn=>({...tile,rotation:tile.rotation+turn})))
       if(!items.length)return
       variant.traverse(part=>{
         if(!part.isMesh)return
@@ -33,6 +47,7 @@ export default function ShrubWalls({ tiles }) {
       parent.remove(group)
       group.traverse(obj=>{if(obj.isInstancedMesh)obj.dispose()})
       materials.forEach(mat=>mat.dispose())
+      coreGeometry.dispose()
     }
   },[tiles,variants])
   return <group ref={container} />

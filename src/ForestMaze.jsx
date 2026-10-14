@@ -75,7 +75,7 @@ function GroundMist({ level }) {
   }))}</group>
 }
 
-export default function ForestMaze({ level, mobile, reducedMotion }) {
+export default function ForestMaze({ level, mobile, reducedMotion, mist = true }) {
   const soil = useMemo(() => createTexture('soil'), [])
   useEffect(() => () => soil.dispose(), [soil])
   const layout = useMemo(() => {
@@ -119,7 +119,7 @@ export default function ForestMaze({ level, mobile, reducedMotion }) {
     <AssetBoundary fallback={<Grass items={layout.grass} reducedMotion={reducedMotion} />}>
       <Suspense fallback={<Grass items={layout.grass} reducedMotion={reducedMotion} />}><AssetGrass items={layout.grass} reducedMotion={reducedMotion} /></Suspense>
     </AssetBoundary>
-    <GroundMist level={level} />
+    {mist && <GroundMist level={level} />}
     <Landmarks level={level} forest />
     {[level.start, level.end].map((cell, index) => {
       const [x, z] = cellPosition(level, cell)

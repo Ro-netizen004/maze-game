@@ -50,3 +50,11 @@ Browser asset: `public/models/ritual-circle/ritual-circle.glb`, restored from ma
 optimized derivative (12,000 triangles). Adaptations: reduced geometry/textures,
 normalized scale and height, self-lit glyphs and activation glow. Original source
 and exporter are preserved in the main branch's history.
+
+## Forest ambience
+
+**Forest jungle nature dark Atmo** by **szegvari (Freesound)**, distributed by
+**freesound_community** on Pixabay.
+- Source: https://pixabay.com/sound-effects/nature-forest-jungle-nature-dark-atmo-6154/
+- License: Pixabay Content License, https://pixabay.com/service/license-summary/
+- User-supplied MP3 moved to public/audio/forest-ambience.mp3; looped with adjustable volume.

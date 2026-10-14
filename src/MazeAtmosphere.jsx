@@ -3,12 +3,12 @@ import { cellPosition } from './levels'
 import { lightpostLayout } from './mazeLighting.js'
 import LanternLights from './LanternLights.jsx'
 
-export default function MazeAtmosphere({ level, mobile }) {
+export default function MazeAtmosphere({ level, mobile, shadowSize = 1024 }) {
   const fixtures = useMemo(() => lightpostLayout(level,mobile), [level, mobile])
   const warm = level.theme === 'temple' ? '#8be1df' : '#ffcf8b'
   return <group>
     <directionalLight position={[8, 14, -6]} color="#a0bed0" intensity={0.65} castShadow
-      shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
+      shadow-mapSize={[shadowSize, shadowSize]}
       shadow-camera-left={-17} shadow-camera-right={17} shadow-camera-top={17} shadow-camera-bottom={-17}
       shadow-camera-far={45} shadow-normalBias={0.035} shadow-bias={-0.0001} />
     <LanternLights fixtures={fixtures} mobile={mobile} color={warm} />

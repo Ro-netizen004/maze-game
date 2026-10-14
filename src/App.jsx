@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
+import ForestAmbience from './ForestAmbience.jsx'
+import { graphicsPreset } from './graphics.js'
 import ForestMaze from './ForestMaze'
 import Player from './Player'
 import { levelTemplates } from './levels'
@@ -38,6 +40,7 @@ export default function App({ guardianConfig = {} }) {
   const [isTouch, setIsTouch] = useState(false)
   const [flashlightBattery, setFlashlightBattery] = useState(100)
   const [flashlightOn, setFlashlightOn] = useState(true)
+  const ambienceAudio = useRef(null)
   const playerNoise = useRef(null)
   const touchInput = useRef({ forward: 0, right: 0, jump: false, sprint: false, interact: false, lookX: 0, lookY: 0 })
   const elapsedRef = useRef(0)
@@ -46,6 +49,7 @@ export default function App({ guardianConfig = {} }) {
   const difficulty = progress.difficulty
   const settings = progress.settings
   const level = useMemo(() => createSeededLevel(levelTemplates[levelIndex], `${levelTemplates[levelIndex].id}:${attempt}`), [levelIndex, attempt])
+  const graphics = graphicsPreset(settings.graphicsQuality,isTouch)
   const timerActive = status === 'playing' && !paused
 
   useEffect(() => {
@@ -170,6 +174,10 @@ export default function App({ guardianConfig = {} }) {
     }
   }
   function startGame() {
+    if(settings.ambienceEnabled) {
+      ambienceAudio.current.volume=settings.ambienceVolume/100
+      ambienceAudio.current.play().catch(()=>{})
+    }
     setPaused(false)
     setStatus('playing')
     captureMouse()
@@ -189,15 +197,16 @@ export default function App({ guardianConfig = {} }) {
   }
   return (
     <div className={`relative h-screen w-full ${status === 'catching' ? 'guardian-caught' : ''}`}>
-      <Canvas shadows dpr={isTouch ? [1, 1.25] : [1, 1.75]}
+      <ForestAmbience audioRef={ambienceAudio} active={timerActive} enabled={settings.ambienceEnabled} volume={settings.ambienceVolume} />
+      <Canvas shadows={graphics.shadows} dpr={graphics.dpr} frameloop={timerActive || status === 'catching' ? 'always' : 'demand'}
         gl={{ antialias: !isTouch, powerPreference: isTouch ? 'low-power' : 'high-performance' }}
         camera={{ position: [-6, 1.6, -8], fov: 75, near: 0.03 }}>
         <color attach="background" args={[activatedShrines.length ? '#101d29' : '#0b1821']} />
         <fog attach="fog" args={['#203536', 4, 18 + activatedShrines.length * (level.mechanics.shrineVisibilityBoost || 0)]} />
         <hemisphereLight args={['#91afc2', '#26372f', 0.48]} />
-        <MazeAtmosphere level={level} mobile={isTouch} />
-        <EnvironmentalDust mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
-        <ForestMaze level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} />
+        <MazeAtmosphere level={level} mobile={isTouch} shadowSize={graphics.shadowSize} />
+        <EnvironmentalDust mobile={isTouch || settings.graphicsQuality === 'performance'} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
+        <ForestMaze level={level} mobile={isTouch || settings.graphicsQuality === 'performance'} mist={settings.graphicsQuality !== 'performance'} reducedMotion={settings.reducedMotion} />
         <ForestExit level={level} />
         <Monster
           key={`monster-${levelIndex}-${attempt}`}
@@ -251,6 +260,7 @@ export default function App({ guardianConfig = {} }) {
         levelIndex={levelIndex} levels={levelTemplates} unlockedLevel={progress.unlockedLevel}
         difficulty={difficulty} bestTimes={progress.bestTimes} elapsed={elapsed}
         onDifficulty={value => updateProgress(current => ({ ...current, difficulty: value }))}
+        settings={settings} onSettings={next => updateProgress(current => ({ ...current, settings: next }))} onReset={resetProgress}
         onChooseLevel={chooseLevel} onStart={startGame}
         onNext={() => chooseLevel(levelIndex + 1)} onRestart={restart} />}
       <span className="sr-only" role="status" aria-live="polite">{paused ? 'Game paused' : status === 'playing' ? 'Game running' : ''}</span>

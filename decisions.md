@@ -233,3 +233,7 @@ per desktop garden. Pool actual point lights at the nearest five desktop or
 three mobile posts and avoid their shadow passes. Cache static collision bounds
 per gate state so larger padded maps do not recreate walls every movement step.
 Continue deploying codex/original-maze-maps.
+
+## 21. Honest hedge gaps, menu settings and forest ambience
+
+Close misleading shrub gaps using overlapping instances within collision footprints. Keep approximately 30% of eligible isolated hedge recesses as walkable, single-entrance hiding pockets; avoid gates and never join corridors. E enters/exits a pocket and hidden players emit no footsteps. Retain the original three mazes and their key progression. Port main's forest menu styling and graphics choices, expose settings before play, and keep audio mute/volume preferences. User-supplied ambience loops only during active visible gameplay with szegvari/Pixabay credits. Remove obsolete box-maze components, unused starter assets and standalone preview entry points; retain source models and exporters.

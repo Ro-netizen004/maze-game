@@ -176,7 +176,7 @@ export default function Player({
     forward.current.normalize()
     right.current.set(-forward.current.z, 0, forward.current.x)
     const length = Math.hypot(vertical, horizontal) || 1
-    const moving = Math.hypot(vertical, horizontal) > 0
+    const moving = Math.hypot(vertical, horizontal) > 0 && !player.hiddenIn
     const sprinting = input.sprint && moving && player.stamina > 0 && !player.hiddenIn
     player.sprinting = sprinting
     const drain = level.mechanics.sprintDrain
@@ -219,7 +219,7 @@ export default function Player({
     const [endX, endZ] = cellPosition(level, level.end)
     let nearby = null
     let interaction = null
-    for (const key of level.keys) {
+    for (const key of player.hiddenIn ? [] : level.keys) {
       const [keyX, keyZ] = cellPosition(level, key.cell)
       if (!collectedKeys.includes(key.id) && Math.hypot(camera.position.x - keyX, camera.position.z - keyZ) < interactionDistance) {
         nearby = key.id
@@ -227,7 +227,7 @@ export default function Player({
         break
       }
     }
-    if (!interaction) {
+    if (!interaction && !player.hiddenIn) {
       for (const door of level.doors) {
         const [doorX, doorZ] = doorPosition(level, door)
         if (openedDoors.includes(door.id) || Math.hypot(camera.position.x - doorX, camera.position.z - doorZ) >= interactionDistance) continue
@@ -236,7 +236,7 @@ export default function Player({
         break
       }
     }
-    if (!interaction) {
+    if (!interaction && !player.hiddenIn) {
       for (const shrine of level.shrines) {
         const [x, z] = cellPosition(level, shrine.cell)
         if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < (shrine.type==='rune'?3:interactionDistance)) {
@@ -249,7 +249,7 @@ export default function Player({
       for (const spot of level.hidingSpots) {
         const [x, z] = cellPosition(level, spot.cell)
         if ((player.hiddenIn === spot.id || Math.hypot(camera.position.x - x, camera.position.z - z) < interactionDistance)) {
-          interaction = { type: 'hiding', id: spot.id, label: player.hiddenIn ? 'Leave hiding spot' : 'Hide' }
+          interaction = { type: 'hiding', id: spot.id, label: player.hiddenIn ? 'Leave hiding spot' : spot.type === 'shrub' ? 'Hide in the hedge' : 'Hide' }
           break
         }
       }
@@ -262,6 +262,12 @@ export default function Player({
       }
       if (interaction.type === 'shrine') onActivateShrine(interaction.id)
       if (interaction.type === 'hiding') {
+        const spot=level.hidingSpots.find(item=>item.id===interaction.id)
+        if(spot.type==='shrub') {
+          const [x,z]=cellPosition(level,player.hiddenIn ? spot.entryCell : spot.cell)
+          camera.position.set(x,eyeHeight,z)
+          player.velocityY=0
+        }
         player.hiddenIn = player.hiddenIn ? null : interaction.id
         onHiddenChange(Boolean(player.hiddenIn))
       }

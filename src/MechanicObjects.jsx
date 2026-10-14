@@ -9,7 +9,7 @@ function Marker({ cell, level, children }) {
 export default function MechanicObjects({ level, triggeredTraps = [], activatedShrines = [] }) {
   return (
     <group>
-      {level.hidingSpots.map(spot => (
+      {level.hidingSpots.filter(spot=>spot.type!=='shrub').map(spot => (
         <Marker key={spot.id} level={level} cell={spot.cell}>
           <mesh castShadow position={[0, 0.75, 0]}>
             <boxGeometry args={[1.25, 1.5, 1.25]} />

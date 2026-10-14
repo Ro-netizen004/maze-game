@@ -41,3 +41,91 @@ input:focus-visible,
   outline: 3px solid #a5b4fc;
   outline-offset: 3px;
 }
+.forest-menu {
+  color: #e1e4d6;
+  background: radial-gradient(ellipse at 50% 35%, rgba(31, 48, 39, 0.28), rgba(5, 13, 12, 0.85));
+  color-scheme: dark;
+}
+.forest-panel {
+  position: relative;
+  margin: auto 0;
+  border: 1px solid #63745b;
+  border-radius: 4px;
+  background: linear-gradient(145deg, rgba(31, 45, 36, 0.96), rgba(13, 24, 21, 0.97));
+  box-shadow: 0 22px 80px #030b09a6, inset 0 0 40px #8b997a0a;
+}
+.forest-panel::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid #a1aa801f;
+  pointer-events: none;
+}
+.forest-kicker {
+  color: #b3bc9c;
+  font-size: 10px;
+  letter-spacing: 0.23em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.forest-menu h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  color: #e7d7ae;
+  font-size: 36px;
+}
+.forest-menu h1:focus { outline: none; }
+.forest-menu label { color: #c8cdb9; }
+.forest-menu select {
+  background: #14231c;
+  border-color: #596a4e;
+  color: #e1e4d6;
+  border-radius: 3px;
+  padding: 10px 12px;
+}
+.forest-menu option { background: #14231c; }
+.forest-menu button {
+  border: 1px solid #6b7b59;
+  border-radius: 3px;
+  background: #27382b;
+  color: #e1e4d6;
+  transition: background 150ms, border-color 150ms;
+}
+.forest-menu button:hover { background: #374b33; border-color: #b0b991; }
+.forest-menu .forest-primary { background: #c0ab75; border-color: #deca96; color: #192318; }
+.forest-menu .forest-primary:hover { background: #d8c38e; }
+.forest-menu .forest-danger { background: transparent; color: #c8a69b; border-color: #805d52; }
+.forest-menu .text-slate-400 { color: #a7b09c; }
+.forest-menu [class*='bg-slate-950'] { background: #09191280; border: 1px solid #60734b40; border-radius: 3px; }
+.forest-menu fieldset { border-color: #566647; }
+.forest-menu input { accent-color: #b9ba85; }
+.forest-menu a:hover { color: #e7d7ae; }
+.forest-panel--lost { border-color: #806456; }
+.forest-panel--lost h1 { color: #d3aaa0; }
+.forest-hud [class*='bg-slate-950'] {
+  background: #10221deb;
+  border: 1px solid #78866355;
+  border-radius: 4px;
+  color: #e1e4d6;
+}
+.forest-hud .text-slate-300 { color: #b5bfa7; }
+.forest-hud .bg-cyan-300 { background: #b4c18a; }
+.forest-hud .bg-slate-700 { background: #344735; }
+.forest-pause { background: #10221deb; color: #e1e4d6; border: 1px solid #78866388; border-radius: 3px; }
+.forest-pause:hover { background: #304431; }
+@media (prefers-reduced-motion: reduce) { .forest-menu button { transition: none; } }
+
+
+/* White type over the forest, with lightweight translucent controls. */
+.forest-menu { color: #fff; background: radial-gradient(ellipse at center, #07120e18, #07120e80); }
+.forest-panel { background: #07120e66; border: 0; border-radius: 0; box-shadow: none; text-shadow: 0 2px 5px #000b; }
+.forest-panel::before { display: none; }
+.forest-menu h1 { font-family: Arial, sans-serif; font-weight: 800; color: #fff; letter-spacing: 0.04em; text-transform: uppercase; }
+.forest-kicker, .forest-menu label, .forest-menu .text-slate-400, .forest-panel--lost h1 { color: #fff; }
+.forest-menu select { background: #ffffff12; color: #fff; border-color: #ffffff55; }
+.forest-menu option { background: #14231c; color: #fff; }
+.forest-menu button, .forest-menu .forest-primary { background: #ffffff16; color: #fff; border-color: #ffffff88; }
+.forest-menu button:hover, .forest-menu .forest-primary:hover { background: #ffffff30; border-color: #fff; }
+.forest-menu [class*='bg-slate-950'] { background: #0002; border: 0; color: #fff; }
+.forest-menu a:hover { color: #fff; }
