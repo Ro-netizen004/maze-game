@@ -22,13 +22,15 @@ export const guardianDifficultyPresets = Object.freeze({
     chaseSpeed: 2.2,
   }),
   hard: Object.freeze({
-    sightRange: 11,
-    fieldOfView: 120,
-    hearingRange: 6,
-    searchDuration: 8,
-    patrolSpeed: 1.55,
-    investigateSpeed: 1.9,
-    chaseSpeed: 2.65,
+    sightRange: 14,
+    fieldOfView: 145,
+    hearingRange: 8,
+    searchDuration: 16,
+    patrolSpeed: 2.2,
+    investigateSpeed: 3.4,
+    chaseSpeed: 4.7,
+    flashlightRange: 19,
+    exposureMemory: 25,
   }),
 })
 
@@ -46,6 +48,7 @@ export function createGuardianState() {
     targetPosition: null,
     searchRemaining: 0,
     lastNoiseId: null,
+    exposedRemaining: 0,
   }
 }
 
@@ -93,10 +96,11 @@ export function updateGuardianState(state, input) {
   const {
     dt = 0, level, openedDoors = [], guardianPosition, guardianFacing,
     playerPosition, playerHidden = false, noise = null, targetReached = false,
-    config = guardianDifficultyPresets.normal,
+    config = guardianDifficultyPresets.normal, flashlightExposure = false,
   } = input
   const next = {
     ...state,
+    exposedRemaining: Math.max(0,(state.exposedRemaining||0)-dt),
     lastKnownPosition: state.lastKnownPosition && [...state.lastKnownPosition],
     targetPosition: state.targetPosition && [...state.targetPosition],
   }
@@ -108,11 +112,19 @@ export function updateGuardianState(state, input) {
     && findPath(level, worldCell(level, ...guardianPosition), worldCell(level, ...noiseWorldPosition(level, noise)), openedDoors).length > 0
 
   if (isNewNoise) next.lastNoiseId = noise.id
-  if (seesPlayer) {
+  if (seesPlayer || flashlightExposure) {
+    if(flashlightExposure) next.exposedRemaining=config.exposureMemory||15
     next.mode = 'chase'
     next.lastKnownPosition = [...playerPosition]
     next.targetPosition = [...playerPosition]
     next.searchRemaining = config.searchDuration
+    return next
+  }
+  // Once a hidden player reveals their shelter, keep approaching that known
+  // position briefly even after they switch the beam off.
+  if(playerHidden && next.exposedRemaining>0 && next.lastKnownPosition) {
+    next.mode='chase'
+    next.targetPosition=[...next.lastKnownPosition]
     return next
   }
   if (hearsNoise) {

@@ -3,6 +3,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { cellPosition } from './levels'
 import { movePlayer } from './collision'
 import { findPath, worldCell } from './navigation'
+import { Vector3 } from 'three'
+import { flashlightHitsGuardian, guardianCanCatch } from './flashlightDetection.js'
 import {
   createGuardianState,
   readPlayerNoise,
@@ -20,6 +22,7 @@ export default function Monster({
   openedDoors,
   active,
   hidden = false,
+  flashlightOn = false,
   playerNoise = null,
   difficulty = 'normal',
   guardianConfig = {},
@@ -27,9 +30,11 @@ export default function Monster({
   catchDuration = 0.85,
   onCatchStart = () => {},
   onAlertChange = () => {},
+  onExposureChange = () => {},
   onCaught,
 }) {
   const body = useRef(null)
+  const beamDirection=useRef(new Vector3())
   const { camera, gl } = useThree()
   const config = useMemo(
     () => resolveGuardianDifficulty(difficulty, guardianConfig),
@@ -49,6 +54,7 @@ export default function Monster({
     guardian: createGuardianState(),
     routeMode: 'patrol',
     routeDoors: '',
+    shelterRevealed: false,
   })
   const [spawnX, spawnZ] = cellPosition(level, level.monster[0])
   useFrame((_, delta) => {
@@ -71,6 +77,11 @@ export default function Monster({
     const sameCell = worldCell(level, monster.position.x, monster.position.z).join(',') === worldCell(level, camera.position.x, camera.position.z).join(',')
     state.attacking = distance < 1.4 && sameCell
     const facing = [Math.sin(monster.rotation.y), Math.cos(monster.rotation.y)]
+    camera.getWorldDirection(beamDirection.current)
+    const exposed=flashlightHitsGuardian({level,openedDoors,
+      playerPosition:[camera.position.x,camera.position.y,camera.position.z],
+      playerDirection:beamDirection.current.toArray(),guardianPosition:[monster.position.x,monster.position.z],
+      flashlightOn,range:config.flashlightRange||14})
     const targetReached = Boolean(
       state.guardian.targetPosition
       && Math.hypot(
@@ -86,10 +97,17 @@ export default function Monster({
       guardianFacing: facing,
       playerPosition: [camera.position.x, camera.position.z],
       playerHidden: hidden,
+      flashlightExposure: exposed,
       noise: readPlayerNoise(playerNoise),
       targetReached,
       config,
     })
+    const revealed=hidden && state.guardian.exposedRemaining>0 && state.guardian.lastKnownPosition
+      && Math.hypot(camera.position.x-state.guardian.lastKnownPosition[0],camera.position.z-state.guardian.lastKnownPosition[1])<1
+    if(state.shelterRevealed!==Boolean(revealed)) {
+      state.shelterRevealed=Boolean(revealed)
+      onExposureChange(Boolean(revealed))
+    }
     if (state.alertMode !== state.guardian.mode) {
       state.alertMode = state.guardian.mode
       onAlertChange(state.guardian.mode)
@@ -136,7 +154,9 @@ export default function Monster({
         monster.rotation.y += turn * (1 - Math.exp(-dt * 8))
       }
     }
-    if (distance < 0.65 && sameCell && !hidden) {
+    if (guardianCanCatch({distance,sameCell,hidden,flashlightExposure:exposed,
+      exposedRemaining:state.guardian.exposedRemaining,knownPosition:state.guardian.lastKnownPosition,
+      playerPosition:[camera.position.x,camera.position.z]})) {
       state.caught = true
       state.caughtRemaining = catchDuration
       state.attacking = true

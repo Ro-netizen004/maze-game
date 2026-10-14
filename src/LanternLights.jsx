@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useFrame,useThree } from '@react-three/fiber'
 
 // Every post glows; only the nearest posts need real lights. No cube shadows.
-export default function LanternLights({fixtures,mobile,color}) {
+export default function LanternLights({fixtures,mobile,color,power=1}) {
   const lights=useRef([]), elapsed=useRef(1)
   const {camera}=useThree()
   useFrame((_,dt)=>{
@@ -17,5 +17,5 @@ export default function LanternLights({fixtures,mobile,color}) {
       if(fixture)light.position.set(fixture.position[0],2.05,fixture.position[2])
     })
   })
-  return Array.from({length:mobile?3:5},(_,index)=><pointLight key={index} ref={node=>{lights.current[index]=node}} color={color} intensity={9} distance={6} decay={2} />)
+  return Array.from({length:mobile?3:5},(_,index)=><pointLight key={index} ref={node=>{lights.current[index]=node}} color={color} intensity={9*power} distance={6} decay={2} />)
 }

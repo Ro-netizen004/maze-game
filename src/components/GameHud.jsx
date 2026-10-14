@@ -9,6 +9,7 @@ function KeyIcon() {
 export default function GameHud({
   level, levelIndex, levelCount, collectedKeys, openedDoors, stamina, hidden, elapsed, prompt, notice, isTouch,
   flashlightBattery, flashlightOn, guardianAlert, activatedShrines = [],
+  shelterRevealed = false,
 }) {
   const required = level.mechanics.requiredDoors || []
   const openedRequired = required.filter(id => openedDoors.includes(id)).length
@@ -20,7 +21,7 @@ export default function GameHud({
       <p className="text-emerald-300">Runes lit {activatedShrines.length} / {level.shrines.length} · Required for escape</p>
       <p className="mt-1 font-semibold">{nextObjective(level,collectedKeys,openedDoors,activatedShrines)}</p>
       <p>{isTouch ? 'Use the virtual controls to move and look.' : 'WASD · Mouse look (drag if capture is unavailable) · Shift sprint · F flashlight · Space jump · E interact · Esc pause'}</p>
-      <p>Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>
+      <p className={shelterRevealed?'font-bold text-red-400':''}>Stamina {Math.round(stamina)}%{hidden ? shelterRevealed ? ' · Shelter revealed! E to leave' : ' · Hidden' : ''}</p>
       <p className={`font-semibold ${guardianAlert === 'chase' ? 'text-red-400' : guardianAlert === 'investigate' || guardianAlert === 'search' ? 'text-amber-300' : 'text-emerald-300'}`}>
         Guardian · {guardianAlert === 'chase' ? 'Chasing' : guardianAlert === 'investigate' ? 'Investigating noise' : guardianAlert === 'search' ? 'Searching' : 'Patrolling'}
       </p>

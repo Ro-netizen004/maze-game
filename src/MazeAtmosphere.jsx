@@ -3,7 +3,7 @@ import { cellPosition } from './levels'
 import { lightpostLayout } from './mazeLighting.js'
 import LanternLights from './LanternLights.jsx'
 
-function MazeAtmosphere({ level, mobile, shadowSize = 1024 }) {
+function MazeAtmosphere({ level, mobile, shadowSize = 1024, power = 1 }) {
   const fixtures = useMemo(() => lightpostLayout(level,mobile), [level, mobile])
   const warm = level.theme === 'temple' ? '#8be1df' : '#ffcf8b'
   return <group>
@@ -11,15 +11,15 @@ function MazeAtmosphere({ level, mobile, shadowSize = 1024 }) {
       shadow-mapSize={[shadowSize, shadowSize]}
       shadow-camera-left={-17} shadow-camera-right={17} shadow-camera-top={17} shadow-camera-bottom={-17}
       shadow-camera-far={45} shadow-normalBias={0.035} shadow-bias={-0.0001} />
-    <LanternLights fixtures={fixtures} mobile={mobile} color={warm} />
+    <LanternLights fixtures={fixtures} mobile={mobile} color={warm} power={power} />
     {fixtures.map(({ id,position }) => {
       const [x,,z]=position
       return <group key={id} position={[x,2.2,z]}>
         <mesh position={[0, -1.1, 0]}><cylinderGeometry args={[0.045, 0.07, 2.2, 6]} /><meshStandardMaterial color="#39453b" roughness={0.9} /></mesh>
         <mesh castShadow><boxGeometry args={[0.18, 0.42, 0.18]} /><meshStandardMaterial color="#26363c" metalness={0.65} roughness={0.4} /></mesh>
-        <mesh><boxGeometry args={[0.19, 0.23, 0.19]} /><meshStandardMaterial color={warm} emissive={warm} emissiveIntensity={2} /></mesh>
+        <mesh><boxGeometry args={[0.19, 0.23, 0.19]} /><meshStandardMaterial color={power ? warm : '#26363c'} emissive={warm} emissiveIntensity={2*power} /></mesh>
         {[0.17, -0.17].map(y => <mesh key={y} position={[0, y, 0]}><boxGeometry args={[0.26, 0.06, 0.26]} /><meshStandardMaterial color="#33454b" metalness={0.65} roughness={0.4} /></mesh>)}
-        <mesh position={[0,-2.18,0]} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[1.05,24]} /><meshBasicMaterial color={warm} transparent opacity={0.07} depthWrite={false} /></mesh>
+        <mesh position={[0,-2.18,0]} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[1.05,24]} /><meshBasicMaterial color={warm} transparent opacity={0.07*power} depthWrite={false} /></mesh>
       </group>
     })}
     {level.grid.flatMap((row, r) => row.map((cell, c) => {
