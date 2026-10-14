@@ -1,20 +1,42 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { lightpostPower,blackoutPhase,BLACKOUT_END } from './blackout.js'
+import { lightpostPower,blackoutPhase,BLACKOUT_END,createBlackoutState,advanceBlackout,blackoutPower,blackoutRemaining } from './blackout.js'
 import { flashlightHitsGuardian,guardianCanCatch } from './flashlightDetection.js'
 import { createGuardianState,updateGuardianState,guardianDifficultyPresets } from './guardianAI.js'
 import { updateFlashlightBattery } from './flashlightBattery.js'
 
 const level={grid:[[0,0,0],[0,0,0],[0,0,0]],doors:[]}
+test('a stalled timer cannot skip the flicker or the twelve-second dark phase',()=>{
+  let state=advanceBlackout(createBlackoutState(),80,40)
+  assert.equal(state.phase,'flickering')
+  state=advanceBlackout(state,100,20)
+  assert.equal(state.phase,'flickering')
+  assert.equal(blackoutPower(state),0)
+  for(let i=0;i<11;i++)state=advanceBlackout(state,110,0.25)
+  assert.equal(state.phase,'dark')
+  assert.equal(blackoutRemaining(state),12)
+  for(let i=0;i<47;i++)state=advanceBlackout(state,150,0.25)
+  assert.equal(blackoutPower(state),0)
+  state=advanceBlackout(state,151,0.25)
+  assert.equal(state.phase,'done')
+  assert.equal(blackoutPower(state),1)
+  assert.equal(advanceBlackout(state,200,10),state)
+  assert.equal(createBlackoutState().phase,'waiting','restarting creates a fresh event')
+})
 test('45-second flicker is followed by twelve seconds of darkness and restoration',()=>{
   assert.equal(lightpostPower(44.9),1)
   assert.equal(blackoutPhase(45),'flickering')
-  assert.equal(lightpostPower(45.1),0)
-  assert.equal(lightpostPower(46.2),0)
+  assert.equal(lightpostPower(45.1),1)
+  assert.equal(lightpostPower(45.3),0)
+  assert.equal(lightpostPower(45.8),1)
+  assert.equal(blackoutPhase(47.9),'flickering')
+  assert.equal(lightpostPower(48),0)
+  assert.equal(blackoutPhase(48),'dark')
+  assert.equal(BLACKOUT_END,60)
   assert.equal(lightpostPower(BLACKOUT_END-0.01),0)
   assert.equal(lightpostPower(BLACKOUT_END),1)
   assert.equal(blackoutPhase(BLACKOUT_END),'normal')
-  assert.ok(updateFlashlightBattery(100,58.2,true)>60,'flashlight is not depleted by the outage')
+  assert.ok(updateFlashlightBattery(100,60,true)>60,'flashlight is not depleted by the outage')
 })
 test('beam exposure respects aim, range, walls and closed doors',()=>{
   const input={level,playerPosition:[0,1.6,-2],playerDirection:[0,0,1],guardianPosition:[0,2],flashlightOn:true}

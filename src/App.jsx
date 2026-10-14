@@ -21,7 +21,7 @@ import MobileControls from './components/MobileControls'
 import { createDefaultProgress, loadProgress, recordWin, saveProgress } from './persistence'
 import { advanceTimer } from './runTimer'
 import { updateFlashlightBattery } from './flashlightBattery'
-import { lightpostPower, blackoutPhase, BLACKOUT_END } from './blackout.js'
+import { createBlackoutState,advanceBlackout,blackoutPower,blackoutRemaining } from './blackout.js'
 
 export default function App({ guardianConfig = {} }) {
   const [progress, setProgress] = useState(loadProgress)
@@ -40,6 +40,7 @@ export default function App({ guardianConfig = {} }) {
   const [guardianAlert, setGuardianAlert] = useState('patrol')
   const [notice, setNotice] = useState(null)
   const [elapsed, setElapsed] = useState(0)
+  const [blackout,setBlackout]=useState(createBlackoutState)
   const [isTouch, setIsTouch] = useState(false)
   const [flashlightBattery, setFlashlightBattery] = useState(100)
   const [flashlightOn, setFlashlightOn] = useState(true)
@@ -74,9 +75,11 @@ export default function App({ guardianConfig = {} }) {
     if (!timerActive) return
     const tick = () => {
       const now = performance.now()
+      const blackoutDelta=(now-timerNow.current)/1000
       elapsedRef.current = advanceTimer(elapsedRef.current, timerNow.current, now, true)
       timerNow.current = now
       setElapsed(elapsedRef.current)
+      setBlackout(current=>advanceBlackout(current,elapsedRef.current/1000,blackoutDelta))
     }
     const timer = setInterval(tick, 100)
     return () => {
@@ -138,6 +141,7 @@ export default function App({ guardianConfig = {} }) {
     playerNoise.current = null
     elapsedRef.current = 0
     setElapsed(0)
+    setBlackout(createBlackoutState())
     setPaused(false)
     setAttempt(value => value + 1)
     setStatus('ready')
@@ -208,7 +212,7 @@ export default function App({ guardianConfig = {} }) {
         <color attach="background" args={[activatedShrines.length ? '#101d29' : '#0b1821']} />
         <fog attach="fog" args={['#203536', 4, 18 + activatedShrines.length * (level.mechanics.shrineVisibilityBoost || 0)]} />
         <hemisphereLight args={['#91afc2', '#26372f', 0.48]} />
-        <MazeAtmosphere level={level} mobile={isTouch} shadowSize={graphics.shadowSize} power={lightpostPower(elapsed/1000)} />
+        <MazeAtmosphere level={level} mobile={isTouch} shadowSize={graphics.shadowSize} power={blackoutPower(blackout)} />
         <EnvironmentalDust mobile={isTouch || settings.graphicsQuality === 'performance'} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
         <ForestMaze level={level} mobile={isTouch || settings.graphicsQuality === 'performance'} mist={settings.graphicsQuality !== 'performance'} reducedMotion={settings.reducedMotion} />
         <ForestExit level={level} />
@@ -258,7 +262,7 @@ export default function App({ guardianConfig = {} }) {
         collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={hidden} shelterRevealed={shelterRevealed}
         elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
         flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} activatedShrines={activatedShrines} />}
-      {status==='playing' && blackoutPhase(elapsed/1000)!=='normal' && <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-sm font-bold text-amber-200" role="status">Lightpost blackout · {Math.ceil(BLACKOUT_END-elapsed/1000)}s · Watch where you aim your flashlight</div>}
+      {status==='playing' && (blackout.phase==='flickering' || blackout.phase==='dark') && <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-sm font-bold text-amber-200" role="status">Lightposts {blackout.phase==='flickering'?'flickering':'off'} · {blackoutRemaining(blackout)}s · Watch where you aim your flashlight</div>}
       {status === 'playing' && !paused && <button className="absolute right-4 top-24 z-20 rounded-lg border border-white/30 bg-slate-950/80 px-4 py-2 font-semibold text-white" onClick={pauseGame}>Pause</button>}
       {status === 'playing' && !paused && isTouch && <MobileControls inputRef={touchInput}
         flashlightOn={flashlightOn} onToggleFlashlight={toggleFlashlight} />}
