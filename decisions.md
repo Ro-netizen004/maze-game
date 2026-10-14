@@ -261,3 +261,7 @@ At 90 seconds of active run time, all lightposts flicker for 1.2 seconds and the
 ## 27. Earlier lightpost blackout
 
 Move the first lightpost flicker from 90 to 45 seconds of active run time, as requested. Retain the 1.2-second flicker, 12-second darkness, pause behavior and independent flashlight.
+
+## 28. Separate shelter exposure from ordinary pursuit
+
+Fix reports of players being caught after switching the flashlight off before hiding. A beam from a walking player still starts a chase, but cannot expose a shelter entered later. Record a separate shelter position only when the guardian is illuminated while the player is already hidden; ordinary sightings and noises cannot transfer that exposure to a different location. Preserve the brief memory of a genuinely revealed shelter after its light is switched off. Add regressions for normal and Hard mode and for moving to a different hiding location.

@@ -102,8 +102,8 @@ export default function Monster({
       targetReached,
       config,
     })
-    const revealed=hidden && state.guardian.exposedRemaining>0 && state.guardian.lastKnownPosition
-      && Math.hypot(camera.position.x-state.guardian.lastKnownPosition[0],camera.position.z-state.guardian.lastKnownPosition[1])<1
+    const revealed=hidden && state.guardian.exposedRemaining>0 && state.guardian.revealedShelterPosition
+      && Math.hypot(camera.position.x-state.guardian.revealedShelterPosition[0],camera.position.z-state.guardian.revealedShelterPosition[1])<1
     if(state.shelterRevealed!==Boolean(revealed)) {
       state.shelterRevealed=Boolean(revealed)
       onExposureChange(Boolean(revealed))
@@ -155,7 +155,7 @@ export default function Monster({
       }
     }
     if (guardianCanCatch({distance,sameCell,hidden,flashlightExposure:exposed,
-      exposedRemaining:state.guardian.exposedRemaining,knownPosition:state.guardian.lastKnownPosition,
+      exposedRemaining:state.guardian.exposedRemaining,revealedShelterPosition:state.guardian.revealedShelterPosition,
       playerPosition:[camera.position.x,camera.position.z]})) {
       state.caught = true
       state.caughtRemaining = catchDuration

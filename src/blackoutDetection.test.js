@@ -36,10 +36,32 @@ test('shining at a guardian reveals a hidden player and preserves the revealed s
   state=updateGuardianState(state,{...input,flashlightExposure:false,dt:1})
   assert.equal(state.mode,'chase')
   assert.ok(state.exposedRemaining>0)
-  assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,exposedRemaining:state.exposedRemaining,knownPosition:state.lastKnownPosition,playerPosition:input.playerPosition}),true)
+  assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,exposedRemaining:state.exposedRemaining,revealedShelterPosition:state.revealedShelterPosition,playerPosition:input.playerPosition}),true)
   assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,playerPosition:[0,-2]}),false)
-  assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,exposedRemaining:3,knownPosition:[0,2],playerPosition:[0,-2]}),false)
+  assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,exposedRemaining:3,revealedShelterPosition:[0,2],playerPosition:[0,-2]}),false)
   assert.equal(guardianCanCatch({distance:0.5,sameCell:false,flashlightExposure:true,playerPosition:[0,-2]}),false)
+})
+
+test('turning the light off before hiding does not carry walking exposure into the shelter',()=>{
+  for(const config of [guardianDifficultyPresets.normal,guardianDifficultyPresets.hard]) {
+    const input={level,guardianPosition:[0,2],guardianFacing:[0,1],playerPosition:[0,-2],playerHidden:false,flashlightExposure:true,dt:0.1,config}
+    let state=updateGuardianState(createGuardianState(),input)
+    assert.equal(state.mode,'chase')
+    assert.equal(state.revealedShelterPosition,null)
+    state=updateGuardianState(state,{...input,playerHidden:true,flashlightExposure:false})
+    assert.equal(state.revealedShelterPosition,null)
+    assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,exposedRemaining:state.exposedRemaining,revealedShelterPosition:state.revealedShelterPosition,playerPosition:input.playerPosition}),false)
+  }
+})
+
+test('ordinary sightings cannot transfer a previously revealed shelter to a new hiding location',()=>{
+  const input={level,guardianPosition:[0,2],guardianFacing:[0,-1],playerPosition:[0,-2],playerHidden:true,flashlightExposure:true,dt:0.1}
+  let state=updateGuardianState(createGuardianState(),input)
+  state=updateGuardianState(state,{...input,playerHidden:false,flashlightExposure:false,playerPosition:[0,0]})
+  assert.deepEqual(state.lastKnownPosition,[0,0])
+  assert.deepEqual(state.revealedShelterPosition,[0,-2])
+  state=updateGuardianState(state,{...input,flashlightExposure:false,playerPosition:[0,0]})
+  assert.equal(guardianCanCatch({distance:0.5,sameCell:true,hidden:true,exposedRemaining:state.exposedRemaining,revealedShelterPosition:state.revealedShelterPosition,playerPosition:[0,0]}),false)
 })
 test('hard guardian outruns walking and retains a stronger search',()=>{
   const hard=guardianDifficultyPresets.hard,normal=guardianDifficultyPresets.normal

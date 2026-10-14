@@ -15,7 +15,7 @@ export function flashlightHitsGuardian({level,openedDoors=[],playerPosition,play
   return hasLineOfSight(level,worldCell(level,playerPosition[0],playerPosition[2]),worldCell(level,...guardianPosition),openedDoors)
 }
 
-export function guardianCanCatch({distance,sameCell,hidden=false,flashlightExposure=false,exposedRemaining=0,knownPosition,playerPosition}) {
-  const revealedShelter=exposedRemaining>0 && knownPosition && Math.hypot(knownPosition[0]-playerPosition[0],knownPosition[1]-playerPosition[1])<1
+export function guardianCanCatch({distance,sameCell,hidden=false,flashlightExposure=false,exposedRemaining=0,revealedShelterPosition,playerPosition}) {
+  const revealedShelter=exposedRemaining>0 && revealedShelterPosition && Math.hypot(revealedShelterPosition[0]-playerPosition[0],revealedShelterPosition[1]-playerPosition[1])<1
   return distance<0.9 && sameCell && (!hidden || flashlightExposure || Boolean(revealedShelter))
 }

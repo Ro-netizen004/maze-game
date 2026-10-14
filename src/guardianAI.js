@@ -49,6 +49,7 @@ export function createGuardianState() {
     searchRemaining: 0,
     lastNoiseId: null,
     exposedRemaining: 0,
+    revealedShelterPosition: null,
   }
 }
 
@@ -101,9 +102,11 @@ export function updateGuardianState(state, input) {
   const next = {
     ...state,
     exposedRemaining: Math.max(0,(state.exposedRemaining||0)-dt),
+    revealedShelterPosition: state.revealedShelterPosition && [...state.revealedShelterPosition],
     lastKnownPosition: state.lastKnownPosition && [...state.lastKnownPosition],
     targetPosition: state.targetPosition && [...state.targetPosition],
   }
+  if(next.exposedRemaining===0) next.revealedShelterPosition=null
   const seesPlayer = canSeePlayer({
     level, openedDoors, guardianPosition, guardianFacing, playerPosition, playerHidden, config,
   })
@@ -113,7 +116,12 @@ export function updateGuardianState(state, input) {
 
   if (isNewNoise) next.lastNoiseId = noise.id
   if (seesPlayer || flashlightExposure) {
-    if(flashlightExposure) next.exposedRemaining=config.exposureMemory||15
+    // Seeing a beam while the player is walking must not mark a shelter they
+    // enter later. Only a beam from inside cover reveals that exact shelter.
+    if(flashlightExposure && playerHidden) {
+      next.exposedRemaining=config.exposureMemory||15
+      next.revealedShelterPosition=[...playerPosition]
+    }
     next.mode = 'chase'
     next.lastKnownPosition = [...playerPosition]
     next.targetPosition = [...playerPosition]
@@ -122,9 +130,9 @@ export function updateGuardianState(state, input) {
   }
   // Once a hidden player reveals their shelter, keep approaching that known
   // position briefly even after they switch the beam off.
-  if(playerHidden && next.exposedRemaining>0 && next.lastKnownPosition) {
+  if(playerHidden && next.exposedRemaining>0 && next.revealedShelterPosition) {
     next.mode='chase'
-    next.targetPosition=[...next.lastKnownPosition]
+    next.targetPosition=[...next.revealedShelterPosition]
     return next
   }
   if (hearsNoise) {
