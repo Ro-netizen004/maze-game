@@ -15,7 +15,7 @@ export default function StartResultOverlay({
       <p className="forest-kicker">{status === 'won' ? 'Beyond the treeline' : status === 'lost' ? 'Lost in the woods' : 'After dark · Forest trails'}</p>
       <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
       {status === 'ready' ? <>
-        <p className="mt-3">Five journals. Five ritual circles. Each activated rune calls the guardian and strengthens its hunt. Save your sprint, break sight before hiding, and escape along the Old Road.</p>
+        <p className="mt-3">Five journals. Three ritual circles in the middle of the Longleat hedge maze. Each activated rune calls the guardian and strengthens its hunt. Save your sprint, break sight before hiding, and escape along the Old Road.</p>
         <label className="mt-4 block text-left text-sm font-semibold" htmlFor="difficulty">Difficulty</label>
         <select id="difficulty" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={difficulty} onChange={event => onDifficulty(event.target.value)}>
           <option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option>
@@ -33,6 +33,7 @@ export default function StartResultOverlay({
           <button className="rounded-lg border border-slate-300 px-5 py-3" onClick={onRestart}>Play again / Menu</button>
         </div>
       </>}
+      <p className="mt-1 text-xs text-slate-400">Longleat Hedge Maze by <a className="underline" href="https://skfb.ly/6TYUT" target="_blank" rel="noreferrer">Marius Dobre</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · three circular clearings and optimized textures</p>
       <p className="mt-1 text-xs text-slate-400">Hooded Figure Statue by <a className="underline" href="https://skfb.ly/pyB9M" target="_blank" rel="noreferrer">llussun7</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · scaled and arranged</p>
       <p className="mt-4 text-xs text-slate-400">Ritual Circle by <a className="underline" href="https://skfb.ly/pBDOJ" target="_blank" rel="noreferrer">ARTEL_3D</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · optimized and adapted</p>
       <p className="mt-4 text-xs text-slate-400">Book Prop by <a className="underline" href="https://skfb.ly/oGZut" target="_blank" rel="noreferrer">Sofkin</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · scaled for the game</p>

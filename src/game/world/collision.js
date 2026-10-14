@@ -16,8 +16,9 @@ export function moveWithinBoundary(level, x, z, dx, dz, radius = playerRadius) {
 // Resolve a small movement step by pushing the circle out along wall normals.
 // Unlike rejecting X and Z separately, this also slides around rounded corners.
 export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = playerRadius, forestInset = 0) {
-  const width = level.grid[0].length * cellSize
-  const depth = level.grid.length * cellSize
+  const size = level.cellSize || cellSize
+  const width = level.grid[0].length * size
+  const depth = level.grid.length * size
   // Forest shoulders stay narrower than the player diameter between blocked cells.
   const inset = Math.max(0, Math.min(0.18, forestInset))
   const signature = `${openedDoors === null ? 'walls' : [...openedDoors].sort().join(',')}:${inset}`
@@ -30,12 +31,12 @@ export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = pla
     const openDoorCells = new Set((level.doors || []).filter(door => opened.has(door.id)).map(door => door.cell.join(',')))
     level.grid.forEach((row, r) => row.forEach((cell, c) => {
       if (!cell || openDoorCells.has(`${r},${c}`)) return
-      const left = c * cellSize - width / 2
-      const front = r * cellSize - depth / 2
+      const left = c * size - width / 2
+      const front = r * size - depth / 2
       // Keep gate neighbours full width so shoulders cannot bypass a locked seal.
       const nearGate = (level.doors || []).some(door => Math.abs(door.cell[0] - r) + Math.abs(door.cell[1] - c) <= 1)
       const margin = nearGate ? 0 : inset
-      obstacles.push({ left: left + margin, right: left + cellSize - margin, front: front + margin, back: front + cellSize - margin })
+      obstacles.push({ left: left + margin, right: left + size - margin, front: front + margin, back: front + size - margin })
     }))
     if (openedDoors !== null) {
       for (const door of getLockedDoors(level, openedDoors)) obstacles.push(doorBounds(level, door))
@@ -49,6 +50,7 @@ export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = pla
     z = Math.max(-depth / 2 + radius, Math.min(depth / 2 - radius, z))
     let corrected = false
     obstacles.forEach(({ left, right, front, back }) => {
+      if (x + radius < left || x - radius > right || z + radius < front || z - radius > back) return
       const nearestX = Math.max(left, Math.min(x, right))
       const nearestZ = Math.max(front, Math.min(z, back))
       const nx = x - nearestX

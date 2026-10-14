@@ -1,7 +1,8 @@
 import { cellSize } from './levels.js'
 import { getLockedCellIds } from './levelRuntime.js'
 export function worldCell(level, x, z) {
-  return [Math.floor(z / cellSize + level.grid.length / 2), Math.floor(x / cellSize + level.grid[0].length / 2)]
+  const size = level.cellSize || cellSize
+  return [Math.floor(z / size + level.grid.length / 2), Math.floor(x / size + level.grid[0].length / 2)]
 }
 export function findPath(level, start, goal, openedDoors) {
   const locked = getLockedCellIds(level, openedDoors)

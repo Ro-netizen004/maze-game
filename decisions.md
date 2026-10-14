@@ -117,7 +117,7 @@ See docs/architecture.md for module ownership and maintenance commands.
 Update this log when a major decision changes, explicitly marking replaced
 choices and distinguishing agreed future work from implemented behavior.
 
-## 13. Return to a maze made of trees — current, 2026-10-14
+## 13. Return to a maze made of trees — superseded by decision 16
 
 The user supplied a sketch of broken circular rings and hooked corridors and
 requested a maze-like structure again, using trees instead of plain box walls.
@@ -145,3 +145,42 @@ north/south entrances remain between statues. Share geometry, materials, and
 textures; avoid additional dynamic lights or statue shadow passes. Preserve
 the original downloaded files and add attribution to CREDITS and the game menu.
 The statues are decorative and do not change objectives or guardian tuning.
+
+## 16. Use the supplied Longleat maze — current, 2026-10-14
+
+The user explicitly replaced the custom map: use Longleat Hedge Maze by Marius
+Dobre (https://skfb.ly/6TYUT), CC BY 4.0, and make exactly three circular clearings
+in the middle for the runes. This supersedes decisions 13 and 15's generated tree
+walls. Preserve the supplied hedge corridor plan; the only path layout cuts are
+the three circles. Derive collision/navigation by raycasting the edited hedge
+geometry. Do not generate connecting corridors or substitute a custom maze.
+
+Normalize the longest dimension to 96 meters. Clearings have radius 5 meters at
+game positions (0,-14), (0,0), (0,14), each with one ritual circle. Keep five
+journals on reachable authored paths. Escape now requires five journals and three
+runes. Update HUD/menu instructions and journal clues accordingly. The statue
+ring remains in the middle clearing, tightened to radius 3.5 meters.
+
+Level the supplied ground for fixed-height movement, remove source preview
+characters and elevated bridges/platforms, and resize textures for the browser.
+Preserve the original GLB and source attribution. A distinct level ID keeps old
+forest best times separate. Generate an overhead render from the actual edited
+asset. Prior layout images are historical references, not the active map.
+
+## 17. Spread the rune clearings farther apart — 2026-10-14
+
+At the user's request, move the north/south clearings from z=-14/+14 to
+z=-24/+24, keeping the central clearing at zero and all radii at five meters.
+Adjacent centers are now 24 meters apart, with 14 meters between their edges.
+Regenerate from the untouched supplied source so the earlier cuts are restored.
+Keep the Longleat corridors and verify all three runes are reachable. Deploy the
+finished change to GitHub Pages as explicitly requested.
+
+## 15. Visible maze barriers and empty scenery batches — tree walls superseded by decision 16
+
+Browser verification found that empty path/rock instance batches crashed the
+scene after the labyrinth update. Empty batches now render nothing. Tall trees
+alone also left visually open gaps beneath their canopies, so add dense evergreen
+saplings along the same barrier grid. Use shared low-poly geometry, three
+instanced batches, and no additional shadows to make the walls visible at player
+height without multiplying imported tree costs. Keep the existing layout intact.

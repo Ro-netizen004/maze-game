@@ -126,7 +126,7 @@ export default function Monster({
       const dx = target[0] - monster.position.x
       const dz = target[1] - monster.position.z
       const remaining = Math.hypot(dx, dz)
-      if (remaining < 0.07) {
+      if (remaining < (level.longleatMaze ? 0.09 : 0.07)) {
         state.waypoint = null
         state.timer = 0
       }
@@ -134,7 +134,7 @@ export default function Monster({
         const step = Math.min(remaining, dt * guardianSpeed(state.guardian, config))
         const [x, z] = (level.openForest && !level.treeLabyrinth)
           ? moveWithinBoundary(level, monster.position.x, monster.position.z, dx / remaining * step, dz / remaining * step, 0.5)
-          : movePlayer(level, monster.position.x, monster.position.z, dx / remaining * step, dz / remaining * step, openedDoors, 0.75)
+          : movePlayer(level, monster.position.x, monster.position.z, dx / remaining * step, dz / remaining * step, openedDoors, level.longleatMaze ? 0.3 : 0.75)
         state.moving = Math.hypot(x - monster.position.x, z - monster.position.z) > 0.001
         monster.position.set(x, 0, z)
         const targetAngle = Math.atan2(dx, dz)

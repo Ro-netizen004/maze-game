@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import OpenForest from './environment/OpenForest.jsx'
+import LongleatMaze from './environment/LongleatMaze.jsx'
 import Player from './player/Player.jsx'
 import QuestObjects from './quest/QuestObjects.jsx'
 import Monster from './guardian/Monster.jsx'
@@ -24,7 +25,7 @@ export default function GameScene({ session, guardianConfig }) {
         <hemisphereLight args={['#a6c7d6', '#374638', 0.7]} />
         <MazeAtmosphere level={level} mobile={isTouch} />
         <EnvironmentalDust mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
-        <OpenForest level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} graphics={graphics} />
+        {level.longleatMaze ? <LongleatMaze level={level} /> : <OpenForest level={level} mobile={isTouch} reducedMotion={settings.reducedMotion} graphics={graphics} />}
         <ForestExit level={level} collectedClues={collectedClues} activatedRituals={activatedShrines} />
         <Monster
           key={`monster-${levelIndex}-${attempt}`}

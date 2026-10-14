@@ -27,10 +27,12 @@ must not import fixtures or legacy scenes. Shared forest primitives live in the
 active environment folder rather than depending on the old maze renderer.
 
 The active level keeps `openForest` for journal/rune quest behavior and sets
-`treeLabyrinth` for grid collision, guardian routing, and blocked sight. Its
-barrier geometry is defined in `world/forestLayout.js`; objective clearings are
-reserved in `world/levels.js`. `scripts/layout` exports that same map and renders
-the top-down picture in `docs/layout` (Python rendering requires Pillow).
+`treeLabyrinth` for grid collision, guardian routing, and blocked sight. It uses
+the supplied Longleat GLB through `environment/LongleatMaze.jsx`. The Blender
+exporter `scripts/assets/export-longleat.py` cuts three middle clearings and samples
+collision data into `world/longleatLayout.json`. `world/levels.js` places journals
+on reachable authored paths. Imported maps declare their own cell size; legacy
+maps retain two-meter cells. Prior custom-map files and images are historical.
 
 Some internal names (`collectedClues`, `activatedShrines`, key/door helpers) are
 retained for compatibility with existing components and regression fixtures.

@@ -6,6 +6,7 @@ import { cellPosition } from '../world/levels.js'
 export function Instances({ items, children, shadows = true }) {
   const mesh = useRef(null)
   useLayoutEffect(() => {
+    if (!items.length || !mesh.current) return
     const transform = new Object3D(), color = new Color()
     items.forEach((item, index) => {
       transform.position.set(...item.position)
@@ -19,6 +20,7 @@ export function Instances({ items, children, shadows = true }) {
     mesh.current.instanceColor.needsUpdate = true
     mesh.current.computeBoundingSphere()
   }, [items])
+  if (!items.length) return null
   return <instancedMesh ref={mesh} args={[null, null, items.length]} castShadow={shadows} receiveShadow>{children}</instancedMesh>
 }
 

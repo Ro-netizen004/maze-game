@@ -6,8 +6,8 @@ import { canEscapeForest } from '../src/game/quest/journals.js'
 import { readFile } from 'node:fs/promises'
 
 const level = levels[0]
-test('five rituals can be activated from every side without exact aiming', () => {
-  assert.equal(level.rituals.length, 5)
+test('three central rituals can be activated from every side without exact aiming', () => {
+  assert.equal(level.rituals.length, 3)
   for (const ritual of level.rituals) {
     const [x, z] = cellPosition(level, ritual.cell)
     for (let i = 0; i < 8; i++) {

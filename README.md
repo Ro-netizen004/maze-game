@@ -4,7 +4,9 @@ A first-person nighttime forest exploration game built with React, Three.js,
 React Three Fiber, Vite, and Tailwind. Recover five journals, learn the keeper’s
 story, avoid the guardian, and escape along the Old Road. There are no maze
 corridors made of box walls, keys, or locked gates in the active game. The active
-layout is a tree labyrinth with broken rings and winding corridors.
+layout uses the supplied **Longleat Hedge Maze by Marius Dobre**, CC BY 4.0, with
+three circular rune clearings cut into its middle. The original hedge paths are
+preserved; collision and navigation are sampled from the edited model.
 
 ## Run locally
 
@@ -56,22 +58,22 @@ from the repository root. Dormant maze code is isolated in `src/legacy`.
 See [architecture](docs/architecture.md) for module ownership and
 [decisions](decisions.md) for current, superseded, and pending major choices.
 
-Explore one 50-meter forest labyrinth with six landmark signs. Dense tree rows
-form solid barriers around broken circular groves and hooked corridors inspired
-by the supplied sketch. Player and guardian follow connected passages inside a
-low post-and-rope perimeter; the guardian's sight is blocked by tree rows.
-See [the actual layout](docs/layout/forest-layout.png). Regenerate the map with
-`node scripts/layout/export-layout.mjs` and render it with
-`python scripts/layout/render-layout.py` (requires Pillow), from the repo root.
+Explore the Longleat hedge maze, normalized to 96 meters along its longer side.
+Player collision, guardian paths, and blocked sight follow the supplied hedges.
+Three circular clearings of radius five meters run along the middle, each with
+one rune. Eight hooded statues face inward around the middle clearing.
+See [the actual edited model](docs/layout/longleat-clearings.png). Regenerate the
+browser model, collision data, and overhead image with
+`blender --background --python scripts/assets/export-longleat.py`.
 The five journals can be found in any order; each contains original lore
 and a clue to another location. Collecting one opens a reader and pauses the
 guardian, player, timer, and flashlight battery. Reopen recovered books using J
-or the HUD archive button. Activate the ritual circle just south of each journal
-site with E (or the touch Interact button). Circles have a faint turquoise glow
+or the HUD archive button. Activate the three ritual circles in the middle
+clearings with E (or the touch Interact button). Circles have a faint turquoise glow
 and floating marker before activation, then stay brightly lit with a light column.
 Interaction works within three meters from any side and requires no precise aim.
-Once all five journals are recovered and all five runes are lit, step into the glowing
-Old Road clearing in the southeast to win.
+Once all five journals are recovered and all three runes are lit, step into the glowing
+Old Road clearing in the northeast to win.
 
 The journal prop uses the supplied **Book Prop by Sofkin**, licensed under CC BY
 4.0. Attribution appears in the game menu and CREDITS.md. Original asset files

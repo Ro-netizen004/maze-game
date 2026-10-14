@@ -4,14 +4,14 @@ import { forestObjective } from '../quest/forestQuest.js'
 
 export default function GameHud({ level, collectedClues = [], stamina, hidden, elapsed, prompt, notice, isTouch,
   flashlightBattery, flashlightOn, guardianAlert, onReadJournal, canRead, heading, activatedRituals = [], exhausted = false }) {
-  const quest = forestObjective(collectedClues, activatedRituals)
+  const quest = forestObjective(collectedClues, activatedRituals, level)
   const complete = collectedClues.length === level.clues.length && activatedRituals.length === level.rituals.length
   return <div className="forest-hud pointer-events-none absolute inset-0">
     <div className="forest-compass absolute left-1/2 top-3 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-xs text-white" aria-label={'Facing ' + heading}>COMPASS · <strong className="text-base">{heading}</strong></div>
     <div className="forest-stats absolute left-3 top-3 max-w-xs rounded-lg bg-slate-950/90 p-3 text-sm text-white">
-      <p className="font-bold">The Keeper’s Forest</p>
+      <p className="font-bold">{level.name}</p>
       <p className="tabular-nums">{formatTime(elapsed)} · Journals {collectedClues.length} / 5</p>
-      <p className="text-xs text-emerald-200">Runes lit {activatedRituals.length} / 5</p>
+      <p className="text-xs text-emerald-200">Runes lit {activatedRituals.length} / {level.rituals.length}</p>
       {activatedRituals.length > 0 && <p className="text-xs text-amber-200">The guardian grows stronger with each rune.</p>}
       <p className="mt-1">{complete ? 'All records and runes ready · Reach the Old Road' : 'Recover journals · Activate their ritual circles'}</p>
       <p className="mt-2 text-xs">Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>

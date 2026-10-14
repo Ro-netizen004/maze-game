@@ -67,3 +67,12 @@ Creative Commons Attribution (https://creativecommons.org/licenses/by/4.0/).
 Original source: `src/hooded-figure-statue`. Browser asset:
 `public/models/hooded-statue/statue.glb`. Adaptations: scaled to 2.4 meters tall
 and arranged as eight shared copies facing the center of the forest clearing.
+
+## Longleat Hedge Maze
+
+"Longleat Hedge Maze" (https://skfb.ly/6TYUT) by Marius Dobre is licensed under
+Creative Commons Attribution (https://creativecommons.org/licenses/by/4.0/).
+Source: `longleat_hedge_maze.glb`. Browser asset:
+`public/models/longleat-maze/maze.glb`. Adaptations: normalized scale, three
+circular rune clearings, leveled ground, removed preview characters and elevated
+bridges/platforms, and reduced texture resolution. Collision follows the model.

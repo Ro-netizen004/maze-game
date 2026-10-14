@@ -51,7 +51,7 @@ export default function Player({
   useEffect(() => {
     const [x, z] = cellPosition(level, level.start)
     camera.position.set(x, eyeHeight, z)
-    camera.lookAt(x, eyeHeight, z + cellSize)
+    camera.lookAt(x, eyeHeight, z + (level.longleatMaze ? -cellSize : cellSize))
     const controls = new PointerLockControls(camera, gl.domElement)
     controls.enabled = activeRef.current
     controls.pointerSpeed = lookSensitivity
@@ -215,7 +215,7 @@ export default function Player({
     for (let i = 0; i < steps; i++) {
       const [nextX, nextZ] = level.openForest && !level.treeLabyrinth
         ? moveWithinBoundary(level, camera.position.x, camera.position.z, dx * dt, dz * dt)
-        : movePlayer(level, camera.position.x, camera.position.z, dx * dt, dz * dt, openedDoors, 0.3, 0.18)
+        : movePlayer(level, camera.position.x, camera.position.z, dx * dt, dz * dt, openedDoors, 0.3, level.longleatMaze ? 0 : 0.18)
       camera.position.set(nextX, camera.position.y, nextZ)
 
       player.velocityY -= 14 * dt
