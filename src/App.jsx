@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import ForestAmbience from './ForestAmbience.jsx'
+import GuardianAudio from './GuardianAudio.jsx'
 import { graphicsPreset } from './graphics.js'
 import { canActivateShrine } from './objectives.js'
 import ForestMaze from './ForestMaze'
@@ -38,6 +39,7 @@ export default function App({ guardianConfig = {} }) {
   const [hidden, setHidden] = useState(false)
   const [shelterRevealed,setShelterRevealed]=useState(false)
   const [guardianAlert, setGuardianAlert] = useState('patrol')
+  const [guardianProximity,setGuardianProximity]=useState(0)
   const [notice, setNotice] = useState(null)
   const [elapsed, setElapsed] = useState(0)
   const [blackout,setBlackout]=useState(createBlackoutState)
@@ -45,6 +47,7 @@ export default function App({ guardianConfig = {} }) {
   const [flashlightBattery, setFlashlightBattery] = useState(100)
   const [flashlightOn, setFlashlightOn] = useState(true)
   const ambienceAudio = useRef(null)
+  const guardianAudio=useRef(null)
   const playerNoise = useRef(null)
   const touchInput = useRef({ forward: 0, right: 0, jump: false, sprint: false, interact: false, lookX: 0, lookY: 0 })
   const elapsedRef = useRef(0)
@@ -138,6 +141,7 @@ export default function App({ guardianConfig = {} }) {
     setHidden(false)
     setShelterRevealed(false)
     setGuardianAlert('patrol')
+    setGuardianProximity(0)
     playerNoise.current = null
     elapsedRef.current = 0
     setElapsed(0)
@@ -171,6 +175,7 @@ export default function App({ guardianConfig = {} }) {
     setPaused(false)
   }
   function resume() {
+    guardianAudio.current?.unlock()
     setPaused(false)
     captureMouse()
   }
@@ -182,6 +187,7 @@ export default function App({ guardianConfig = {} }) {
     }
   }
   function startGame() {
+    guardianAudio.current?.unlock()
     if(settings.ambienceEnabled) {
       ambienceAudio.current.volume=settings.ambienceVolume/100
       ambienceAudio.current.play().catch(()=>{})
@@ -206,6 +212,7 @@ export default function App({ guardianConfig = {} }) {
   return (
     <div className={`relative h-screen w-full ${status === 'catching' ? 'guardian-caught' : ''}`}>
       <ForestAmbience audioRef={ambienceAudio} active={timerActive} enabled={settings.ambienceEnabled} volume={settings.ambienceVolume} />
+      <GuardianAudio controllerRef={guardianAudio} active={timerActive} enabled={settings.ambienceEnabled} volume={settings.ambienceVolume} proximity={guardianProximity} />
       <Canvas shadows={graphics.shadows} dpr={graphics.dpr} frameloop={timerActive || status === 'catching' ? 'always' : 'demand'}
         gl={{ antialias: !isTouch, powerPreference: isTouch ? 'low-power' : 'high-performance' }}
         camera={{ position: [-6, 1.6, -8], fov: 75, near: 0.03 }}>
@@ -230,6 +237,7 @@ export default function App({ guardianConfig = {} }) {
           guardianConfig={guardianConfig}
           onAlertChange={setGuardianAlert}
           onExposureChange={setShelterRevealed}
+          onProximityChange={setGuardianProximity}
           onCatchStart={() => setStatus(current => current === 'playing' ? 'catching' : current)}
           onCaught={() => {
             setNotice(null)

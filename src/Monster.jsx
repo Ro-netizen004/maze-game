@@ -5,6 +5,7 @@ import { movePlayer } from './collision'
 import { findPath, worldCell } from './navigation'
 import { Vector3 } from 'three'
 import { flashlightHitsGuardian, guardianCanCatch } from './flashlightDetection.js'
+import { guardianProximityBand } from './guardianProximity.js'
 import {
   createGuardianState,
   readPlayerNoise,
@@ -31,6 +32,7 @@ export default function Monster({
   onCatchStart = () => {},
   onAlertChange = () => {},
   onExposureChange = () => {},
+  onProximityChange = () => {},
   onCaught,
 }) {
   const body = useRef(null)
@@ -55,6 +57,7 @@ export default function Monster({
     routeMode: 'patrol',
     routeDoors: '',
     shelterRevealed: false,
+    proximity: 0,
   })
   const [spawnX, spawnZ] = cellPosition(level, level.monster[0])
   useFrame((_, delta) => {
@@ -74,6 +77,11 @@ export default function Monster({
     if (!active || paused) { state.moving = false; return }
     state.moving = false
     const distance = Math.hypot(monster.position.x - camera.position.x, monster.position.z - camera.position.z)
+    const proximity=guardianProximityBand(distance,state.proximity)
+    if(proximity!==state.proximity) {
+      state.proximity=proximity
+      onProximityChange(proximity)
+    }
     const sameCell = worldCell(level, monster.position.x, monster.position.z).join(',') === worldCell(level, camera.position.x, camera.position.z).join(',')
     state.attacking = distance < 1.4 && sameCell
     const facing = [Math.sin(monster.rotation.y), Math.cos(monster.rotation.y)]

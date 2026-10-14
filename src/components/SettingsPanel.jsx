@@ -14,8 +14,8 @@ export default function SettingsPanel({ settings, onChange, onReset }) {
     </label>
     <label className="flex items-center gap-2"><input type="checkbox" checked={settings.invertY} onChange={event => update({ invertY: event.target.checked })} /> Invert vertical look</label>
     <label className="flex items-center gap-2"><input type="checkbox" checked={settings.reducedMotion} onChange={event => update({ reducedMotion: event.target.checked })} /> Reduced motion</label>
-    <label className="flex items-center gap-2"><input type="checkbox" checked={settings.ambienceEnabled} onChange={event => update({ ambienceEnabled: event.target.checked })} /> Forest ambience</label>
-    <label className="block text-sm">Ambience volume: {settings.ambienceVolume}%
+    <label className="flex items-center gap-2"><input type="checkbox" checked={settings.ambienceEnabled} onChange={event => update({ ambienceEnabled: event.target.checked })} /> Game audio (forest + guardian)</label>
+    <label className="block text-sm">Audio volume: {settings.ambienceVolume}%
       <input className="mt-1 block w-full" type="range" min="0" max="100" step="5" value={settings.ambienceVolume} onChange={event => update({ ambienceVolume: Number(event.target.value) })} />
     </label>
     <label className="block text-sm">Flashlight intensity: {settings.flashlightIntensity}

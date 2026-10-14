@@ -1,5 +1,12 @@
 # Asset credits
 
+**Demonic Whisper** by **Magnesus (Freesound)**, distributed by
+**freesound_community** on Pixabay.
+- Source: https://pixabay.com/sound-effects/horror-demonic-whisper-100425/
+- License: Pixabay Content License, https://pixabay.com/service/license-summary/
+- User-supplied MP3: `public/audio/demonic-whisper.mp3`; looped as a guardian
+  proximity cue with distance-based volume. Stops outside range and when paused.
+
 **Flashlight** by **MAR.COS.**
 
 - Original model: https://skfb.ly/o8H9O

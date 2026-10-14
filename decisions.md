@@ -269,3 +269,7 @@ Fix reports of players being caught after switching the flashlight off before hi
 ## 29. Make the lightpost flicker visibly distinct
 
 Keep the requested once-per-run blackout at 45 seconds. Replace the brief 12 Hz dim flicker with three seconds of slower, full-brightness flashes that are easier to see, followed by a full twelve seconds of darkness. Latch the event instead of deriving it only from the current timer: a long frame stall must not skip the whole outage. Cap phase advancement on delayed ticks, freeze while paused, and reset on restart. Without stalls, lightposts restore at 60 seconds. Keep the flashlight independent.
+
+## 30. Guardian proximity whisper
+
+Use the user-supplied Demonic Whisper by Magnesus (Freesound), via Pixabay, as a proximity warning. Start within six metres, increase volume as the guardian approaches, and stop at eight metres to avoid rapid toggling at the threshold. Loop the clip only during active, visible gameplay, including while hiding; silence it on pause and after the run ends. Unlock playback from Start/Resume gestures and reuse the existing audio mute/volume settings, relabelled for both forest and guardian audio. Credit the artist and Pixabay Content License in the menu and CREDITS.md. This sound is a warning for the player and does not itself reveal their hiding spot.
