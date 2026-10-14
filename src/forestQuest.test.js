@@ -2,33 +2,40 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { levels } from './levels.js'
 import { forestObjective } from './forestQuest.js'
-import { canOpenDoor, isLevelSolvable, reachableCells } from './levelRuntime.js'
+import { canEscapeForest, journalCollection } from './journals.js'
+import { reachableCells } from './levelRuntime.js'
+import { findPath } from './navigation.js'
 
-test('first forest has loops, clearings and reachable journals behind their seals', () => {
-  const level = levels[0]
-  assert.equal(isLevelSolvable(level), true)
-  const cells = reachableCells(level, [5, 5], ['ruby'])
-  let edges = 0
-  for (const id of cells) {
-    const [r, c] = id.split(',').map(Number)
-    edges += Number(cells.has(`${r + 1},${c}`)) + Number(cells.has(`${r},${c + 1}`))
+const level = levels[0]
+test('open forest has exactly five complete journals reachable without gates', () => {
+  assert.equal(level.clues.length, 5)
+  assert.equal(level.doors.length, 0)
+  assert.equal(level.keys.length, 0)
+  assert.equal(new Set(level.clues.map(item => item.id)).size, 5)
+  const reachable = reachableCells(level)
+  assert.ok(reachable.size > 550, 'broad open forest, not narrow corridors')
+  for (const journal of level.clues) {
+    assert.ok(reachable.has(journal.cell.join(',')))
+    assert.ok(journal.text.length > 200 && journal.hint.length > 60)
   }
-  assert.ok(edges >= cells.size + 2, 'several independent loops must remain open for escape')
-  assert.ok([[3, 4], [3, 5], [4, 4], [4, 5]].every(([r,c]) => level.grid[r][c] === 0), 'a two-cell-wide clearing')
-  for (const [id, door] of [['dawn-note', 'emerald'], ['dusk-note', 'amber']]) {
-    const clue = level.clues.find(clue => clue.id === id)
-    assert.equal(cells.has(clue.cell.join(',')), false)
-    assert.equal(reachableCells(level, [5, 5], ['ruby', door]).has(clue.cell.join(',')), true)
+  for (const from of level.clues) for (const to of level.clues) {
+    assert.ok(findPath(level, from.cell, to.cell).length > 0, 'any discovery order works')
   }
+  assert.ok(reachable.has(level.end.join(',')))
 })
-
-test('exit requires all four seals and both journals, and hints advance with progress', () => {
-  const level = levels[0], exit = level.doors.find(door => door.id === 'exit')
-  assert.equal(canOpenDoor(level, exit, [], level.mechanics.requiredDoors), false)
-  assert.equal(canOpenDoor(level, exit, [], level.mechanics.requiredDoors, [], ['dawn-note']), false)
-  assert.equal(canOpenDoor(level, exit, [], level.mechanics.requiredDoors, [], ['dawn-note', 'dusk-note']), true)
-  assert.equal(forestObjective().title, 'Find the Ruby key')
-  assert.equal(forestObjective(['ruby'], ['ruby']).title, 'Find the Emerald key')
-  assert.equal(forestObjective(['ruby', 'emerald'], ['ruby', 'emerald']).title, 'Read the Dawn journal')
-  assert.equal(forestObjective(level.keys.map(key => key.id), [...level.mechanics.requiredDoors, 'exit'], level.mechanics.requiredClues).title, 'Escape the keeper’s forest')
+test('escape requires all five distinct journal IDs, not a collection count', () => {
+  const ids = level.clues.map(item => item.id)
+  assert.equal(canEscapeForest(level, []), false)
+  for (const missing of ids) assert.equal(canEscapeForest(level, ids.filter(id => id !== missing)), false)
+  assert.equal(canEscapeForest(level, Array(5).fill(ids[0])), false)
+  assert.equal(canEscapeForest(level, [...ids].reverse()), true)
+  assert.equal(forestObjective(ids).title, 'Return to the Old Road')
+  assert.equal(forestObjective([ids[0]]).title, 'Find Borrowed Footsteps')
+  assert.deepEqual(journalCollection(level, [], [ids[3], ids[0]]).map(item => item.id), [ids[0], ids[3]])
+})
+test('guardian can patrol all forest sites with no gate restrictions', () => {
+  for (let i = 0; i < level.monster.length; i++) {
+    assert.ok(findPath(level, level.monster[i], level.monster[(i + 1) % level.monster.length]).length > 1)
+    assert.ok(findPath(level, level.monster[i], level.start).length > 0)
+  }
 })

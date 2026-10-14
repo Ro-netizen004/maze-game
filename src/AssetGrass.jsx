@@ -4,7 +4,7 @@ import { Box3, Group, InstancedMesh, Object3D, Vector3 } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 
 export default function AssetGrass({ items, reducedMotion }) {
-  const gltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/grass/grass.glb`)
+  const gltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/grass/grass-lite.glb`)
   const container = useRef(null), shaders = useRef([])
   useLayoutEffect(() => {
     const parent = container.current, group = new Group(), transform = new Object3D()

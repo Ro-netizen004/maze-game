@@ -1,57 +1,15 @@
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { cellPosition, doorPosition } from './levels'
+import { Suspense } from 'react'
+import { cellPosition } from './levels'
+import BookModel from './BookModel'
+import AssetBoundary from './MonsterAssetBoundary'
 
-function Key({ position, color }) {
-  const ref = useRef(null)
-  useFrame(({ clock }, delta) => {
-    ref.current.rotation.y += delta
-    ref.current.position.y = 1 + Math.sin(clock.elapsedTime * 2) * 0.12
-  })
-  const material = <meshStandardMaterial color={color} metalness={0.3} roughness={0.3} />
-  return (
-    <group ref={ref} position={[position[0], 1, position[1]]}>
-      <mesh position={[0, 0.22, 0]}><torusGeometry args={[0.18, 0.055, 8, 20]} />{material}</mesh>
-      <mesh position={[0, -0.12, 0]}><boxGeometry args={[0.08, 0.4, 0.08]} />{material}</mesh>
-      {[-0.2, -0.32].map(y => <mesh key={y} position={[0.08, y, 0]}><boxGeometry args={[0.2, 0.07, 0.08]} />{material}</mesh>)}
+export default function QuestObjects({ level, collectedClues = [] }) {
+  return <group>{level.clues.filter(item => !collectedClues.includes(item.id)).map(item => {
+    const [x, z] = cellPosition(level, item.cell)
+    return <group key={item.id} position={[x, 0, z]}>
+      <mesh position={[0, 0.35, 0]} castShadow><cylinderGeometry args={[0.35, 0.43, 0.7, 9]} /><meshStandardMaterial color="#584837" roughness={1} /></mesh>
+      <AssetBoundary fallback={null}><Suspense fallback={null}><group position={[0, 0.72, 0]} rotation={[0, 0.3, 0]}><BookModel /></group></Suspense></AssetBoundary>
+      <mesh position={[0, 0.71, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[0.36, 0.44, 24]} /><meshStandardMaterial color={item.color} emissive={item.color} emissiveIntensity={0.6} /></mesh>
     </group>
-  )
-}
-
-export default function QuestObjects({ level, collectedKeys, collectedClues = [], openedDoors }) {
-  return (
-    <group>
-      {level.keys.filter(key => !collectedKeys.includes(key.id)).map(key => <Key key={key.id} position={cellPosition(level, key.cell)} color={key.color} />)}
-      {(level.clues || []).filter(clue => !collectedClues.includes(clue.id)).map(clue => {
-        const [x, z] = cellPosition(level, clue.cell)
-        return <group key={clue.id} position={[x, 0, z]}>
-          <mesh position={[0, 0.35, 0]} castShadow><cylinderGeometry args={[0.28, 0.38, 0.7, 7]} /><meshStandardMaterial color="#584837" /></mesh>
-          <mesh position={[0, 0.73, 0]} rotation={[-0.08, 0.3, 0]}><boxGeometry args={[0.42, 0.06, 0.3]} /><meshStandardMaterial color="#e2cf9e" emissive="#8e6b31" emissiveIntensity={0.35} /></mesh>
-        </group>
-      })}
-      {level.doors.map(door => {
-        const [x, z] = doorPosition(level, door)
-        return <group key={door.id} position={[x, 0, z]} rotation={[0, door.axis === 'x' ? Math.PI / 2 : 0, 0]}>
-        {[-0.94, 0.94].map(offset => (
-          <mesh key={offset} castShadow position={[offset, 1.5, 0]}>
-            <boxGeometry args={[0.2, 3, 0.45]} />
-            <meshStandardMaterial color="#59685c" roughness={0.95} />
-          </mesh>
-        ))}
-        <mesh castShadow position={[0, 2.95, 0]}><boxGeometry args={[2.15, 0.24, 0.48]} /><meshStandardMaterial color="#677566" roughness={0.95} /></mesh>
-        {!openedDoors.includes(door.id) && (
-          <group>
-            <mesh castShadow receiveShadow position={[0, 1.4, 0]}>
-              <boxGeometry args={[1.76, 2.8, 0.3]} />
-              <meshStandardMaterial color={level.theme === 'temple' ? '#5e5472' : '#69452d'} roughness={0.8} />
-            </mesh>
-            {[0.5, 2.2].map(y => <mesh key={y} position={[0, y, -0.17]}><boxGeometry args={[1.76, 0.12, 0.04]} /><meshStandardMaterial color="#292e35" metalness={0.7} roughness={0.4} /></mesh>)}
-            {[-0.21, 0.21].map(z => <mesh key={z} position={[0.5, 1.3, z]}><boxGeometry args={[0.22, 0.28, 0.1]} /><meshStandardMaterial color={door.color} metalness={0.3} roughness={0.3} /></mesh>)}
-            {[-0.17, 0.17].map(z => <mesh key={z} position={[0, 2.5, z]}><boxGeometry args={[1.7, 0.12, 0.04]} /><meshStandardMaterial color={door.color} /></mesh>)}
-          </group>
-        )}
-      </group>
-      })}
-    </group>
-  )
+  })}</group>
 }

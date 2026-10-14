@@ -7,6 +7,7 @@ import { movePlayer } from './collision'
 import { readInput } from './input'
 import { worldCell } from './navigation'
 import PlayerAvatar from './PlayerAvatar'
+import { canEscapeForest } from './journals'
 
 const eyeHeight = 1.6
 const speed = 4
@@ -24,12 +25,13 @@ export default function Player({
   onCollectKey, onOpenDoor, onNearbyKey = () => {}, onPromptChange = () => {}, onStaminaChange = () => {},
   collectedClues = [], onCollectClue = () => {},
   onHiddenChange = () => {}, onTriggerTrap = () => {}, onActivateShrine = () => {}, onNoise = () => {},
+  onHeadingChange = () => {},
 }) {
   const { camera, gl } = useThree()
   const state = useRef({
     keys: new Set(), jump: false, interact: false, velocityY: 0, grounded: true,
     stamina: 100, hiddenIn: null, triggeredTraps: new Set(), trapSlow: 0, noiseTimer: 0,
-    touchInteractHeld: false, reportedStamina: 100, sprinting: false,
+    touchInteractHeld: false, reportedStamina: 100, sprinting: false, heading: null,
   })
   const nearbyRef = useRef(null)
   const promptRef = useRef(null)
@@ -175,6 +177,8 @@ export default function Player({
     camera.getWorldDirection(forward.current)
     forward.current.y = 0
     forward.current.normalize()
+    const direction = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(Math.atan2(forward.current.x, -forward.current.z) / (Math.PI / 4) + 8) % 8]
+    if (player.heading !== direction) { player.heading = direction; onHeadingChange(direction) }
     right.current.set(-forward.current.z, 0, forward.current.x)
     const length = Math.hypot(vertical, horizontal) || 1
     const moving = Math.hypot(vertical, horizontal) > 0
@@ -218,13 +222,14 @@ export default function Player({
     pose.current.moving = moving && !player.hiddenIn
     pose.current.sprinting = sprinting
     const [endX, endZ] = cellPosition(level, level.end)
+    const escapeReady = level.openForest ? canEscapeForest(level, collectedClues) : openedDoors.includes('exit')
     let nearby = null
     let interaction = null
     for (const key of level.keys) {
       const [keyX, keyZ] = cellPosition(level, key.cell)
       if (!collectedKeys.includes(key.id) && Math.hypot(camera.position.x - keyX, camera.position.z - keyZ) < interactionDistance) {
         nearby = key.id
-        interaction = { type: 'key', id: key.id, label: `Pick up ${key.name} key` }
+        interaction = { type: 'key', id: key.id, label: `Read and collect ${key.name}` }
         break
       }
     }
@@ -233,7 +238,7 @@ export default function Player({
         const [doorX, doorZ] = doorPosition(level, door)
         if (openedDoors.includes(door.id) || Math.hypot(camera.position.x - doorX, camera.position.z - doorZ) >= interactionDistance) continue
         const available = canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines, collectedClues)
-        interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : `${door.name} door is locked` }
+        interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : door.keyId ? `Find the ${door.name} journal to release this seal` : door.id === 'exit' ? 'Open every inner seal and collect the required journals' : `${door.name} door is locked` }
         break
       }
     }
@@ -263,6 +268,9 @@ export default function Player({
           break
         }
       }
+    }
+    if (!interaction && level.openForest && !escapeReady && Math.hypot(camera.position.x - endX, camera.position.z - endZ) < 2.2) {
+      interaction = { type: 'exit', id: 'road', available: false, label: `Recover all five journals before leaving (${collectedClues.length}/5)` }
     }
     if (interaction && player.interact) {
       if (interaction.type === 'key') { onCollectKey(interaction.id); nearby = null }
@@ -302,7 +310,7 @@ export default function Player({
       player.noiseTimer = 0.3
       onNoise({ cell: currentCell, intensity: (sprinting ? 5 : 2) * (noisyZone ? level.mechanics.noisyFloorMultiplier : 1), source: noisyZone ? 'noisy-floor' : sprinting ? 'sprint' : 'step' })
     }
-    if (openedDoors.includes('exit') && Math.abs(camera.position.x - endX) < 0.75 && Math.abs(camera.position.z - endZ) < 0.75) {
+    if (escapeReady && Math.abs(camera.position.x - endX) < 1.2 && Math.abs(camera.position.z - endZ) < 1.2) {
       controlsRef.current.unlock()
       onWin()
     }

@@ -29,6 +29,7 @@ export default function Flashlight({
   mobile = false,
   reducedMotion = false,
   active = true,
+  graphics = { shadows: true, shadowSize: 512 },
 }) {
   const { camera } = useThree()
   const light = useRef(null)
@@ -65,8 +66,8 @@ export default function Flashlight({
     </group>
     <primitive object={target} />
     <spotLight ref={light} position={[0.25, -0.25, -0.9]} target={target} color="#fff2dc" intensity={available ? intensity * 0.75 : 0}
-      distance={23} angle={0.56} penumbra={0.95} decay={2} castShadow
-      shadow-mapSize={[mobile ? 512 : 1024, mobile ? 512 : 1024]} shadow-camera-near={0.05} shadow-camera-far={20}
+      distance={23} angle={0.56} penumbra={0.95} decay={2} castShadow={graphics.shadows && !mobile}
+      shadow-mapSize={[graphics.shadowSize, graphics.shadowSize]} shadow-camera-near={0.1} shadow-camera-far={20}
       shadow-bias={-0.0001} shadow-normalBias={0.015} />
     <spotLight ref={spill} position={[0.25, -0.25, -0.9]} target={target} color="#d9e9ee" intensity={available ? intensity * 0.38 : 0}
       distance={14} angle={1.05} penumbra={1} decay={2}

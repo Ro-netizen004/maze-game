@@ -6,6 +6,7 @@ export const defaultSettings = Object.freeze({
   invertY: false,
   reducedMotion: false,
   flashlightIntensity: 65,
+  graphicsQuality: 'balanced',
 })
 
 export function createDefaultProgress() {
@@ -36,6 +37,7 @@ export function normalizeProgress(value) {
     bestTimes,
     difficulty: ['easy', 'normal', 'hard'].includes(value.difficulty) ? value.difficulty : defaults.difficulty,
     settings: {
+      graphicsQuality: ['performance', 'balanced', 'high'].includes(settings.graphicsQuality) ? settings.graphicsQuality : defaults.settings.graphicsQuality,
       lookSensitivity: finite(settings.lookSensitivity)
         ? Math.max(0.25, Math.min(2, settings.lookSensitivity))
         : defaults.settings.lookSensitivity,

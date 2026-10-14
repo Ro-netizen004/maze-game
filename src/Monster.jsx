@@ -113,7 +113,7 @@ export default function Monster({
       const path = goal ? findPath(level, start, goal, openedDoors) : []
       state.waypoint = path.length > 1 ? cellPosition(level, path[1]) : path.length === 1 ? target : null
       if (state.guardian.mode === 'patrol' && path.length <= 1) {
-        state.patrol = 1 - state.patrol
+        state.patrol = (state.patrol + 1) % level.monster.length
         state.waypoint = null
       }
     }

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { movePlayer, playerRadius } from './collision.js'
-import { cellSize, cellPosition, doorBounds, doorPosition, canOpenDoor, levels } from './levels.js'
+import { cellSize, cellPosition, doorBounds, doorPosition, canOpenDoor, levels } from './mazeFixtures.js'
 
 function assertClear(level, x, z) {
   const width = level.grid[0].length * cellSize

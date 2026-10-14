@@ -1,70 +1,36 @@
 import { formatTime } from '../runTimer'
-import { FLASHLIGHT_LOW_THRESHOLD, flashlightBatteryStatus } from '../flashlightBattery'
+import { flashlightBatteryStatus } from '../flashlightBattery'
 import { forestObjective } from '../forestQuest'
 
-function KeyIcon() {
-  return <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="8" cy="8" r="5" /><path d="m12 12 9 9m-4-4 3-3m-6 0 3-3" /></svg>
-}
-
-export default function GameHud({
-  level, levelIndex, levelCount, collectedKeys, openedDoors, stamina, hidden, elapsed, prompt, notice, isTouch,
-  flashlightBattery, flashlightOn, guardianAlert, collectedClues = [],
-}) {
-  const required = level.mechanics.requiredDoors || []
-  const openedRequired = required.filter(id => openedDoors.includes(id)).length
-  const missingNames = level.doors
-    .filter(door => required.includes(door.id) && !openedDoors.includes(door.id))
-    .map(door => door.name)
-  const quest = level.clues?.length ? forestObjective(collectedKeys, openedDoors, collectedClues) : null
-  const journal = level.clues?.find(clue => clue.id === collectedClues.at(-1))
+export default function GameHud({ level, collectedClues = [], stamina, hidden, elapsed, prompt, notice, isTouch,
+  flashlightBattery, flashlightOn, guardianAlert, onReadJournal, canRead, heading }) {
+  const quest = forestObjective(collectedClues)
+  const complete = collectedClues.length === level.clues.length
   return <div className="forest-hud pointer-events-none absolute inset-0">
-    <div className="pointer-events-none absolute left-4 top-4 max-w-sm rounded-lg border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow">
-      <p className="font-bold">{level.name} · Level {levelIndex + 1} / {levelCount}</p>
-      <p className="text-lg font-bold tabular-nums" aria-label={`Elapsed time ${formatTime(elapsed)}`}>{formatTime(elapsed)}</p>
-      <p>Keys {collectedKeys.length} / {level.keys.length} · Inner doors {openedRequired} / {required.length}</p>
-      <p>{openedDoors.includes('exit') ? 'Exit open — reach the finish!' : missingNames.length ? `Find keys and clear: ${missingNames.join(', ')}.` : 'All seals cleared — approach the exit door.'}</p>
-      <p>{isTouch ? 'Use the virtual controls to move and look.' : 'WASD · Mouse look (drag if capture is unavailable) · Shift sprint · F flashlight · Space jump · E interact · Esc pause'}</p>
-      <p>Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>
-      <p className={`font-semibold ${guardianAlert === 'chase' ? 'text-red-400' : guardianAlert === 'investigate' || guardianAlert === 'search' ? 'text-amber-300' : 'text-emerald-300'}`}>
-        Guardian · {guardianAlert === 'chase' ? 'Chasing' : guardianAlert === 'investigate' ? 'Investigating noise' : guardianAlert === 'search' ? 'Searching' : 'Patrolling'}
-      </p>
-      <div className="mt-2" aria-label={`Flashlight battery ${Math.round(flashlightBattery)} percent, ${flashlightBatteryStatus(flashlightBattery, flashlightOn)}`}>
-        <div className="flex justify-between text-xs font-semibold">
-          <span>Flashlight · {flashlightBatteryStatus(flashlightBattery, flashlightOn)}</span>
-          <span>{Math.round(flashlightBattery)}%</span>
-        </div>
-        <div className="mt-1 h-2 overflow-hidden rounded bg-slate-700" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(flashlightBattery)}>
-          <div className={`h-full transition-[width] ${flashlightBattery <= FLASHLIGHT_LOW_THRESHOLD ? 'bg-amber-400' : 'bg-cyan-300'}`} style={{ width: `${flashlightBattery}%` }} />
-        </div>
-      </div>
+    <div className="forest-compass absolute left-1/2 top-3 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-xs text-white" aria-label={'Facing ' + heading}>COMPASS · <strong className="text-base">{heading}</strong></div>
+    <div className="forest-stats absolute left-3 top-3 max-w-xs rounded-lg bg-slate-950/90 p-3 text-sm text-white">
+      <p className="font-bold">The Keeper’s Forest</p>
+      <p className="tabular-nums">{formatTime(elapsed)} · Journals {collectedClues.length} / 5</p>
+      <p className="mt-1">{complete ? 'All records found · Reach the Old Road' : 'Explore freely · Recover the five records'}</p>
+      <p className="mt-2 text-xs">Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>
+      <p className={guardianAlert === 'chase' ? 'text-red-400' : 'text-emerald-300'}>Guardian · {guardianAlert === 'chase' ? 'Chasing' : guardianAlert === 'investigate' ? 'Investigating noise' : guardianAlert === 'search' ? 'Searching' : 'Patrolling'}</p>
+      <div className="mt-2 flex justify-between text-xs"><span>Flashlight · {flashlightBatteryStatus(flashlightBattery, flashlightOn)}</span><span>{Math.round(flashlightBattery)}%</span></div>
+      <div className="mt-1 h-1.5 overflow-hidden rounded bg-slate-700" role="progressbar" aria-label="Flashlight battery" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(flashlightBattery)}><div className="h-full bg-cyan-300" style={{ width: flashlightBattery + '%' }} /></div>
+      <button className="pointer-events-auto mt-3 rounded border border-white/30 px-3 py-1 disabled:opacity-50" disabled={!canRead || !collectedClues.length} onClick={() => onReadJournal(collectedClues.at(-1))}>Journal archive {isTouch ? '' : '· J'}</button>
     </div>
-    <div className="pointer-events-none absolute bottom-4 left-4 hidden rounded-xl bg-slate-950/90 p-4 text-white shadow-lg sm:block">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-300">Key inventory</p>
-      <div className="flex max-w-lg flex-wrap gap-3">
-        {level.keys.map(key => {
-          const owned = collectedKeys.includes(key.id)
-          return <div key={key.id} className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${owned ? 'border-white/30 bg-white/10' : 'border-white/10 opacity-50'}`} style={{ color: owned ? key.color : '#cbd5e1' }}>
-            <KeyIcon />
-            <div><p className="text-sm font-bold">{key.name} key</p><p className="text-xs">{owned ? 'Collected ✓' : 'Not found'}</p></div>
-          </div>
-        })}
-      </div>
+    <div className="quest-card absolute right-3 top-40 max-w-xs rounded-lg bg-slate-950/90 p-3 text-sm text-white sm:top-36">
+      <p className="text-xs uppercase tracking-widest">The keeper’s records</p>
+      <p className="mt-2 font-bold">{quest.title}</p><p className="mt-1 text-xs leading-relaxed text-slate-300">{quest.hint}</p>
     </div>
-    {quest && <div className="absolute bottom-52 left-4 right-4 rounded-lg bg-slate-950/90 p-3 text-xs text-white sm:bottom-auto sm:left-auto sm:top-40 sm:w-80 sm:text-sm" aria-live="polite">
-      <p className="text-xs font-bold uppercase tracking-widest">The keeper’s journals · {collectedClues.length}/2</p>
-      <p className="mt-2 font-bold">{quest.title}</p>
-      <p className="mt-1 text-slate-300">{quest.hint}</p>
-      {journal && <p className="mt-3 hidden border-t border-white/20 pt-2 text-xs sm:block"><strong>{journal.name}:</strong> {journal.text}</p>}
-    </div>}
-    {prompt && <div className="pointer-events-none absolute bottom-32 left-1/2 -translate-x-1/2 rounded-xl bg-slate-950/90 px-5 py-3 text-center text-white shadow-lg">
-      {!isTouch && <span className="mr-3 inline-block rounded border border-white/40 px-2 py-1 font-bold">E</span>}
-      <span className={prompt.available === false ? 'text-slate-400' : 'font-bold'}>{prompt.label}</span>
-    </div>}
-    <div className="pointer-events-none absolute right-4 top-4" role="status" aria-live="polite">
-      {notice && <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-slate-950/90 px-5 py-4 text-white shadow-lg">
-        <span style={{ color: notice.color }}><KeyIcon /></span>
-        <p className="font-bold">{notice.name} key collected!</p>
-      </div>}
+    <div className="absolute bottom-4 left-4 hidden max-w-md rounded-lg bg-slate-950/90 p-3 text-white sm:block">
+      <p className="mb-2 text-xs uppercase tracking-widest">Recovered journals · select to reread</p>
+      <div className="flex flex-wrap gap-2">{level.clues.map((journal, index) => {
+        const owned = collectedClues.includes(journal.id)
+        return <button key={journal.id} disabled={!owned || !canRead} onClick={() => onReadJournal(journal.id)} className="pointer-events-auto rounded border border-white/20 px-2 py-1 text-xs disabled:opacity-40" style={{ color: owned ? journal.color : '#cbd5e1' }}>{index + 1}. {owned ? journal.name : 'Undiscovered'}</button>
+      })}</div>
+      <p className="mt-2 text-xs text-slate-300">WASD · Mouse look · Shift run · Space jump · E interact · F light</p>
     </div>
+    {prompt && <div className="absolute bottom-32 left-1/2 -translate-x-1/2 rounded-lg bg-slate-950/90 px-4 py-3 text-center text-sm text-white">{isTouch ? '' : 'E · '}{prompt.label}</div>}
+    {notice && <div className="absolute right-3 top-3 rounded-lg bg-slate-950/90 p-3 text-sm text-white" role="status">{notice.name} recovered</div>}
   </div>
 }

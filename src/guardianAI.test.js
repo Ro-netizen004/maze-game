@@ -7,7 +7,7 @@ import {
   guardianDifficultyPresets,
   updateGuardianState,
 } from './guardianAI.js'
-import { cellPosition, levels } from './levels.js'
+import { cellPosition, levels } from './mazeFixtures.js'
 
 const level = levels[0]
 const config = guardianDifficultyPresets.normal

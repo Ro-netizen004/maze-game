@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { levelTemplates } from './levels.js'
+import { levelTemplates } from './mazeFixtures.js'
 import {
   canOpenDoor, createNoise, createSeededLevel, getLockedCellIds, hasLineOfSight,
   isLevelSolvable, noiseAtDistance, reachableCells,

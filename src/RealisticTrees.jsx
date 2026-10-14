@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { prepareTreeVariants } from './treeVariants'
 
 export default function RealisticTrees({ trees, bushes }) {
-  const gltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/forest-trees/trees.glb`)
+  const gltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/forest-trees/trees-lite.glb`)
   const container = useRef(null)
   useLayoutEffect(() => {
     const parent = container.current, group = new Group(), asset = prepareTreeVariants(gltf.scene)

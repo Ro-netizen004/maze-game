@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { levels, cellPosition } from './levels.js'
+import { levels, cellPosition } from './mazeFixtures.js'
 import { findPath, worldCell } from './navigation.js'
 import { movePlayer } from './collision.js'
 

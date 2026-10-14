@@ -1,5 +1,14 @@
 # Asset credits
 
+**Book Prop** by **Sofkin**
+
+- Original model: https://skfb.ly/oGZut
+- License: Creative Commons Attribution 4.0 International
+  https://creativecommons.org/licenses/by/4.0/
+- Game adaptation: supplied GLB preserved in `src/book-prop/source`, copied to
+  `public/models/book-prop/book.glb`, scaled and grounded on journal stumps;
+  geometry and textures shared by five copies. Story text and clues are original.
+
 **Flashlight** by **MAR.COS.**
 
 - Original model: https://skfb.ly/o8H9O
@@ -34,3 +43,10 @@
   scaled/instanced plants along paths, and added gentle wind motion.
 
 The blocky player avatar, mist, and maze forest layout are original game code.
+
+Performance editions preserve the original assets alongside `*-lite.glb` copies.
+Tree and grass geometry was simplified for browser rendering. The Book Prop’s
+mesh parts were merged by material without removing faces. Book textures were
+resized to at most 1024 pixels. `export-performance-assets.py` regenerates these
+copies with Blender. Ground textures, footpath/moss decals, camping props, moon,
+and the lightweight road continuation are original game code.

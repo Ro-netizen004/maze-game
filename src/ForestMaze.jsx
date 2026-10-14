@@ -8,7 +8,7 @@ import RealisticTrees from './RealisticTrees'
 import AssetGrass from './AssetGrass'
 import AssetBoundary from './MonsterAssetBoundary'
 
-function Instances({ items, children, shadows = true }) {
+export function Instances({ items, children, shadows = true }) {
   const mesh = useRef(null)
   useLayoutEffect(() => {
     const transform = new Object3D(), color = new Color()
@@ -27,7 +27,7 @@ function Instances({ items, children, shadows = true }) {
   return <instancedMesh ref={mesh} args={[null, null, items.length]} castShadow={shadows} receiveShadow>{children}</instancedMesh>
 }
 
-function Grass({ items, reducedMotion }) {
+export function Grass({ items, reducedMotion }) {
   const material = useRef(null)
   useFrame(({ clock }) => {
     const shader = material.current?.userData.shader
@@ -50,7 +50,7 @@ function Grass({ items, reducedMotion }) {
   </Instances>
 }
 
-export function GroundMist({ level }) {
+export function GroundMist({ level, maxLayers = 14 }) {
   const texture = useMemo(() => {
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = 64
@@ -64,13 +64,16 @@ export function GroundMist({ level }) {
     return new CanvasTexture(canvas)
   }, [])
   useEffect(() => () => texture.dispose(), [texture])
-  return <group>{level.grid.flatMap((row, r) => row.map((cell, c) => {
-    if (cell || (r * 3 + c) % 7 !== 0) return null
+  const cells = useMemo(() => {
+    const candidates = level.grid.flatMap((row, r) => row.flatMap((cell, c) => !cell && (r * 3 + c) % 7 === 0 ? [[r, c]] : []))
+    return candidates.filter((_, index) => index % Math.ceil(candidates.length / maxLayers) === 0).slice(0, maxLayers)
+  }, [level, maxLayers])
+  return <group>{cells.map(([r, c]) => {
     const [x, z] = cellPosition(level, [r, c])
-    return <sprite key={`mist-${r}-${c}`} position={[x, 0.45, z]} scale={[5, 0.9, 1]}>
-      <spriteMaterial map={texture} color="#aec6bd" transparent opacity={0.17} depthWrite={false} />
+    return <sprite key={`mist-${r}-${c}`} position={[x, 0.45, z]} scale={[7, 0.8, 1]}>
+      <spriteMaterial map={texture} color="#aec6bd" transparent opacity={0.12} depthWrite={false} />
     </sprite>
-  }))}</group>
+  })}</group>
 }
 
 export default function ForestMaze({ level, mobile, reducedMotion }) {

@@ -2,6 +2,13 @@ export default function SettingsPanel({ settings, onChange, onReset }) {
   const update = patch => onChange({ ...settings, ...patch })
   return <fieldset className="mt-5 space-y-4 border-t border-slate-700 pt-5 text-left">
     <legend className="px-2 text-lg font-bold">Settings</legend>
+    <label className="block text-sm">Graphics
+      <select className="mt-1 block w-full rounded p-2" value={settings.graphicsQuality} onChange={event => update({ graphicsQuality: event.target.value })}>
+        <option value="performance">Performance · fastest</option>
+        <option value="balanced">Balanced</option>
+        <option value="high">High detail</option>
+      </select>
+    </label>
     <label className="block text-sm">Look sensitivity: {settings.lookSensitivity.toFixed(2)}
       <input className="mt-1 block w-full" type="range" min="0.25" max="2" step="0.05" value={settings.lookSensitivity} onChange={event => update({ lookSensitivity: Number(event.target.value) })} />
     </label>

@@ -17,6 +17,7 @@ const definitions = {
 
 // Mount each plaque on a neighboring wall, facing its walkable landmark cell.
 export function getLandmarks(level) {
+  if (level.landmarks) return level.landmarks.map((item, index) => ({ ...item, wallCell: [item.cell[0], item.cell[1] + 1], normal: [0, -1], number: index + 1 }))
   return definitions[level.name].map(([name, [r, c]], index) => {
     const direction = [[-1, 0], [0, 1], [1, 0], [0, -1]].find(([dr, dc]) => level.grid[r + dr]?.[c + dc] === 1)
     if (!direction) throw new Error(`No wall for landmark ${name}`)

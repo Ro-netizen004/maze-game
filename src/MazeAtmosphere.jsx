@@ -3,6 +3,7 @@ import { cellPosition } from './levels'
 
 export default function MazeAtmosphere({ level, mobile }) {
   const fixtures = useMemo(() => {
+    if (level.openForest) return level.landmarks.map(item => ({ cell: item.cell, side: [0, 1] }))
     const candidates = []
     level.grid.forEach((row, r) => row.forEach((cell, c) => {
       if (cell !== 0 || r < 1 || c < 1) return
@@ -13,7 +14,7 @@ export default function MazeAtmosphere({ level, mobile }) {
   }, [level, mobile])
   const warm = level.theme === 'temple' ? '#8be1df' : '#ffcf8b'
   return <group>
-    <directionalLight position={[8, 14, -6]} color="#a0bed0" intensity={0.65} castShadow
+    <directionalLight position={[8, 14, -6]} color="#a0bed0" intensity={0.8}
       shadow-mapSize={[mobile ? 512 : 1024, mobile ? 512 : 1024]}
       shadow-camera-left={-17} shadow-camera-right={17} shadow-camera-top={17} shadow-camera-bottom={-17}
       shadow-camera-far={45} shadow-normalBias={0.035} shadow-bias={-0.0001} />
