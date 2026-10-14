@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { CanvasTexture, Color, DoubleSide, Object3D } from 'three'
 import { cellPosition, cellSize } from './levels'
@@ -75,11 +75,11 @@ function GroundMist({ level }) {
   }))}</group>
 }
 
-export default function ForestMaze({ level, mobile, reducedMotion, mist = true }) {
+function ForestMaze({ level, mobile, reducedMotion, mist = true }) {
   const soil = useMemo(() => createTexture('soil'), [])
   useEffect(() => () => soil.dispose(), [soil])
   const layout = useMemo(() => {
-    const tiles = [], grass = []
+    const tiles = [], grass = [], trails = []
     let seed = 391
     const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
     level.grid.forEach((row, r) => row.forEach((cell, c) => {
@@ -87,6 +87,7 @@ export default function ForestMaze({ level, mobile, reducedMotion, mist = true }
       if (cell && !level.doors.some(door => door.cell[0] === r && door.cell[1] === c)) {
         tiles.push({ position: [x, 0, z], rotation: ((r + c) % 4) * Math.PI / 2 })
       } else if (!cell) {
+        trails.push({position:[x,0.006,z],rotation:[-Math.PI/2,0,0],scale:[1,1,1]})
         for (const [dr, dc] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
           if (level.grid[r + dr]?.[c + dc] !== 1) continue
           for (let i = 0; i < (mobile ? 2 : 4); i++) {
@@ -97,7 +98,7 @@ export default function ForestMaze({ level, mobile, reducedMotion, mist = true }
         }
       }
     }))
-    return { tiles, grass }
+    return { tiles, grass, trails }
   }, [level, mobile])
   const width = level.grid[0].length * cellSize, depth = level.grid.length * cellSize
   return <group>
@@ -106,13 +107,9 @@ export default function ForestMaze({ level, mobile, reducedMotion, mist = true }
       return <mesh key={clearing.id} rotation={[-Math.PI/2,0,0]} position={[x,0.015,z]} receiveShadow><circleGeometry args={[clearing.radius,48]} /><meshStandardMaterial color="#7b8770" roughness={1} /></mesh>
     })}
     <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[width + 16, depth + 16]} /><meshStandardMaterial color="#38463b" roughness={0.9} /></mesh>
-    {level.grid.flatMap((row, r) => row.map((cell, c) => {
-      if (cell) return null
-      const [x, z] = cellPosition(level, [r, c])
-      return <mesh key={`trail-${r}-${c}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.006, z]} receiveShadow>
-        <planeGeometry args={[2, 2]} /><meshStandardMaterial map={soil} bumpMap={soil} bumpScale={0.035} color="#b4ae90" roughness={0.78} />
-      </mesh>
-    }))}
+    <Instances items={layout.trails} shadows={false}>
+      <planeGeometry args={[2,2]} /><meshStandardMaterial map={soil} bumpMap={soil} bumpScale={0.035} color="#b4ae90" roughness={0.78} />
+    </Instances>
     <AssetBoundary fallback={null}>
       <Suspense fallback={null}><ShrubWalls tiles={layout.tiles} /></Suspense>
     </AssetBoundary>
@@ -127,3 +124,5 @@ export default function ForestMaze({ level, mobile, reducedMotion, mist = true }
     })}
   </group>
 }
+
+export default memo(ForestMaze)

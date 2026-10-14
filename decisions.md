@@ -237,3 +237,7 @@ Continue deploying codex/original-maze-maps.
 ## 21. Honest hedge gaps, menu settings and forest ambience
 
 Close misleading shrub gaps using overlapping instances within collision footprints. Keep approximately 30% of eligible isolated hedge recesses as walkable, single-entrance hiding pockets; avoid gates and never join corridors. E enters/exits a pocket and hidden players emit no footsteps. Retain the original three mazes and their key progression. Port main's forest menu styling and graphics choices, expose settings before play, and keep audio mute/volume preferences. User-supplied ambience loops only during active visible gameplay with szegvari/Pixabay credits. Remove obsolete box-maze components, unused starter assets and standalone preview entry points; retain source models and exporters.
+
+## 22. Scene-first menu and rendering efficiency
+
+Use the supplied shooter lobby reference for layout: centered title/play action, left navigation, right maze/difficulty setup, and an unobstructed scene. Reorganize only existing instructions, best times, settings and credits; add no gameplay or online systems. Batch trail tiles into a single instanced draw with the same texture and geometry. Memoize static forest and lighting components so timer/HUD updates do not rebuild the scene. Preserve existing graphics presets, vegetation, lights and shadows.

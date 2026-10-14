@@ -1,54 +1,57 @@
+import { useEffect, useRef, useState } from 'react'
 import SettingsPanel from './SettingsPanel'
-import { useEffect, useRef } from 'react'
+import AssetCredits from './AssetCredits'
 import { bestTimeKey } from '../persistence'
 import { formatTime } from '../runTimer'
 
-export default function StartResultOverlay({
-  status, level, levelIndex, levels, unlockedLevel, difficulty, bestTimes, elapsed,
-  settings, onSettings, onReset, onDifficulty, onChooseLevel, onStart, onNext, onRestart,
-}) {
-  const headingRef = useRef(null)
-  useEffect(() => headingRef.current?.focus(), [status])
-  const resultTitle = status === 'won' ? 'You reached the forest!' : status === 'lost' ? 'The guardian caught you!' : level.name
-  const currentBest = bestTimes[bestTimeKey(level.id, difficulty)]
-  return <div className="forest-menu absolute inset-0 z-20 flex items-center justify-center overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="game-dialog-title">
-    <div className="forest-panel w-full max-w-md p-7 text-center">
-      <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
-      {status === 'ready' ? <>
-        <p className="mt-3">Collect every required key, open the seals, and escape the guardian. Follow the lightposts and explore three side clearings to light their runes with E.</p>
-        <label className="mt-5 block text-left text-sm font-semibold" htmlFor="level">Choose a maze</label>
-        <select id="level" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={levelIndex} onChange={event => onChooseLevel(Number(event.target.value))}>
-          {levels.map((item, index) => <option key={item.id} value={index} disabled={index > unlockedLevel}>
-            {item.name}{index > unlockedLevel ? ' — Locked' : ''}
-          </option>)}
-        </select>
-        <label className="mt-4 block text-left text-sm font-semibold" htmlFor="difficulty">Difficulty</label>
-        <select id="difficulty" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={difficulty} onChange={event => onDifficulty(event.target.value)}>
-          <option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option>
-        </select>
-        <div className="mt-4 rounded-lg bg-slate-950/50 p-3 text-left text-sm">
-          <p className="font-semibold">Best times · {difficulty}</p>
-          {levels.slice(0, unlockedLevel + 1).map(item => <p key={item.id} className="mt-1 flex justify-between"><span>{item.name}</span><span className="tabular-nums">{formatTime(bestTimes[bestTimeKey(item.id, difficulty)])}</span></p>)}
-        </div>
-        <button className="mt-5 rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500" onClick={onStart}>Start game</button>
-        <p className="mt-3 text-sm text-slate-400">WASD · Shift to sprint · E to interact or hide · F flashlight<br />Click or drag to look · Escape pauses</p>
-        <details className="mt-4 text-left"><summary className="cursor-pointer">Settings</summary><SettingsPanel settings={settings} onChange={onSettings} onReset={onReset} /></details>
-      </> : <>
-        <p className="mt-3">{status === 'won' ? `Escaped in ${formatTime(elapsed)}. Best: ${formatTime(currentBest)}.` : 'Keep moving and use turns to escape the guardian.'}</p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          {status === 'won' && levelIndex < levels.length - 1 && <button className="rounded-lg bg-indigo-600 px-5 py-3 text-white" onClick={onNext}>Next maze</button>}
-          <button className="rounded-lg border border-slate-300 px-5 py-3" onClick={onRestart}>Play again / Menu</button>
-        </div>
+export default function StartResultOverlay({ status, level, levelIndex, levels, unlockedLevel, difficulty, bestTimes, elapsed,
+  settings, onSettings, onReset, onDifficulty, onChooseLevel, onStart, onNext, onRestart }) {
+  const heading=useRef(null)
+  const [panel,setPanel]=useState(null)
+  useEffect(()=>heading.current?.focus(),[status])
+  useEffect(()=>{
+    const close=event=>{if(event.key==='Escape')setPanel(null)}
+    window.addEventListener('keydown',close)
+    return ()=>window.removeEventListener('keydown',close)
+  },[])
+  const ready=status==='ready'
+  const titles={settings:'Settings',guide:'How to play',times:'Best times',credits:'Asset credits'}
+  return <div className="forest-menu maze-lobby" role="dialog" aria-modal="true" aria-labelledby="game-dialog-title">
+    <header className="lobby-bar">
+      <span className="lobby-status"><span className="lobby-dot" /> SOLO SURVIVAL <span className="lobby-divider">/</span> MAZE {levelIndex+1} OF {levels.length}</span>
+      <button onClick={()=>setPanel('settings')} aria-label="Open settings">Settings <span aria-hidden="true">⚙</span></button>
+    </header>
+    <div className="lobby-brand"><span className="lobby-eyebrow">AFTER DARK</span><h1 id="game-dialog-title" tabIndex="-1" ref={heading}>THE MAZE</h1><span className="lobby-brand-rule" /> <p>A way out. Something watching.</p></div>
+    <nav className="lobby-nav" aria-label="Game menu">
+      <p className="lobby-eyebrow">EXPLORE THE FOREST</p>
+      {['guide','times','settings','credits'].map((id,i)=><button key={id} onClick={()=>setPanel(id)}><span className="lobby-nav-number">0{i+1}</span>{titles[id]}<span className="lobby-nav-arrow" aria-hidden="true">↗</span></button>)}
+    </nav>
+    <main className="lobby-center">
+      <p className="lobby-eyebrow">{ready ? 'THE FOREST IS WAITING' : status==='won' ? 'BEYOND THE TREELINE' : 'LOST IN THE WOODS'}</p>
+      {ready ? <button className="lobby-play" onClick={onStart}>CLICK TO PLAY <span aria-hidden="true">▶</span></button> : <>
+        <h2 className="lobby-result">{status==='won'?'YOU ESCAPED':'THE GUARDIAN CAUGHT YOU'}</h2>
+        <p>{status==='won' ? 'Escaped in '+formatTime(elapsed)+'. Best: '+formatTime(bestTimes[bestTimeKey(level.id,difficulty)]) : 'Use turns and hedge pockets to escape the guardian.'}</p>
+        <div className="lobby-result-actions">{status==='won' && levelIndex<levels.length-1 && <button onClick={onNext}>Next maze</button>}<button onClick={onRestart}>Play again / Menu</button></div>
       </>}
-      <details className="mt-5 text-left text-sm"><summary className="cursor-pointer">Asset credits</summary>
-      <p className="mt-2 text-xs">Forest jungle nature dark Atmo by szegvari (Freesound), via <a className="underline" href="https://pixabay.com/sound-effects/nature-forest-jungle-nature-dark-atmo-6154/" target="_blank" rel="noreferrer">freesound_community / Pixabay</a> · <a className="underline" href="https://pixabay.com/service/license-summary/" target="_blank" rel="noreferrer">Pixabay Content License</a> · looped in game</p>
-      <p className="mt-1 text-xs text-slate-400">Ritual Circle by <a className="underline" href="https://skfb.ly/pBDOJ" target="_blank" rel="noreferrer">ARTEL_3D</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · optimized and adapted</p>
-      <p className="mt-1 text-xs text-slate-400">Shrub tiles pack by <a className="underline" href="https://skfb.ly/pOyYY" target="_blank" rel="noreferrer">LOLIPOP</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · extracted, resized, and tiled for the maze</p>
-      <p className="mt-4 text-xs text-slate-400">Flashlight by <a className="underline" href="https://skfb.ly/o8H9O" target="_blank" rel="noreferrer">MAR.COS.</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
-      <p className="mt-1 text-xs text-slate-400">Trees by <a className="underline" href="https://skfb.ly/pDzJR" target="_blank" rel="noreferrer">Jungle Jim</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
-      <p className="mt-1 text-xs text-slate-400">Forest road by <a className="underline" href="https://skfb.ly/pMHKA" target="_blank" rel="noreferrer">dasy444</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
-      <p className="mt-1 text-xs text-slate-400">Grass by <a className="underline" href="https://skfb.ly/p6tJE" target="_blank" rel="noreferrer">Cosmic_dust</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
-      </details>
-    </div>
+      <p className="lobby-center-note">{level.name} <span>·</span> {difficulty.toUpperCase()}</p>
+    </main>
+    <aside className="lobby-setup" aria-label="Run setup">
+      <p className="lobby-eyebrow">YOUR NEXT RUN</p>
+      <h2>{level.name}</h2>
+      <label htmlFor="level">Choose a maze</label>
+      <select id="level" value={levelIndex} disabled={!ready} onChange={event=>onChooseLevel(Number(event.target.value))}>{levels.map((item,index)=><option key={item.id} value={index} disabled={index>unlockedLevel}>{item.name}{index>unlockedLevel?' — Locked':''}</option>)}</select>
+      <label htmlFor="difficulty">Difficulty</label>
+      <select id="difficulty" value={difficulty} disabled={!ready} onChange={event=>onDifficulty(event.target.value)}><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option></select>
+      <div className="lobby-objective"><span>THE OBJECTIVE</span><p>Find the keys. Open the seals.<br />Escape the guardian.</p><small>Three rune clearings along the way.</small></div>
+      <p className="lobby-personal-best">BEST TIME <strong>{formatTime(bestTimes[bestTimeKey(level.id,difficulty)])}</strong></p>
+    </aside>
+    <footer className="lobby-footer"><span>WASD <small>MOVE</small> <b>·</b> SHIFT <small>SPRINT</small> <b>·</b> E <small>INTERACT / HIDE</small> <b>·</b> F <small>FLASHLIGHT</small></span><span>CLICK OR DRAG TO LOOK <b>·</b> ESC TO PAUSE</span></footer>
+    {panel && <div className="lobby-sheet-backdrop" onClick={()=>setPanel(null)}><section className="lobby-sheet" aria-label={titles[panel]} onClick={event=>event.stopPropagation()}>
+      <header><h2>{titles[panel]}</h2><button autoFocus onClick={()=>setPanel(null)} aria-label="Close panel">✕</button></header>
+      {panel==='settings' && <SettingsPanel settings={settings} onChange={onSettings} onReset={onReset} />}
+      {panel==='guide' && <div className="lobby-guide"><p>Collect every required key, open the seals, and escape the guardian. Follow the lightposts to three side clearings and light their runes with E.</p><p>WASD to move · Shift to sprint · Space to jump · E to collect, activate, open or hide · F to toggle the flashlight · Escape to pause.</p><p>Click the scene to capture your mouse, or drag to look. Step into a hedge pocket and press E to hide. Press E again to leave. Save stamina and use turns to break the guardian’s sight.</p></div>}
+      {panel==='times' && <div className="lobby-times"><p>{difficulty.toUpperCase()} DIFFICULTY</p>{levels.slice(0,unlockedLevel+1).map(item=><p key={item.id}><span>{item.name}</span><strong>{formatTime(bestTimes[bestTimeKey(item.id,difficulty)])}</strong></p>)}</div>}
+      {panel==='credits' && <AssetCredits />}
+    </section></div>}
   </div>
 }

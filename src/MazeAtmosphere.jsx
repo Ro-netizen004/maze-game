@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { cellPosition } from './levels'
 import { lightpostLayout } from './mazeLighting.js'
 import LanternLights from './LanternLights.jsx'
 
-export default function MazeAtmosphere({ level, mobile, shadowSize = 1024 }) {
+function MazeAtmosphere({ level, mobile, shadowSize = 1024 }) {
   const fixtures = useMemo(() => lightpostLayout(level,mobile), [level, mobile])
   const warm = level.theme === 'temple' ? '#8be1df' : '#ffcf8b'
   return <group>
@@ -36,3 +36,5 @@ export default function MazeAtmosphere({ level, mobile, shadowSize = 1024 }) {
     }))}
   </group>
 }
+
+export default memo(MazeAtmosphere)

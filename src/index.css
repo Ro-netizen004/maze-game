@@ -41,6 +41,61 @@ input:focus-visible,
   outline: 3px solid #a5b4fc;
   outline-offset: 3px;
 }
+
+/* Scene-first lobby: existing game controls arranged around the play action. */
+.maze-lobby { position:absolute; inset:0; z-index:20; display:grid; grid-template-columns:260px 1fr 290px; grid-template-rows:58px 180px 1fr 62px; gap:0 38px; padding:0 38px; background:linear-gradient(180deg,#06100fd9 0%,#06100f35 42%,#06100f70 72%,#06100fe6 100%); color:#f2f2e9; font-family:Arial,sans-serif; }
+.lobby-bar { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffffff26; font-size:12px; font-weight:800; letter-spacing:.05em; }
+.lobby-status { display:flex; align-items:center; gap:12px; }
+.lobby-dot { width:6px; height:6px; border-radius:50%; background:#bace88; box-shadow:0 0 14px #bace8870; }
+.lobby-divider { color:#ffffff50; }
+.maze-lobby .lobby-bar button { border:0; background:transparent; padding:12px 0 12px 20px; font-size:14px; }
+.lobby-bar button span { margin-left:10px; }
+.lobby-brand { grid-column:2; grid-row:2; text-align:center; align-self:center; text-shadow:0 3px 14px #000; }
+.lobby-eyebrow { color:#c2c9ab; font-size:10px; font-weight:800; letter-spacing:.22em; }
+.maze-lobby .lobby-brand h1 { font-size:clamp(38px,5vw,72px); font-weight:950; letter-spacing:-.065em; line-height:1.05; margin:6px 0 10px; transform:skew(-4deg); }
+.lobby-brand-rule { display:block; height:3px; width:58px; margin:0 auto 12px; background:#c1ca96; }
+.lobby-brand p:last-child { color:#d2d8ce; font-size:12px; }
+.lobby-nav { grid-column:1; grid-row:2/4; align-self:center; margin-bottom:44px; }
+.lobby-nav>p { margin-bottom:20px; }
+.maze-lobby .lobby-nav button { display:flex; align-items:center; width:100%; border:0; border-bottom:1px solid #ffffff20; background:transparent; text-align:left; padding:17px 0; font-size:18px; font-weight:850; text-transform:uppercase; letter-spacing:-.03em; }
+.maze-lobby .lobby-nav button:hover { background:#ffffff08; padding-left:8px; }
+.lobby-nav-number { margin-right:15px; font:10px monospace; color:#b9c8a0; }
+.lobby-nav-arrow { margin-left:auto; color:#ffffff50; font-weight:400; }
+.lobby-center { grid-column:2; grid-row:3; align-self:center; text-align:center; padding-bottom:64px; text-shadow:0 2px 6px #000; }
+.maze-lobby .lobby-play { background:transparent; border:0; font-size:clamp(28px,3.5vw,52px); font-weight:950; letter-spacing:-.04em; padding:14px 10px; white-space:nowrap; text-shadow:0 3px 14px #000; }
+.maze-lobby .lobby-play:hover { background:transparent; color:#d8e6ad; transform:translateY(-2px); }
+.lobby-play span { font-size:20px; vertical-align:middle; margin-left:12px; color:#c1ca96; }
+.lobby-center-note { font-size:11px; letter-spacing:.16em; font-weight:700; color:#d2d8ce; }
+.lobby-center-note span { padding:0 10px; color:#c1ca96; }
+.lobby-setup { grid-column:3; grid-row:2/4; align-self:center; background:#0814109c; border-left:2px solid #bacb8c; padding:25px 22px; }
+.lobby-setup h2 { font-size:25px; font-weight:900; margin:8px 0 22px; letter-spacing:-.05em; }
+.lobby-setup label { display:block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.14em; margin:15px 0 7px; }
+.maze-lobby .lobby-setup select { width:100%; padding:11px 9px; font-size:13px; background:#ffffff08; border:1px solid #ffffff35; border-radius:0; }
+.lobby-objective { border-top:1px solid #ffffff26; margin-top:22px; padding-top:20px; }
+.lobby-objective>span { color:#c1ca96; font-size:9px; letter-spacing:.2em; font-weight:800; }
+.lobby-objective p { margin:9px 0; line-height:1.65; font-size:14px; font-weight:700; }
+.lobby-objective small { font-size:11px; color:#c4cebc; }
+.lobby-personal-best { display:flex; justify-content:space-between; margin-top:23px; font-size:10px; letter-spacing:.12em; }
+.lobby-personal-best strong { font:14px monospace; color:#d8e6ad; }
+.lobby-footer { grid-column:1/-1; grid-row:4; display:flex; justify-content:space-between; align-items:center; gap:20px; border-top:1px solid #ffffff26; color:#f2f2e9; font-size:10px; font-weight:800; letter-spacing:.03em; }
+.lobby-footer small { color:#aab4a5; font-size:9px; margin-left:3px; }
+.lobby-footer b { color:#ffffff40; padding:0 8px; }
+.lobby-result { font-size:32px; font-weight:900; margin:12px 0; }
+.lobby-result-actions { display:flex; justify-content:center; gap:12px; margin:20px 0; }
+.lobby-result-actions button { padding:12px 16px; }
+.lobby-sheet-backdrop { position:absolute; inset:0; z-index:2; background:#030907c7; display:flex; align-items:center; justify-content:center; padding:20px; }
+.lobby-sheet { width:min(520px,100%); max-height:calc(100dvh - 40px); overflow:auto; background:#102019; border:1px solid #6b7b59; padding:26px; box-shadow:0 20px 70px #0008; }
+.lobby-sheet>header { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.lobby-sheet h2 { font-size:24px; font-weight:850; text-transform:uppercase; }
+.lobby-sheet>header button { padding:7px 12px; }
+.lobby-guide { display:grid; gap:18px; margin-top:22px; font-size:14px; line-height:1.75; color:#d2d8ce; }
+.lobby-times { margin-top:24px; }
+.lobby-times p { display:flex; justify-content:space-between; border-bottom:1px solid #ffffff20; padding:14px 0; font-size:14px; }
+.lobby-times p:first-child { font-size:10px; color:#c1ca96; letter-spacing:.14em; }
+.lobby-credits { margin-top:24px; line-height:1.65; }
+@media(max-width:1000px) { .maze-lobby { grid-template-columns:180px 1fr 240px; padding:0 22px; gap:0 20px; } .maze-lobby .lobby-nav button { font-size:15px; } .lobby-setup { padding:20px 16px; } .lobby-footer { font-size:9px; } .lobby-footer small { display:none; } }
+@media(max-width:740px) { .maze-lobby { overflow-y:auto; grid-template-columns:1fr; grid-template-rows:50px 140px minmax(120px,1fr) auto auto auto; gap:0; padding:0 20px; } .lobby-brand { grid-column:1; grid-row:2; } .lobby-center { grid-column:1; grid-row:3; padding:10px 0 24px; } .lobby-setup { grid-column:1; grid-row:4; width:100%; } .lobby-nav { grid-column:1; grid-row:5; display:grid; grid-template-columns:1fr 1fr; gap:0 20px; margin:16px 0; } .lobby-nav>p { display:none; } .maze-lobby .lobby-nav button { padding:14px 0; font-size:13px; } .lobby-footer { grid-row:6; display:block; padding:15px 0; line-height:2; } .lobby-footer>span { display:block; } .lobby-status { font-size:9px; gap:6px; } .lobby-sheet-backdrop { position:fixed; } }
+@media(prefers-reduced-motion:reduce) { .maze-lobby .lobby-play:hover { transform:none; } }
 .forest-menu {
   color: #e1e4d6;
   background: radial-gradient(ellipse at 50% 35%, rgba(31, 48, 39, 0.28), rgba(5, 13, 12, 0.85));
