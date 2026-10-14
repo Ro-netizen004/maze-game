@@ -15,6 +15,7 @@ export default function LanternLights({fixtures,mobile,color,power=1}) {
       const fixture=nearest[index]
       light.visible=Boolean(fixture && fixture.distance<9)
       if(fixture)light.position.set(fixture.position[0],2.05,fixture.position[2])
+      if(fixture)light.color.set(fixture.color||color)
     })
   })
   return Array.from({length:mobile?3:5},(_,index)=><pointLight key={index} ref={node=>{lights.current[index]=node}} color={color} intensity={9*power} distance={6} decay={2} />)

@@ -1,6 +1,7 @@
 import { canOpenDoor as canOpenRuntimeDoor, createSeededLevel } from './levelRuntime.js'
 import { addHedgeHiding } from './hedgeHiding.js'
 import { addRuneClearings } from './runeClearings.js'
+import { namePlaces } from './placeNames.js'
 
 export const cellSize = 2
 const layouts = [
@@ -33,7 +34,7 @@ const runtimeConfig = {
 // # = wall, . = passage; coordinates use [row, column].
 export const levelTemplates = layouts.map(({ rows, ...level }) => {
   const config = runtimeConfig[level.name]
-  return addHedgeHiding(addRuneClearings({
+  return namePlaces(addHedgeHiding(addRuneClearings({
   ...level,
   id: level.name.toLowerCase().replaceAll(' ', '-'),
   theme: { Stonegate: 'stone', 'Amber Halls': 'timber', 'Twilight Labyrinth': 'temple' }[level.name],
@@ -57,7 +58,7 @@ export const levelTemplates = layouts.map(({ rows, ...level }) => {
   shrines: config.shrines || [],
   noisyZones: config.noisyZones || [],
   mechanics: config.mechanics,
-}))})
+})))})
 export const levels = levelTemplates.map(level => createSeededLevel(level, level.id))
 export function cellPosition(level, [row, column]) {
   return [(column - (level.grid[0].length - 1) / 2) * cellSize, (row - (level.grid.length - 1) / 2) * cellSize]

@@ -4,7 +4,7 @@ export function lightpostLayout(level,mobile=false) {
   const fixtures=[]
   for(const clearing of level.clearings||[]){
     const [x,z]=center(clearing.cell)
-    for(const side of mobile?[1]:[-1,1])fixtures.push({id:clearing.id+'-'+side,position:[x+side*1.85,0,z+1.4],garden:true})
+    for(const side of mobile?[1]:[-1,1])fixtures.push({id:clearing.id+'-'+side,position:[x+side*1.85,0,z+1.4],garden:true,color:clearing.color})
   }
   const candidates=[], offset=level.mapOffset||0
   const original=level.originalGrid||level.grid

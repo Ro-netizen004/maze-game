@@ -242,7 +242,7 @@ export default function Player({
         const [x, z] = cellPosition(level, shrine.cell)
         if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < (shrine.type==='rune'?3:interactionDistance)) {
           const available=canActivateShrine(shrine,openedDoors,activatedShrines)
-          interaction = { type: 'shrine', id: shrine.id, available, label: available ? shrine.type==='rune'?`Light the ${shrine.name} rune`:'Activate shrine' : shrineRequirement(level,shrine,openedDoors,activatedShrines) }
+          interaction = { type: 'shrine', id: shrine.id, available, label: available ? shrine.type==='rune'?`Light the ${shrine.name} rune · ${shrine.placeName}`:'Activate shrine' : shrineRequirement(level,shrine,openedDoors,activatedShrines) }
           break
         }
       }

@@ -17,7 +17,7 @@ export function addRuneClearings(level) {
     for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)grid[center[0]+dr+padding][center[1]+dc+padding]=0
     const [rr,cc]=center
     for(let row=Math.min(r,rr);row<=Math.max(r,rr);row++)for(let col=Math.min(c,cc);col<=Math.max(c,cc);col++)grid[row+padding][col+padding]=0
-    return {id:['dawn','moon','watch'][index],name:['Dawn','Moon','Watcher'][index],cell:shift(center),entrance:shift([r,c]),radius:2.6,color:['#74d4ca','#b9a5ff','#e9b85b'][index]}
+    return {id:['dawn','moon','watch'][index],name:['Dawn','Moon','Watcher'][index],cell:shift(center),entrance:shift([r,c]),radius:2.6,color:['#e9b85b','#b9a5ff','#74d4ca'][index]}
   })
   // Continue the existing start/end openings through the added perimeter.
   for(let r=0;r<padding;r++)grid[r][level.start[1]+padding]=0

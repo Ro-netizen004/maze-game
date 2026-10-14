@@ -16,11 +16,11 @@ export function nextObjective(level,collectedKeys=[],openedDoors=[],activatedShr
   const steps=[
     ['key','ruby','Find the Ruby key to break the first seal.'],
     ['door','ruby','Open the Ruby seal to awaken the Dawn rune.'],
-    ['rune','dawn','Light Dawn in its clearing; the Ruby seal has awakened it.'],
+    ['rune','dawn','Light Dawn in Sunwell Clearing; the Ruby seal has awakened it.'],
     ['key','sapphire','Find the Sapphire key beyond the Ruby seal.'],
     ['door','sapphire','Open the Sapphire seal to awaken the Moon rune.'],
-    ['rune','moon','Light Moon in its clearing; the Sapphire seal has awakened it.'],
-    ['rune','watch','Dawn and Moon are lit — complete the Watcher ritual.'],
+    ['rune','moon','Light Moon in Moonwell Clearing; the Sapphire seal has awakened it.'],
+    ['rune','watch','Dawn and Moon are lit — complete the ritual in the Watcher’s Court.'],
   ]
   for(const [type,id,text] of steps) {
     const completed=type==='key'?collectedKeys:type==='door'?openedDoors:activatedShrines

@@ -67,7 +67,7 @@ function Plaque({ level, item, forest }) {
   useEffect(() => () => texture.dispose(), [texture])
   const [x, z] = cellPosition(level, item.wallCell)
   const [nx, nz] = item.normal
-  const face = level.theme === 'stone' ? 1 : level.theme === 'timber' ? 0.95 : 0.9
+  const face = forest ? 1 : level.theme === 'stone' ? 1 : level.theme === 'timber' ? 0.95 : 0.9
   return (
     <group position={[x + nx * (face + 0.045), 1.65, z + nz * (face + 0.045)]} rotation={[0, Math.atan2(nx, nz), 0]}>
       <mesh castShadow>

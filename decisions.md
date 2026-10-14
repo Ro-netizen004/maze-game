@@ -273,3 +273,7 @@ Keep the requested once-per-run blackout at 45 seconds. Replace the brief 12 Hz 
 ## 30. Guardian proximity whisper
 
 Use the user-supplied Demonic Whisper by Magnesus (Freesound), via Pixabay, as a proximity warning. Start within six metres, increase volume as the guardian approaches, and stop at eight metres to avoid rapid toggling at the threshold. Loop the clip only during active, visible gameplay, including while hiding; silence it on pause and after the run ends. Unlock playback from Start/Resume gestures and reuse the existing audio mute/volume settings, relabelled for both forest and guardian audio. Credit the artist and Pixabay Content License in the menu and CREDITS.md. This sound is a warning for the player and does not itself reveal their hiding spot.
+
+## 31. Meaningful place names
+
+Rename the maps to The Forgotten Garden, The Keeper’s Grounds and The Ritual Grove. Keep their internal IDs and original layout lookup names so saved best times/unlocks survive. Give Dawn, Moon and Watcher distinct place names: Sunwell Clearing, Moonwell Clearing and The Watcher’s Court. Retain the rune names for the objective chain, add sun/crescent/eye plaques in their clearings, and give Sunwell warm lights and Moonwell cool lights. Rename existing landmarks after nearby paths, seals, shelters and the Old Road exit instead of inventing buildings or props that are not there. Update menu, HUD prompts, guide and objectives consistently.
