@@ -9,7 +9,9 @@ import { graphicsPreset } from './graphics.js'
 test('30 percent of eligible hedge recesses become reachable, collision-free leaf pockets',()=>{
   for(const level of levels) {
     assert.ok(level.hedgeGapCount>0)
-    assert.equal(level.hedgePockets.length,Math.round(level.hedgeGapCount*0.3))
+    assert.equal(level.hedgePockets.filter(p=>p.id!=='entrance-hide').length,Math.round(level.hedgeGapCount*0.3))
+    assert.ok(level.hedgePockets.some(p=>p.id==='entrance-hide'))
+    assert.equal(Math.abs(level.entranceHidingSpot.entryCell[0]-level.start[0])+Math.abs(level.entranceHidingSpot.entryCell[1]-level.start[1]),1)
     const reachable=reachableCells(level,level.start,level.doors.map(d=>d.id))
     for(const pocket of level.hedgePockets) {
       const [r,c]=pocket.cell

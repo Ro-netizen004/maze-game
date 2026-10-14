@@ -241,3 +241,7 @@ Close misleading shrub gaps using overlapping instances within collision footpri
 ## 22. Scene-first menu and rendering efficiency
 
 Use the supplied shooter lobby reference for layout: centered title/play action, left navigation, right maze/difficulty setup, and an unobstructed scene. Reorganize only existing instructions, best times, settings and credits; add no gameplay or online systems. Batch trail tiles into a single instanced draw with the same texture and geometry. Memoize static forest and lighting components so timer/HUD updates do not rebuild the scene. Preserve existing graphics presets, vegetation, lights and shadows.
+
+## 23. Foreground flashlight and entrance shelter
+
+Render the held flashlight in a small foreground scene after clearing world depth, so hedges cannot occlude or cut through it. Keep its fixed camera-relative position and render its beams in the world as before. Add one guaranteed hedge hiding pocket beside the outside entrance step on each maze, in addition to the roughly 30% optional recesses. Keep it isolated from adjacent pockets and retain gate progression.
