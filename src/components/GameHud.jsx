@@ -3,7 +3,7 @@ import { flashlightBatteryStatus } from '../flashlightBattery'
 import { forestObjective } from '../forestQuest'
 
 export default function GameHud({ level, collectedClues = [], stamina, hidden, elapsed, prompt, notice, isTouch,
-  flashlightBattery, flashlightOn, guardianAlert, onReadJournal, canRead, heading, activatedRituals = [] }) {
+  flashlightBattery, flashlightOn, guardianAlert, onReadJournal, canRead, heading, activatedRituals = [], exhausted = false }) {
   const quest = forestObjective(collectedClues, activatedRituals)
   const complete = collectedClues.length === level.clues.length && activatedRituals.length === level.rituals.length
   return <div className="forest-hud pointer-events-none absolute inset-0">
@@ -12,8 +12,10 @@ export default function GameHud({ level, collectedClues = [], stamina, hidden, e
       <p className="font-bold">The Keeper’s Forest</p>
       <p className="tabular-nums">{formatTime(elapsed)} · Journals {collectedClues.length} / 5</p>
       <p className="text-xs text-emerald-200">Runes lit {activatedRituals.length} / 5</p>
+      {activatedRituals.length > 0 && <p className="text-xs text-amber-200">The guardian grows stronger with each rune.</p>}
       <p className="mt-1">{complete ? 'All records and runes ready · Reach the Old Road' : 'Recover journals · Activate their ritual circles'}</p>
       <p className="mt-2 text-xs">Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>
+      {exhausted && <p className="text-xs text-amber-200">Exhausted · recover to 25% before sprinting</p>}
       <p className={guardianAlert === 'chase' ? 'text-red-400' : 'text-emerald-300'}>Guardian · {guardianAlert === 'chase' ? 'Chasing' : guardianAlert === 'investigate' ? 'Investigating noise' : guardianAlert === 'search' ? 'Searching' : 'Patrolling'}</p>
       <div className="mt-2 flex justify-between text-xs"><span>Flashlight · {flashlightBatteryStatus(flashlightBattery, flashlightOn)}</span><span>{Math.round(flashlightBattery)}%</span></div>
       <div className="mt-1 h-1.5 overflow-hidden rounded bg-slate-700" role="progressbar" aria-label="Flashlight battery" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(flashlightBattery)}><div className="h-full bg-cyan-300" style={{ width: flashlightBattery + '%' }} /></div>

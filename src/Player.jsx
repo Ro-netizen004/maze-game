@@ -9,6 +9,7 @@ import { worldCell } from './navigation'
 import PlayerAvatar from './PlayerAvatar'
 import { canEscapeForest } from './journals'
 import { nearbyRitual } from './rituals'
+import { advanceStamina } from './stamina'
 
 const eyeHeight = 1.6
 const speed = 4
@@ -27,12 +28,14 @@ export default function Player({
   collectedClues = [], onCollectClue = () => {},
   onHiddenChange = () => {}, onTriggerTrap = () => {}, onActivateShrine = () => {}, onNoise = () => {},
   onHeadingChange = () => {},
+  guardianAlert = 'patrol',
+  onExhaustionChange = () => {},
 }) {
   const { camera, gl } = useThree()
   const state = useRef({
     keys: new Set(), jump: false, interact: false, velocityY: 0, grounded: true,
-    stamina: 100, hiddenIn: null, triggeredTraps: new Set(), trapSlow: 0, noiseTimer: 0,
-    touchInteractHeld: false, reportedStamina: 100, sprinting: false, heading: null,
+    stamina: 100, exhausted: false, hiddenIn: null, triggeredTraps: new Set(), trapSlow: 0, noiseTimer: 0,
+    touchInteractHeld: false, reportedStamina: 100, reportedExhaustion: false, sprinting: false, heading: null,
   })
   const nearbyRef = useRef(null)
   const promptRef = useRef(null)
@@ -183,11 +186,16 @@ export default function Player({
     right.current.set(-forward.current.z, 0, forward.current.x)
     const length = Math.hypot(vertical, horizontal) || 1
     const moving = Math.hypot(vertical, horizontal) > 0
-    const sprinting = input.sprint && moving && player.stamina > 0 && !player.hiddenIn
+    const staminaState = advanceStamina(player.stamina, elapsed, input.sprint && moving && !player.hiddenIn,
+      player.exhausted, level.mechanics.sprintDrain * (level.openForest ? 1 : 0.55), level.mechanics.staminaRegen)
+    const sprinting = staminaState.sprinting
     player.sprinting = sprinting
-    const drain = level.mechanics.sprintDrain * 0.55
-    const regen = level.mechanics.staminaRegen
-    player.stamina = Math.max(0, Math.min(100, player.stamina + (sprinting ? -drain : regen) * elapsed))
+    player.stamina = staminaState.stamina
+    player.exhausted = staminaState.exhausted
+    if (player.reportedExhaustion !== player.exhausted) {
+      player.reportedExhaustion = player.exhausted
+      onExhaustionChange(player.exhausted)
+    }
     const roundedStamina = Math.round(player.stamina)
     if (roundedStamina !== player.reportedStamina) {
       player.reportedStamina = roundedStamina
@@ -271,7 +279,8 @@ export default function Player({
       for (const spot of level.hidingSpots) {
         const [x, z] = cellPosition(level, spot.cell)
         if ((player.hiddenIn === spot.id || Math.hypot(camera.position.x - x, camera.position.z - z) < interactionDistance)) {
-          interaction = { type: 'hiding', id: spot.id, label: player.hiddenIn ? 'Leave hiding spot' : 'Hide' }
+          const available = Boolean(player.hiddenIn) || guardianAlert !== 'chase'
+          interaction = { type: 'hiding', id: spot.id, available, label: player.hiddenIn ? 'Leave hiding spot' : available ? 'Hide' : 'Break line of sight before hiding' }
           break
         }
       }
@@ -287,8 +296,13 @@ export default function Player({
         onNoise({ cell: worldCell(level, camera.position.x, camera.position.z), intensity: 6, source: 'door' })
       }
       if (interaction.type === 'shrine') onActivateShrine(interaction.id)
-      if (interaction.type === 'ritual') onActivateShrine(interaction.id)
-      if (interaction.type === 'hiding') {
+      if (interaction.type === 'ritual') {
+        onActivateShrine(interaction.id)
+        const ritual = level.rituals.find(item => item.id === interaction.id)
+        onNoise({ position: cellPosition(level, ritual.cell), intensity: 60, source: 'ritual' })
+        player.noiseTimer = 1.2
+      }
+      if (interaction.type === 'hiding' && interaction.available) {
         player.hiddenIn = player.hiddenIn ? null : interaction.id
         onHiddenChange(Boolean(player.hiddenIn))
       }
@@ -314,7 +328,7 @@ export default function Player({
     }
     player.noiseTimer -= elapsed
     const noisyZone = level.noisyZones.find(zone => zone.cell.join(',') === currentCell.join(','))
-    if (moving && player.noiseTimer <= 0) {
+    if (moving && !player.hiddenIn && player.noiseTimer <= 0) {
       player.noiseTimer = 0.3
       onNoise({ cell: currentCell, intensity: (sprinting ? 5 : 2) * (noisyZone ? level.mechanics.noisyFloorMultiplier : 1), source: noisyZone ? 'noisy-floor' : sprinting ? 'sprint' : 'step' })
     }

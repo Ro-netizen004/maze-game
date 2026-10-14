@@ -15,7 +15,7 @@ export default function StartResultOverlay({
       <p className="forest-kicker">{status === 'won' ? 'Beyond the treeline' : status === 'lost' ? 'Lost in the woods' : 'After dark · Forest trails'}</p>
       <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
       {status === 'ready' ? <>
-        <p className="mt-3">Five journals. Five ritual circles. Recover the records, press E near each glowing rune to activate it, then escape along the Old Road. The guardian is still keeping watch.</p>
+        <p className="mt-3">Five journals. Five ritual circles. Each activated rune calls the guardian and strengthens its hunt. Save your sprint, break sight before hiding, and escape along the Old Road.</p>
         <label className="mt-4 block text-left text-sm font-semibold" htmlFor="difficulty">Difficulty</label>
         <select id="difficulty" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={difficulty} onChange={event => onDifficulty(event.target.value)}>
           <option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option>

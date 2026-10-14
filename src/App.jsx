@@ -40,6 +40,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
   const [triggeredTraps, setTriggeredTraps] = useState([])
   const [prompt, setPrompt] = useState(null)
   const [stamina, setStamina] = useState(100)
+  const [exhausted, setExhausted] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [guardianAlert, setGuardianAlert] = useState('patrol')
   const [heading, setHeading] = useState('S')
@@ -167,6 +168,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
     setTriggeredTraps([])
     setPrompt(null)
     setStamina(100)
+    setExhausted(false)
     setFlashlightBattery(100)
     setFlashlightOn(true)
     setHidden(false)
@@ -249,6 +251,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
           difficulty={difficulty}
           mobile={isTouch}
           guardianConfig={guardianConfig}
+          activatedRituals={activatedShrines}
           onAlertChange={setGuardianAlert}
           onCatchStart={() => setStatus(current => current === 'playing' ? 'catching' : current)}
           onCaught={() => {
@@ -268,12 +271,14 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
           activatedShrines={activatedShrines} onCollectKey={collectKey}
           onPromptChange={setPrompt} onStaminaChange={setStamina} onHiddenChange={setHidden}
           onHeadingChange={setHeading}
+          guardianAlert={guardianAlert}
+          onExhaustionChange={setExhausted}
           onNoise={noise => { playerNoise.current = { ...noise, id: ++noiseId.current } }}
           onTriggerTrap={id => setTriggeredTraps(items => items.includes(id) ? items : [...items, id])}
           onActivateShrine={id => {
             setActivatedShrines(items => items.includes(id) ? items : [...items, id])
             const ritual = level.rituals?.find(item => item.id === id)
-            if (ritual) setNotice({ name: `${ritual.name} activated`, color: ritual.color })
+            if (ritual) setNotice({ name: `${ritual.name} activated — the guardian heard it`, color: ritual.color })
           }}
           onOpenDoor={id => setOpenedDoors(items => items.includes(id) ? items : [...items, id])}
           onWin={handleWin} />}
@@ -282,7 +287,7 @@ export default function App({ guardianConfig = defaultGuardianConfig }) {
       </Canvas>
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.22) 100%)' }} />
       {(status === 'playing' || status === 'catching') && <GameHud level={level} levelIndex={levelIndex} levelCount={levelTemplates.length}
-        collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} stamina={stamina} hidden={hidden}
+        collectedKeys={collectedKeys} collectedClues={collectedClues} openedDoors={openedDoors} stamina={stamina} hidden={hidden} exhausted={exhausted}
         elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
         flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} activatedRituals={activatedShrines}
         onReadJournal={openJournal} canRead={status === 'playing' && !paused} heading={heading} />}

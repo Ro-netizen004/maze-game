@@ -18,7 +18,7 @@ export const levelTemplates = [{
   hidingSpots: [{ id: 'hollow-shelter', type: 'alcove', cell: [9, 19] }, { id: 'arch-shelter', type: 'alcove', cell: [20, 5] }],
   traps: [], shrines: [], noisyZones: [],
   rituals,
-  mechanics: { requiredDoors: [], requiredClues: forestJournals.map(item => item.id), requiredRituals: rituals.map(item => item.id), sprintDrain: 30, staminaRegen: 20 },
+  mechanics: { requiredDoors: [], requiredClues: forestJournals.map(item => item.id), requiredRituals: rituals.map(item => item.id), sprintDrain: 30, staminaRegen: 12 },
   landmarks: [
     { name: 'CROWN CAMP', cell: [3, 5], symbol: 'sun', color: '#e9b85b' },
     { name: 'OWL WATCH', cell: [7, 17], symbol: 'eye', color: '#74d4ca' },

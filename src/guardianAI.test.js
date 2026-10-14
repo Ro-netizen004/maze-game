@@ -6,6 +6,8 @@ import {
   createGuardianState,
   guardianDifficultyPresets,
   updateGuardianState,
+  resolveGuardianDifficulty,
+  forestLineOfSight,
 } from './guardianAI.js'
 import { cellPosition, levels } from './mazeFixtures.js'
 
@@ -38,9 +40,35 @@ test('wall-aware sight respects range, field of view, walls, and hiding', () => 
 
 test('hearing scales with action intensity', () => {
   const guardianPosition = cellPosition(level, [3, 3])
-  const distantCell = [7, 3]
+  const distantCell = [9, 3]
   assert.equal(canHearNoise({ level, guardianPosition, noise: { cell: distantCell, intensity: 2 }, config }), false)
   assert.equal(canHearNoise({ level, guardianPosition, noise: { cell: distantCell, intensity: 5 }, config }), true)
+})
+
+test('normal guardian overtakes walking players and escalates with lit runes', () => {
+  const normal = resolveGuardianDifficulty('normal')
+  const final = resolveGuardianDifficulty('normal', {}, 5)
+  assert.ok(normal.chaseSpeed > 4 && normal.chaseSpeed < 7.2)
+  assert.ok(final.chaseSpeed > normal.chaseSpeed && final.chaseSpeed < 7.2)
+  assert.ok(final.sightRange > normal.sightRange)
+  assert.ok(final.searchDuration > normal.searchDuration)
+  assert.deepEqual(resolveGuardianDifficulty('normal', {}, 100), final)
+})
+
+test('ritual activation is audible across the forest and reveals only its location', () => {
+  const forest = { ...level, openForest: true }
+  const noise = { id: 20, position: [20, 20], intensity: 60, source: 'ritual' }
+  const next = updateGuardianState(createGuardianState(), input({ level: forest, playerHidden: true, noise }))
+  assert.equal(next.mode, 'investigate')
+  assert.deepEqual(next.targetPosition, noise.position)
+  assert.notDeepEqual(next.targetPosition, input().playerPosition)
+})
+
+test('forest scenery blocks sight behind trees but standing inside it is not immunity', () => {
+  const forest = { openForest: true, grid: [[0, 0, 0], [0, 1, 0], [0, 0, 0]] }
+  assert.equal(forestLineOfSight(forest, [-2, 0], [2, 0]), false)
+  assert.equal(forestLineOfSight(forest, [-2, 0.9], [2, 0.9]), true)
+  assert.equal(forestLineOfSight(forest, [-2, 0], [0, 0]), true)
 })
 
 test('guardian transitions patrol to chase then searches last-known position', () => {

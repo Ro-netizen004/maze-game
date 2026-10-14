@@ -83,3 +83,11 @@ large forest scene during play.
 Regenerate the simplified assets with Blender:
 `blender --background --python export-performance-assets.py`.
 For local profiling, visit `/?profile`; the console reports frame and draw budgets.
+
+The hunt escalates with each lit rune. Ritual activation is heard across the forest
+and sends the guardian to that ritual’s location. On Normal and Hard it runs faster
+than walking, searches longer, and moves freely within the same boundary as the
+player. Trees can break sight, but standing inside scenery does not grant immunity.
+Sprinting lasts roughly 3.3 seconds; after exhaustion it must recover to 25% before
+another sprint. Hiding requires breaking the guardian’s line of sight first.
+Easy remains a gentler option, and journal reading still pauses the game.

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { cellPosition } from './levels'
-import { movePlayer } from './collision'
+import { movePlayer, moveWithinBoundary } from './collision'
 import { findPath, worldCell } from './navigation'
 import {
   createGuardianState,
@@ -23,6 +23,7 @@ export default function Monster({
   playerNoise = null,
   difficulty = 'normal',
   guardianConfig = {},
+  activatedRituals = [],
   paused = false,
   catchDuration = 0.85,
   onCatchStart = () => {},
@@ -32,8 +33,8 @@ export default function Monster({
   const body = useRef(null)
   const { camera, gl } = useThree()
   const config = useMemo(
-    () => resolveGuardianDifficulty(difficulty, guardianConfig),
-    [difficulty, guardianConfig],
+    () => resolveGuardianDifficulty(difficulty, guardianConfig, activatedRituals.length),
+    [difficulty, guardianConfig, activatedRituals.length],
   )
   const ai = useRef({
     timer: 0,
@@ -69,7 +70,7 @@ export default function Monster({
     state.moving = false
     const distance = Math.hypot(monster.position.x - camera.position.x, monster.position.z - camera.position.z)
     const sameCell = worldCell(level, monster.position.x, monster.position.z).join(',') === worldCell(level, camera.position.x, camera.position.z).join(',')
-    state.attacking = distance < 1.4 && sameCell
+    state.attacking = distance < 1.4 && (level.openForest || sameCell)
     const facing = [Math.sin(monster.rotation.y), Math.cos(monster.rotation.y)]
     const targetReached = Boolean(
       state.guardian.targetPosition
@@ -95,6 +96,7 @@ export default function Monster({
       onAlertChange(state.guardian.mode)
     }
     state.chasing = state.guardian.mode === 'chase'
+    if (state.guardian.mode === 'search' && targetReached) monster.rotation.y += dt * 0.9
     const doorSignature = openedDoors.join(',')
     if (state.routeMode !== state.guardian.mode || state.routeDoors !== doorSignature) {
       state.waypoint = null
@@ -102,6 +104,7 @@ export default function Monster({
       state.routeDoors = doorSignature
     }
     state.timer -= dt
+    if (level.openForest && state.guardian.mode !== 'patrol') state.waypoint = state.guardian.targetPosition
     // Finish each grid segment before planning the next; mid-segment replans cut corners.
     if (!state.waypoint) {
       state.timer = state.chasing ? 0.12 : 0.35
@@ -110,8 +113,9 @@ export default function Monster({
         ? cellPosition(level, level.monster[state.patrol])
         : state.guardian.targetPosition
       const goal = target ? worldCell(level, target[0], target[1]) : null
-      const path = goal ? findPath(level, start, goal, openedDoors) : []
-      state.waypoint = path.length > 1 ? cellPosition(level, path[1]) : path.length === 1 ? target : null
+      const path = level.openForest ? (target ? [start, goal] : []) : goal ? findPath(level, start, goal, openedDoors) : []
+      if (level.openForest && target && Math.hypot(monster.position.x - target[0], monster.position.z - target[1]) < 0.35) path.pop()
+      state.waypoint = level.openForest ? target : path.length > 1 ? cellPosition(level, path[1]) : path.length === 1 ? target : null
       if (state.guardian.mode === 'patrol' && path.length <= 1) {
         state.patrol = (state.patrol + 1) % level.monster.length
         state.waypoint = null
@@ -128,7 +132,9 @@ export default function Monster({
       }
       else {
         const step = Math.min(remaining, dt * guardianSpeed(state.guardian, config))
-        const [x, z] = movePlayer(level, monster.position.x, monster.position.z, dx / remaining * step, dz / remaining * step, openedDoors, 0.75)
+        const [x, z] = level.openForest
+          ? moveWithinBoundary(level, monster.position.x, monster.position.z, dx / remaining * step, dz / remaining * step, 0.5)
+          : movePlayer(level, monster.position.x, monster.position.z, dx / remaining * step, dz / remaining * step, openedDoors, 0.75)
         state.moving = Math.hypot(x - monster.position.x, z - monster.position.z) > 0.001
         monster.position.set(x, 0, z)
         const targetAngle = Math.atan2(dx, dz)
@@ -136,7 +142,7 @@ export default function Monster({
         monster.rotation.y += turn * (1 - Math.exp(-dt * 8))
       }
     }
-    if (distance < 0.65 && sameCell && !hidden) {
+    if (distance < (level.openForest ? 0.85 : 0.65) && (level.openForest || sameCell) && !hidden) {
       state.caught = true
       state.caughtRemaining = catchDuration
       state.attacking = true
