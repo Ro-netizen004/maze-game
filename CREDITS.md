@@ -1,5 +1,30 @@
 # Asset credits
 
+## Ritual offering models
+
+- **Potion Bottle Inspired By Death Becomes Her** by **Gregory Allen Brown**:
+  https://skfb.ly/oJAyw · CC BY 4.0, https://creativecommons.org/licenses/by/4.0/.
+  Adapted as Moon Tear: reduced geometry, portable materials replacing Blender
+  procedural shaders, normalized and grounded on its pedestal.
+- **FNAF Wall Sun** by **EmilJoes Games**: https://skfb.ly/owHBx · CC BY-NC 4.0,
+  https://creativecommons.org/licenses/by-nc/4.0/. Adapted as Sun Ember: normalized
+  collectible size and 512-pixel textures. This asset is licensed for noncommercial use.
+- **Candle Light Animated** by **CΛTΞИCOΔΞ**: https://skfb.ly/69TFS · CC BY-SA 4.0,
+  https://creativecommons.org/licenses/by-sa/4.0/. Adapted as three ritual candles:
+  normalized geometry, browser-driven emissive flame flicker replacing the source
+  animation. The adapted candle GLB is distributed under CC BY-SA 4.0; see
+  `public/models/ritual-candle/LICENSE.md`. These asset licenses apply to the
+  respective assets; this notice does not relicense unrelated game code.
+
+**Eyeballs Earthly Series Eyes v.4** by **MovedSitesCheckProfile**
+
+- Original model: https://skfb.ly/oKpyC
+- License: Creative Commons Attribution 4.0 International, https://creativecommons.org/licenses/by/4.0/
+- Source: `src/assets/models/eyeballs-earthly-series-eyes-v4/`.
+- Game adaptation: extracted one eye, reduced to 6,000 polygons, resized its color
+  texture to 512 pixels, and centered/scaled it to a 0.48-metre collectible.
+  Browser asset: `public/models/watcher-eye/watcher-eye.glb`.
+
 **Demonic Whisper** by **Magnesus (Freesound)**, distributed by
 **freesound_community** on Pixabay.
 - Source: https://pixabay.com/sound-effects/horror-demonic-whisper-100425/

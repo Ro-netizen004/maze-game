@@ -1,4 +1,4 @@
-import { canActivateShrine } from './objectives.js'
+import { canActivateShrine, canCollectOffering } from './objectives.js'
 const cellId = cell => cell.join(',')
 
 export function hashSeed(seed) {
@@ -35,6 +35,7 @@ export function createSeededLevel(template, seed = template.id || template.name)
   return {
     ...template,
     seed: String(seed),
+    offerings: (template.offerings || []).map(item => ({ ...item, cell: [...item.cell] })),
     keys,
     doors: template.doors.map(door => ({ ...door, cell: [...door.cell] })),
     hidingSpots: (template.hidingSpots || []).map(item => ({ ...item, cell: [...item.cell] })),
@@ -92,6 +93,7 @@ export function isLevelSolvable(level) {
   const keys = new Set()
   const opened = new Set()
   const activated = new Set()
+  const offerings = new Set()
   let changed = true
   while (changed) {
     changed = false
@@ -111,8 +113,14 @@ export function isLevelSolvable(level) {
         changed = true
       }
     }
+    for (const offering of level.offerings || []) {
+      if (!offerings.has(offering.id) && reachable.has(cellId(offering.cell)) && canCollectOffering(offering, [...opened], [...activated], [...offerings])) {
+        offerings.add(offering.id)
+        changed = true
+      }
+    }
     for(const shrine of level.shrines||[]) {
-      if(!activated.has(shrine.id) && reachable.has(cellId(shrine.cell)) && canActivateShrine(shrine,[...opened],[...activated])) {
+      if(!activated.has(shrine.id) && reachable.has(cellId(shrine.cell)) && canActivateShrine(shrine,[...opened],[...activated],[...offerings])) {
         activated.add(shrine.id)
         changed=true
       }

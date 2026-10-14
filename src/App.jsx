@@ -12,6 +12,8 @@ import QuestObjects from './QuestObjects'
 import Monster from './Monster'
 import ForestExit from './ForestExit'
 import Flashlight from './Flashlight'
+import OfferingObjects from './OfferingObjects.jsx'
+import { canCollectOffering } from './offerings.js'
 import MechanicObjects from './MechanicObjects'
 import EnvironmentalDust from './EnvironmentalDust'
 import MazeAtmosphere from './MazeAtmosphere'
@@ -31,6 +33,7 @@ export default function App({ guardianConfig = {} }) {
   const [paused, setPaused] = useState(false)
   const [attempt, setAttempt] = useState(0)
   const [collectedKeys, setCollectedKeys] = useState([])
+  const [collectedOfferings, setCollectedOfferings] = useState([])
   const [openedDoors, setOpenedDoors] = useState([])
   const [activatedShrines, setActivatedShrines] = useState([])
   const [triggeredTraps, setTriggeredTraps] = useState([])
@@ -128,9 +131,16 @@ export default function App({ guardianConfig = {} }) {
     setCollectedKeys(items => items.includes(id) ? items : [...items, id])
     setNotice({ name: key.name, color: key.color })
   }
+  function collectOffering(id) {
+    const offering = level.offerings.find(item => item.id === id)
+    if (!offering || collectedOfferings.includes(id) || !canCollectOffering(offering,openedDoors,activatedShrines,collectedOfferings)) return
+    setCollectedOfferings(items => items.includes(id) ? items : [...items,id])
+    setNotice({ name: offering.name, color: offering.color, message: offering.clue })
+  }
   function restart() {
     setNotice(null)
     setCollectedKeys([])
+    setCollectedOfferings([])
     setOpenedDoors([])
     setActivatedShrines([])
     setTriggeredTraps([])
@@ -149,6 +159,12 @@ export default function App({ guardianConfig = {} }) {
     setPaused(false)
     setAttempt(value => value + 1)
     setStatus('ready')
+  }
+  function activateShrine(id) {
+    const shrine = level.shrines.find(item=>item.id===id)
+    if (!shrine || activatedShrines.includes(id) || !canActivateShrine(shrine,openedDoors,activatedShrines,collectedOfferings)) return
+    setActivatedShrines(items=>items.includes(id)?items:[...items,id])
+    setNotice({name:shrine.name,color:shrine.color,message:`${shrine.name} is lit — both relics placed on the rune.`})
   }
   function chooseLevel(index) {
     if (index > progress.unlockedLevel) return
@@ -245,6 +261,7 @@ export default function App({ guardianConfig = {} }) {
           }}
         />
         <QuestObjects level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} />
+        <OfferingObjects level={level} collectedOfferings={collectedOfferings} openedDoors={openedDoors} activatedShrines={activatedShrines} active={timerActive} reducedMotion={settings.reducedMotion} />
         <MechanicObjects level={level} triggeredTraps={triggeredTraps} activatedShrines={activatedShrines} />
         {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
           active={status === 'playing' && !paused}
@@ -252,14 +269,11 @@ export default function App({ guardianConfig = {} }) {
           reducedMotion={settings.reducedMotion}
           lookSensitivity={settings.lookSensitivity} invertY={settings.invertY}
           onPointerUnlock={handlePointerUnlock}
-          activatedShrines={activatedShrines} onCollectKey={collectKey}
+          activatedShrines={activatedShrines} collectedOfferings={collectedOfferings} onCollectOffering={collectOffering} onCollectKey={collectKey}
           onPromptChange={setPrompt} onStaminaChange={setStamina} onHiddenChange={setHidden}
           onNoise={noise => { playerNoise.current = { ...noise, id: ++noiseId.current } }}
           onTriggerTrap={id => setTriggeredTraps(items => items.includes(id) ? items : [...items, id])}
-          onActivateShrine={id => setActivatedShrines(items => {
-            const shrine=level.shrines.find(s=>s.id===id)
-            return !shrine || items.includes(id) || !canActivateShrine(shrine,openedDoors,items) ? items : [...items,id]
-          })}
+          onActivateShrine={activateShrine}
           onOpenDoor={id => setOpenedDoors(items => items.includes(id) ? items : [...items, id])}
           onWin={handleWin} />}
         <Flashlight intensity={settings.flashlightIntensity} battery={flashlightBattery} on={flashlightOn}
@@ -267,7 +281,7 @@ export default function App({ guardianConfig = {} }) {
       </Canvas>
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.22) 100%)' }} />
       {(status === 'playing' || status === 'catching') && <GameHud level={level} levelIndex={levelIndex} levelCount={levelTemplates.length}
-        collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={hidden} shelterRevealed={shelterRevealed}
+        collectedOfferings={collectedOfferings} collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={hidden} shelterRevealed={shelterRevealed}
         elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
         flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} activatedShrines={activatedShrines} />}
       {status==='playing' && (blackout.phase==='flickering' || blackout.phase==='dark') && <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-sm font-bold text-amber-200" role="status">Lightposts {blackout.phase==='flickering'?'flickering':'off'} · {blackoutRemaining(blackout)}s · Watch where you aim your flashlight</div>}

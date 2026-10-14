@@ -1,3 +1,4 @@
+import QuestInventory from './QuestInventory.jsx'
 import { formatTime } from '../runTimer'
 import { nextObjective } from '../objectives.js'
 import { FLASHLIGHT_LOW_THRESHOLD, flashlightBatteryStatus } from '../flashlightBattery'
@@ -9,7 +10,7 @@ function KeyIcon() {
 export default function GameHud({
   level, levelIndex, levelCount, collectedKeys, openedDoors, stamina, hidden, elapsed, prompt, notice, isTouch,
   flashlightBattery, flashlightOn, guardianAlert, activatedShrines = [],
-  shelterRevealed = false,
+  shelterRevealed = false, collectedOfferings = [],
 }) {
   const required = level.mechanics.requiredDoors || []
   const openedRequired = required.filter(id => openedDoors.includes(id)).length
@@ -18,8 +19,9 @@ export default function GameHud({
       <p className="font-bold">{level.name} · Level {levelIndex + 1} / {levelCount}</p>
       <p className="text-lg font-bold tabular-nums" aria-label={`Elapsed time ${formatTime(elapsed)}`}>{formatTime(elapsed)}</p>
       <p>Keys {collectedKeys.length} / {level.keys.length} · Inner doors {openedRequired} / {required.length}</p>
+      <p className="text-amber-200">Relics found {collectedOfferings.length} / {level.offerings.length} · Each rune needs an offering + candle</p>
       <p className="text-emerald-300">Runes lit {activatedShrines.length} / {level.shrines.length} · Required for escape</p>
-      <p className="mt-1 font-semibold">{nextObjective(level,collectedKeys,openedDoors,activatedShrines)}</p>
+      <p className="mt-1 font-semibold">{nextObjective(level,collectedKeys,openedDoors,activatedShrines,collectedOfferings)}</p>
       <p>{isTouch ? 'Use the virtual controls to move and look.' : 'WASD · Mouse look (drag if capture is unavailable) · Shift sprint · F flashlight · Space jump · E interact · Esc pause'}</p>
       <p className={shelterRevealed?'font-bold text-red-400':''}>Stamina {Math.round(stamina)}%{hidden ? shelterRevealed ? ' · Shelter revealed! E to leave' : ' · Hidden' : ''}</p>
       <p className={`font-semibold ${guardianAlert === 'chase' ? 'text-red-400' : guardianAlert === 'investigate' || guardianAlert === 'search' ? 'text-amber-300' : 'text-emerald-300'}`}>
@@ -35,26 +37,15 @@ export default function GameHud({
         </div>
       </div>
     </div>
-    <div className="pointer-events-none absolute bottom-4 left-4 hidden rounded-xl bg-slate-950/90 p-4 text-white shadow-lg sm:block">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-300">Key inventory</p>
-      <div className="flex gap-3">
-        {level.keys.map(key => {
-          const owned = collectedKeys.includes(key.id)
-          return <div key={key.id} className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${owned ? 'border-white/30 bg-white/10' : 'border-white/10 opacity-50'}`} style={{ color: owned ? key.color : '#cbd5e1' }}>
-            <KeyIcon />
-            <div><p className="text-sm font-bold">{key.name} key</p><p className="text-xs">{owned ? 'Collected ✓' : 'Not found'}</p></div>
-          </div>
-        })}
-      </div>
-    </div>
+    <QuestInventory level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} collectedOfferings={collectedOfferings} activatedShrines={activatedShrines} isTouch={isTouch} />
     {prompt && <div className="pointer-events-none absolute bottom-32 left-1/2 -translate-x-1/2 rounded-xl bg-slate-950/90 px-5 py-3 text-center text-white shadow-lg">
       {!isTouch && <span className="mr-3 inline-block rounded border border-white/40 px-2 py-1 font-bold">E</span>}
       <span className={prompt.available === false ? 'text-slate-400' : 'font-bold'}>{prompt.label}</span>
     </div>}
     <div className="pointer-events-none absolute right-4 top-4" role="status" aria-live="polite">
       {notice && <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-slate-950/90 px-5 py-4 text-white shadow-lg">
-        <span style={{ color: notice.color }}><KeyIcon /></span>
-        <p className="font-bold">{notice.name} key collected!</p>
+        <span style={{ color: notice.color }}>{notice.message ? "◇" : <KeyIcon />}</span>
+        <p className="font-bold">{notice.message || `${notice.name} key collected!`}</p>
       </div>}
     </div>
   </>

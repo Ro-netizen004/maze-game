@@ -277,3 +277,19 @@ Use the user-supplied Demonic Whisper by Magnesus (Freesound), via Pixabay, as a
 ## 31. Meaningful place names
 
 Rename the maps to The Forgotten Garden, The Keeper’s Grounds and The Ritual Grove. Keep their internal IDs and original layout lookup names so saved best times/unlocks survive. Give Dawn, Moon and Watcher distinct place names: Sunwell Clearing, Moonwell Clearing and The Watcher’s Court. Retain the rune names for the objective chain, add sun/crescent/eye plaques in their clearings, and give Sunwell warm lights and Moonwell cool lights. Rename existing landmarks after nearby paths, seals, shelters and the Old Road exit instead of inventing buildings or props that are not there. Update menu, HUD prompts, guide and objectives consistently.
+
+## 32. Ritual offerings extend the quest
+
+Add one collectible relic per rune: Sun Ember for Dawn, Moon Tear for Moon, and Watcher’s Eye for Watcher. Ruby and Sapphire seals awaken their respective relics; both earlier runes must be lit before the Eye can be collected. Carry each relic back to its matching ritual and offer it with the existing interaction control. Retain the seal requirements and require all three completed rituals for escape. Relics occupy distinct original maze trail cells away from their ritual sites, avoiding key spawn pools, gates, traps and shelters. Use small, static emissive meshes without new point lights or downloaded assets. Show missing, carried and offered states in the inventory, explain locks in prompts, and guide each collection/delivery step in the HUD. Clear offerings on restart and validate all seeded maps plus missing-relic deadlocks.
+
+## 33. Supplied eyeball for the Watcher’s Eye
+
+Replace the torus placeholder with one eye extracted from the user-supplied Eyeballs Earthly Series Eyes v.4 by MovedSitesCheckProfile (CC BY 4.0). Preserve the offering’s maze cell and quest requirements. Normalize the model to 0.48 metres, center it above the pedestal with clearance, and face the iris toward the approach along the trail. Reduce geometry and textures for browser performance and include a fallback during loading. Credit the source and adaptations in the menu and CREDITS.md.
+
+## 34. Modelled offerings, ritual candles and sequential revelation
+
+Use the supplied potion bottle for Moon Tear and FNAF wall sun for Sun Ember. Add one collectible candle per ritual, requiring both the original offering and its candle before activation. Sequence: Ruby seal → Sun Ember → Dawn Candle → Dawn; then Sapphire seal → Moon Tear → Moon Candle → Moon; then Watcher’s Eye → Watcher Candle → Watcher. Reveal the next relic only when its preceding conditions are met; hide both model/pedestal and interaction until then. Both earlier rituals remain prerequisites for Watcher. Display a candle at each completed ritual as confirmation. Keep flame flicker lightweight and freeze it when paused or reduced motion is enabled. Normalize assets to fit above their pedestals, retain source assets/exporters, credit every author, retain the sun’s noncommercial terms, and distribute the adapted candle under CC BY-SA 4.0. Extend HUD/guide/progression validation to all six relics and verify that opening seals early cannot reveal later relics.
+
+## 35. Carried inventory and deposited ritual offerings
+
+Show a compact inventory of carried items with distinct icons and full labels on desktop and touch layouts. Remove keys from the box when their seal is opened, and remove both a ritual’s offering and candle when its rune is activated. Place those actual models inside the completed ritual circle, including the supplied eyeball. Keep immutable collection history for quest progress so consumed items cannot respawn or interrupt sequential revelation. Add activation feedback and verify inventory consumption separately from progression history.

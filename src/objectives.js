@@ -1,31 +1,53 @@
-export function canActivateShrine(shrine,openedDoors=[],activatedShrines=[]) {
-  return (shrine.requiresDoors||[]).every(id=>openedDoors.includes(id))
-    && (shrine.requiresShrines||[]).every(id=>activatedShrines.includes(id))
+export function canCollectOffering(offering, openedDoors = [], activatedShrines = [], collectedOfferings = []) {
+  return (offering.requiresDoors || []).every(id => openedDoors.includes(id))
+    && (offering.requiresShrines || []).every(id => activatedShrines.includes(id))
+    && (offering.requiresOfferings || []).every(id => collectedOfferings.includes(id))
 }
 
-export function shrineRequirement(level,shrine,openedDoors=[],activatedShrines=[]) {
+export function visibleOfferings(level, openedDoors = [], activatedShrines = [], collectedOfferings = []) {
+  return (level.offerings || []).filter(item => !collectedOfferings.includes(item.id)
+    && canCollectOffering(item, openedDoors, activatedShrines, collectedOfferings))
+}
+
+export function canActivateShrine(shrine,openedDoors=[],activatedShrines=[],collectedOfferings=[]) {
+  return (shrine.requiresDoors||[]).every(id=>openedDoors.includes(id))
+    && (shrine.requiresShrines||[]).every(id=>activatedShrines.includes(id))
+    && (shrine.requiresOfferings||[]).every(id=>collectedOfferings.includes(id))
+}
+
+export function shrineRequirement(level,shrine,openedDoors=[],activatedShrines=[],collectedOfferings=[]) {
   const missing=[
+    ...(shrine.requiresOfferings||[]).filter(id=>!collectedOfferings.includes(id)).map(id=>level.offerings?.find(o=>o.id===id)?.name||id),
     ...(shrine.requiresDoors||[]).filter(id=>!openedDoors.includes(id)).map(id=>`${level.doors.find(d=>d.id===id)?.name||id} seal`),
     ...(shrine.requiresShrines||[]).filter(id=>!activatedShrines.includes(id)).map(id=>`${level.shrines.find(s=>s.id===id)?.name||id} rune`),
   ]
   return `${shrine.name} rune needs ${missing.join(' and ')}`
 }
 
-export function nextObjective(level,collectedKeys=[],openedDoors=[],activatedShrines=[]) {
+export function nextObjective(level,collectedKeys=[],openedDoors=[],activatedShrines=[],collectedOfferings=[]) {
   if(openedDoors.includes('exit')) return 'Exit open — reach the finish!'
   const steps=[
     ['key','ruby','Find the Ruby key to break the first seal.'],
     ['door','ruby','Open the Ruby seal to awaken the Dawn rune.'],
-    ['rune','dawn','Light Dawn in Sunwell Clearing; the Ruby seal has awakened it.'],
+    ['offering','sun-ember','Find the Sun Ember on the maze trails and carry it to Sunwell Clearing.'],
+    ['offering','dawn-candle','The Sun Ember revealed the Dawn Candle — find it on the maze trails.'],
+    ['rune','dawn','Offer the Sun Ember and Dawn Candle in Sunwell Clearing.'],
     ['key','sapphire','Find the Sapphire key beyond the Ruby seal.'],
     ['door','sapphire','Open the Sapphire seal to awaken the Moon rune.'],
-    ['rune','moon','Light Moon in Moonwell Clearing; the Sapphire seal has awakened it.'],
-    ['rune','watch','Dawn and Moon are lit — complete the ritual in the Watcher’s Court.'],
+    ['offering','moon-tear','Find the Moon Tear on the maze trails and carry it to Moonwell Clearing.'],
+    ['offering','moon-candle','The Moon Tear revealed the Moon Candle — find it on the maze trails.'],
+    ['rune','moon','Offer the Moon Tear and Moon Candle in Moonwell Clearing.'],
+    ['offering','watcher-eye','Dawn and Moon released the Watcher’s Eye — find it on the maze trails.'],
+    ['offering','watch-candle','The Watcher’s Eye revealed the Watcher Candle — find it on the maze trails.'],
+    ['rune','watch','Offer the Watcher’s Eye and Watcher Candle in the Watcher’s Court to release the exit.'],
   ]
   for(const [type,id,text] of steps) {
-    const completed=type==='key'?collectedKeys:type==='door'?openedDoors:activatedShrines
-    const exists=type==='key'?level.keys.some(k=>k.id===id):type==='door'?level.doors.some(d=>d.id===id):level.shrines.some(s=>s.id===id)
-    if(exists && !completed.includes(id)) return text
+    const completed=type==='key'?collectedKeys:type==='door'?openedDoors:type==='offering'?collectedOfferings:activatedShrines
+    const exists=type==='key'?level.keys.some(k=>k.id===id):type==='door'?level.doors.some(d=>d.id===id):type==='offering'?(level.offerings||[]).some(o=>o.id===id):level.shrines.some(s=>s.id===id)
+    if(exists && !completed.includes(id)) {
+      const offering = type==='offering' ? level.offerings.find(item=>item.id===id) : null
+      return offering ? `${text} Search near ${offering.hint}.` : text
+    }
   }
   return 'The ritual is complete — open the exit seal.'
 }

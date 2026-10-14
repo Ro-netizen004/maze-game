@@ -7,6 +7,7 @@ import { movePlayer } from './collision'
 import { readInput } from './input'
 import { worldCell } from './navigation'
 import { canActivateShrine, shrineRequirement } from './objectives.js'
+import { visibleOfferings } from './objectives.js'
 import PlayerAvatar from './PlayerAvatar'
 
 const eyeHeight = 1.6
@@ -16,6 +17,7 @@ const interactionDistance = 1.45
 
 export default function Player({
   level, onWin, collectedKeys, openedDoors, activatedShrines = [], touchInput = {},
+  collectedOfferings = [], onCollectOffering = () => {},
   active = true,
   mobile = false,
   reducedMotion = false,
@@ -229,6 +231,15 @@ export default function Player({
       }
     }
     if (!interaction && !player.hiddenIn) {
+      for (const offering of visibleOfferings(level, openedDoors, activatedShrines, collectedOfferings)) {
+        const [x,z] = cellPosition(level, offering.cell)
+        if (collectedOfferings.includes(offering.id) || Math.hypot(camera.position.x-x,camera.position.z-z) >= interactionDistance) continue
+        const available = true
+        interaction = { type: 'offering', id: offering.id, available, label: available ? 'Collect '+offering.name : offering.rune==='watch' ? 'Watcher’s Eye needs Dawn and Moon lit' : offering.name+' needs the '+offering.requiresDoors.join(' and ')+' seal opened' }
+        break
+      }
+    }
+    if (!interaction && !player.hiddenIn) {
       for (const door of level.doors) {
         const [doorX, doorZ] = doorPosition(level, door)
         if (openedDoors.includes(door.id) || Math.hypot(camera.position.x - doorX, camera.position.z - doorZ) >= interactionDistance) continue
@@ -241,8 +252,8 @@ export default function Player({
       for (const shrine of level.shrines) {
         const [x, z] = cellPosition(level, shrine.cell)
         if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < (shrine.type==='rune'?3:interactionDistance)) {
-          const available=canActivateShrine(shrine,openedDoors,activatedShrines)
-          interaction = { type: 'shrine', id: shrine.id, available, label: available ? shrine.type==='rune'?`Light the ${shrine.name} rune · ${shrine.placeName}`:'Activate shrine' : shrineRequirement(level,shrine,openedDoors,activatedShrines) }
+          const available=canActivateShrine(shrine,openedDoors,activatedShrines,collectedOfferings)
+          interaction = { type: 'shrine', id: shrine.id, available, label: available ? shrine.type==='rune'?`Offer both relics · ${shrine.placeName}`:'Activate shrine' : shrineRequirement(level,shrine,openedDoors,activatedShrines,collectedOfferings) }
           break
         }
       }
@@ -258,6 +269,7 @@ export default function Player({
     }
     if (interaction && player.interact) {
       if (interaction.type === 'key') { onCollectKey(interaction.id); nearby = null }
+      if (interaction.type === 'offering' && interaction.available) onCollectOffering(interaction.id)
       if (interaction.type === 'door' && interaction.available) {
         onOpenDoor(interaction.id)
         onNoise({ cell: worldCell(level, camera.position.x, camera.position.z), intensity: 6, source: 'door' })
