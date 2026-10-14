@@ -257,3 +257,7 @@ Ruby's key opens its seal, which awakens Dawn. Sapphire's key opens its seal, wh
 ## 26. Blackout, flashlight exposure and stronger Hard mode
 
 At 90 seconds of active run time, all lightposts flicker for 1.2 seconds and then go fully dark for 12 seconds before recovering. Pausing freezes this schedule; restarting resets it. The flashlight is independent and a full charge now lasts five minutes. A beam hitting the guardian reveals the player's position regardless of facing or hiding, while walls, closed doors, beam direction and range still matter. Revealed shelters remain vulnerable briefly after the beam switches off, with an explicit HUD warning; a different hiding spot is not automatically exposed. Hard mode outruns walking (4.7 m/s versus 4), has broader sight, stronger hearing, a 16-second search and longer exposure memory. Sprinting and breaking sight remain escape options.
+
+## 27. Earlier lightpost blackout
+
+Move the first lightpost flicker from 90 to 45 seconds of active run time, as requested. Retain the 1.2-second flicker, 12-second darkness, pause behavior and independent flashlight.

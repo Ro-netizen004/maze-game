@@ -6,15 +6,15 @@ import { createGuardianState,updateGuardianState,guardianDifficultyPresets } fro
 import { updateFlashlightBattery } from './flashlightBattery.js'
 
 const level={grid:[[0,0,0],[0,0,0],[0,0,0]],doors:[]}
-test('90-second flicker is followed by twelve seconds of darkness and restoration',()=>{
-  assert.equal(lightpostPower(89.9),1)
-  assert.equal(blackoutPhase(90),'flickering')
-  assert.equal(lightpostPower(90.1),0)
-  assert.equal(lightpostPower(91.2),0)
+test('45-second flicker is followed by twelve seconds of darkness and restoration',()=>{
+  assert.equal(lightpostPower(44.9),1)
+  assert.equal(blackoutPhase(45),'flickering')
+  assert.equal(lightpostPower(45.1),0)
+  assert.equal(lightpostPower(46.2),0)
   assert.equal(lightpostPower(BLACKOUT_END-0.01),0)
   assert.equal(lightpostPower(BLACKOUT_END),1)
   assert.equal(blackoutPhase(BLACKOUT_END),'normal')
-  assert.ok(updateFlashlightBattery(100,103.2,true)>60,'flashlight is not depleted by the outage')
+  assert.ok(updateFlashlightBattery(100,58.2,true)>60,'flashlight is not depleted by the outage')
 })
 test('beam exposure respects aim, range, walls and closed doors',()=>{
   const input={level,playerPosition:[0,1.6,-2],playerDirection:[0,0,1],guardianPosition:[0,2],flashlightOn:true}
