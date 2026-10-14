@@ -12,7 +12,7 @@ function Tree({ position, scale, color }) {
 }
 export default function ForestExit({ level }) {
   const [exitX] = cellPosition(level, level.end)
-  const edge = level.grid.length * cellSize / 2
+  const edge = (level.originalGrid?.length || level.grid.length) * cellSize / 2
   const trees = useMemo(() => Array.from({ length: 28 }, (_, i) => ({
     position: [exitX + (i % 2 ? 1 : -1) * (3.3 + Math.floor(i / 2) % 3 * 2.3), 0, edge + 2.5 + Math.floor(i / 2) * 1.3],
     scale: [1, 4.8 + i % 4 * 0.6, 1],

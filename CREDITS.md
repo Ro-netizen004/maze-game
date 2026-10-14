@@ -42,3 +42,11 @@ Source: `src/shrub_tiles_pack_3_vars_seamless.glb`. Adaptations: extracted the t
 tile examples, resized textures to 512 pixels, normalized each to a 2 × 2 meter
 footprint and 2.4-meter height with its base on the floor, and instanced the tiles
 along the original maze walls. Browser asset: `public/models/shrub-tiles/shrubs.glb`.
+## Occult Ritual Circle – Stylized Prop
+
+"Occult Ritual Circle – Stylized Prop" (https://skfb.ly/pBDOJ) by ARTEL_3D is
+licensed under Creative Commons Attribution (https://creativecommons.org/licenses/by/4.0/).
+Browser asset: `public/models/ritual-circle/ritual-circle.glb`, restored from main's
+optimized derivative (12,000 triangles). Adaptations: reduced geometry/textures,
+normalized scale and height, self-lit glyphs and activation glow. Original source
+and exporter are preserved in the main branch's history.

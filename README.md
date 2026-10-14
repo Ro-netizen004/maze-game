@@ -40,6 +40,16 @@ LOLIPOP. Each tile meets the floor, fills its two-meter wall footprint, and shar
 geometry/materials across the maze. `export-shrub-tiles.py` rebuilds the optimized
 browser asset from `src/shrub_tiles_pack_3_vars_seamless.glb`.
 
+Each map now includes three side clearings with glowing ritual circles. Stand
+within three meters and press E (or touch Interact) to activate one. The HUD tracks
+lit runes. Keys and gates still control the exit; in Twilight, Dawn and Moon runes
+also unlock the existing optional shortcut. Added gardens have single access
+paths and do not replace interior maze corridors.
+
+Lightposts cover more path turns and surround each garden: 15–18 posts on desktop
+and 9 on mobile. Only the nearest five (three on mobile) use actual point lights,
+without extra point-light shadows, so additional lamps stay inexpensive.
+
 ## Asset credits
 
 See [CREDITS.md](CREDITS.md) for creators, source links, licenses, and adaptations.

@@ -2,13 +2,19 @@ import { cellSize, doorBounds } from './levels.js'
 import { getLockedDoors } from './levelRuntime.js'
 
 export const playerRadius = 0.3
+const obstacleCache = new WeakMap()
 
 // Resolve a small movement step by pushing the circle out along wall normals.
 // Unlike rejecting X and Z separately, this also slides around rounded corners.
 export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = playerRadius) {
   const width = level.grid[0].length * cellSize
   const depth = level.grid.length * cellSize
-  const obstacles = []
+  let cache=obstacleCache.get(level)
+  if(!cache){cache=new Map();obstacleCache.set(level,cache)}
+  const signature=openedDoors===null?'walls':'doors:'+openedDoors.slice().sort().join(',')
+  let obstacles=cache.get(signature)
+  if(!obstacles){
+  obstacles = []
   const opened = new Set(openedDoors || [])
   const openDoorCells = new Set((level.doors || []).filter(door => opened.has(door.id)).map(door => door.cell.join(',')))
   level.grid.forEach((row, r) => row.forEach((cell, c) => {
@@ -20,6 +26,8 @@ export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = pla
   if (openedDoors !== null) {
     for (const door of getLockedDoors(level, openedDoors)) obstacles.push(doorBounds(level, door))
   }
+  cache.set(signature,obstacles)
+  }
   x += dx
   z += dz
   for (let pass = 0; pass < 6; pass++) {
@@ -27,6 +35,7 @@ export function movePlayer(level, x, z, dx, dz, openedDoors = null, radius = pla
     z = Math.max(-depth / 2 + radius, Math.min(depth / 2 - radius, z))
     let corrected = false
     obstacles.forEach(({ left, right, front, back }) => {
+      if(x+radius<left || x-radius>right || z+radius<front || z-radius>back)return
       const nearestX = Math.max(left, Math.min(x, right))
       const nearestZ = Math.max(front, Math.min(z, back))
       const nx = x - nearestX

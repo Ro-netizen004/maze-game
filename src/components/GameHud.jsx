@@ -7,7 +7,7 @@ function KeyIcon() {
 
 export default function GameHud({
   level, levelIndex, levelCount, collectedKeys, openedDoors, stamina, hidden, elapsed, prompt, notice, isTouch,
-  flashlightBattery, flashlightOn, guardianAlert,
+  flashlightBattery, flashlightOn, guardianAlert, activatedShrines = [],
 }) {
   const required = level.mechanics.requiredDoors || []
   const openedRequired = required.filter(id => openedDoors.includes(id)).length
@@ -19,6 +19,7 @@ export default function GameHud({
       <p className="font-bold">{level.name} · Level {levelIndex + 1} / {levelCount}</p>
       <p className="text-lg font-bold tabular-nums" aria-label={`Elapsed time ${formatTime(elapsed)}`}>{formatTime(elapsed)}</p>
       <p>Keys {collectedKeys.length} / {level.keys.length} · Inner doors {openedRequired} / {required.length}</p>
+      <p className="text-emerald-300">Runes lit {activatedShrines.length} / {level.shrines.length} · Explore the side clearings</p>
       <p>{openedDoors.includes('exit') ? 'Exit open — reach the finish!' : missingNames.length ? `Find keys and clear: ${missingNames.join(', ')}.` : 'All seals cleared — approach the exit door.'}</p>
       <p>{isTouch ? 'Use the virtual controls to move and look.' : 'WASD · Mouse look (drag if capture is unavailable) · Shift sprint · F flashlight · Space jump · E interact · Esc pause'}</p>
       <p>Stamina {Math.round(stamina)}%{hidden ? ' · Hidden' : ''}</p>

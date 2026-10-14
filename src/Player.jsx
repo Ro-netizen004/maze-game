@@ -239,8 +239,8 @@ export default function Player({
     if (!interaction) {
       for (const shrine of level.shrines) {
         const [x, z] = cellPosition(level, shrine.cell)
-        if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < interactionDistance) {
-          interaction = { type: 'shrine', id: shrine.id, label: 'Activate shrine' }
+        if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < (shrine.type==='rune'?3:interactionDistance)) {
+          interaction = { type: 'shrine', id: shrine.id, label: shrine.type==='rune'?`Light the ${shrine.name} rune`:'Activate shrine' }
           break
         }
       }

@@ -6,6 +6,7 @@ import {
   isLevelSolvable, noiseAtDistance, reachableCells,
 } from './levelRuntime.js'
 import { findPath } from './navigation.js'
+const originalCell=(level,cell)=>cell.map(value=>value+(level.mapOffset||0))
 
 test('seeded levels are deterministic and choose only configured key pools', () => {
   for (const template of levelTemplates) {
@@ -28,12 +29,12 @@ test('spawn variants preserve each handcrafted progression', () => {
 
 test('shared locked cells control reachability and shortcuts', () => {
   const amber = createSeededLevel(levelTemplates[1], 'doors')
-  assert.ok(getLockedCellIds(amber, []).has('6,5'))
-  const longRoute = findPath(amber, [5, 5], [7, 5], [])
-  const shortcutRoute = findPath(amber, [5, 5], [7, 5], ['amber-shortcut'])
+  assert.ok(getLockedCellIds(amber, []).has(originalCell(amber,[6,5]).join(',')))
+  const longRoute = findPath(amber, originalCell(amber,[5, 5]), originalCell(amber,[7, 5]), [])
+  const shortcutRoute = findPath(amber, originalCell(amber,[5, 5]), originalCell(amber,[7, 5]), ['amber-shortcut'])
   assert.ok(longRoute.length > shortcutRoute.length)
   assert.equal(shortcutRoute.length, 3)
-  assert.ok(reachableCells(amber, [5, 5], ['amber-shortcut']).has('7,5'))
+  assert.ok(reachableCells(amber, originalCell(amber,[5, 5]), ['amber-shortcut']).has(originalCell(amber,[7,5]).join(',')))
   const shortcut = amber.doors.find(door => door.id === 'amber-shortcut')
   assert.equal(canOpenDoor(amber, shortcut, [], []), false)
   assert.equal(canOpenDoor(amber, shortcut, ['ruby'], []), true)
@@ -41,9 +42,9 @@ test('shared locked cells control reachability and shortcuts', () => {
 
 test('line of sight is blocked by walls and closed doors', () => {
   const amber = createSeededLevel(levelTemplates[1], 'sight')
-  assert.equal(hasLineOfSight(amber, [5, 5], [7, 5], []), false)
-  assert.equal(hasLineOfSight(amber, [5, 5], [7, 5], ['amber-shortcut']), true)
-  assert.equal(hasLineOfSight(amber, [1, 1], [1, 3], []), true)
+  assert.equal(hasLineOfSight(amber, originalCell(amber,[5, 5]), originalCell(amber,[7, 5]), []), false)
+  assert.equal(hasLineOfSight(amber, originalCell(amber,[5, 5]), originalCell(amber,[7, 5]), ['amber-shortcut']), true)
+  assert.equal(hasLineOfSight(amber, originalCell(amber,[1, 1]), originalCell(amber,[1, 3]), []), true)
 })
 
 test('noise groundwork has deterministic Manhattan falloff', () => {

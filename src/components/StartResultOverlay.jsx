@@ -14,7 +14,7 @@ export default function StartResultOverlay({
     <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-7 text-center text-slate-100 shadow-xl">
       <h1 id="game-dialog-title" ref={headingRef} tabIndex="-1" className="text-3xl font-bold outline-none">{resultTitle}</h1>
       {status === 'ready' ? <>
-        <p className="mt-3">Collect every required key, open the seals, and escape the guardian.</p>
+        <p className="mt-3">Collect every required key, open the seals, and escape the guardian. Follow the lightposts and explore three side clearings to light their runes with E.</p>
         <label className="mt-5 block text-left text-sm font-semibold" htmlFor="level">Choose a maze</label>
         <select id="level" className="mt-2 w-full rounded border border-slate-600 bg-slate-800 p-2" value={levelIndex} onChange={event => onChooseLevel(Number(event.target.value))}>
           {levels.map((item, index) => <option key={item.id} value={index} disabled={index > unlockedLevel}>
@@ -38,6 +38,7 @@ export default function StartResultOverlay({
           <button className="rounded-lg border border-slate-300 px-5 py-3" onClick={onRestart}>Play again / Menu</button>
         </div>
       </>}
+      <p className="mt-1 text-xs text-slate-400">Ritual Circle by <a className="underline" href="https://skfb.ly/pBDOJ" target="_blank" rel="noreferrer">ARTEL_3D</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · optimized and adapted</p>
       <p className="mt-1 text-xs text-slate-400">Shrub tiles pack by <a className="underline" href="https://skfb.ly/pOyYY" target="_blank" rel="noreferrer">LOLIPOP</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · extracted, resized, and tiled for the maze</p>
       <p className="mt-4 text-xs text-slate-400">Flashlight by <a className="underline" href="https://skfb.ly/o8H9O" target="_blank" rel="noreferrer">MAR.COS.</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>
       <p className="mt-1 text-xs text-slate-400">Trees by <a className="underline" href="https://skfb.ly/pDzJR" target="_blank" rel="noreferrer">Jungle Jim</a> · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · adapted for the game</p>

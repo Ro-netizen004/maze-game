@@ -101,6 +101,10 @@ export default function ForestMaze({ level, mobile, reducedMotion }) {
   }, [level, mobile])
   const width = level.grid[0].length * cellSize, depth = level.grid.length * cellSize
   return <group>
+    {(level.clearings||[]).map(clearing=>{
+      const [x,z]=cellPosition(level,clearing.cell)
+      return <mesh key={clearing.id} rotation={[-Math.PI/2,0,0]} position={[x,0.015,z]} receiveShadow><circleGeometry args={[clearing.radius,48]} /><meshStandardMaterial color="#7b8770" roughness={1} /></mesh>
+    })}
     <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[width + 16, depth + 16]} /><meshStandardMaterial color="#38463b" roughness={0.9} /></mesh>
     {level.grid.flatMap((row, r) => row.map((cell, c) => {
       if (cell) return null

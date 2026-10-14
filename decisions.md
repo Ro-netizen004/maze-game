@@ -215,3 +215,21 @@ The user explicitly selected codex/original-maze-maps as the website deployment
 branch. Its workflow triggers on this branch and rejects dispatches from other
 branches. Restrict the github-pages deployment environment to this branch so
 future main pushes cannot replace this website. Keep main's game source intact.
+## 20. More lightposts and rune gardens — 2026-10-14
+
+At the user's request, attach three side clearings to existing paths in each
+original maze. Preserve all interior corridor cells and key/gate world positions.
+Symmetric grid padding provides room outside the old perimeter; isolated access
+spurs prevent new shortcuts around gates. Keep the old start/end openings and
+update coordinate-based fixtures and landmarks for the padded grid.
+
+Use ARTEL_3D's previously supplied ritual-circle model in each garden, with faint
+self-lit glyphs, an E/touch prompt within three meters, and persistent brighter
+glow after activation. Show rune progress in the HUD. The existing key-and-gate
+exit remains; Twilight's Dawn/Moon runes still operate its optional shortcut.
+
+Add 15–18 physical lightposts per desktop map and nine on mobile, including two
+per desktop garden. Pool actual point lights at the nearest five desktop or
+three mobile posts and avoid their shadow passes. Cache static collision bounds
+per gate state so larger padded maps do not recreate walls every movement step.
+Continue deploying codex/original-maze-maps.

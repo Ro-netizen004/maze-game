@@ -1,4 +1,5 @@
 import { cellPosition } from './levels'
+import RitualCircle from './RitualCircle.jsx'
 
 function Marker({ cell, level, children }) {
   const [x, z] = cellPosition(level, cell)
@@ -32,7 +33,7 @@ export default function MechanicObjects({ level, triggeredTraps = [], activatedS
           </mesh>
         </Marker>
       ))}
-      {level.shrines.map(shrine => (
+      {level.shrines.map(shrine => shrine.type==='rune' ? <RitualCircle key={shrine.id} level={level} ritual={shrine} active={activatedShrines.includes(shrine.id)} /> : (
         <Marker key={shrine.id} level={level} cell={shrine.cell}>
           <mesh castShadow position={[0, 0.55, 0]}>
             <cylinderGeometry args={[0.32, 0.48, 1.1, 6]} />
