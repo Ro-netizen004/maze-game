@@ -6,6 +6,14 @@ export function lightpostLayout(level,mobile=false) {
     const [x,z]=center(clearing.cell)
     for(const side of mobile?[1]:[-1,1])fixtures.push({id:clearing.id+'-'+side,position:[x+side*1.85,0,z+1.4],garden:true,color:clearing.color})
   }
+  // Mark the two new outer loops without increasing the active point-light cap.
+  for(const route of (level.escapeRoutes||[]).filter(route=>route.id==='west-flank'||route.id==='moonwell-return')) {
+    const [r,c]=route.cells[Math.floor(route.cells.length/2)]
+    const side=sides.find(([dr,dc])=>level.grid[r+dr]?.[c+dc]===1)
+    if(!side)continue
+    const [x,z]=center([r,c])
+    fixtures.push({id:`route-${route.id}`,position:[x+side[1]*0.73,0,z+side[0]*0.73],garden:false,route:route.id,cell:[r,c]})
+  }
   const candidates=[], offset=level.mapOffset||0
   const original=level.originalGrid||level.grid
   for(let r=offset+1;r<offset+original.length-1;r++)for(let c=offset+1;c<offset+original[0].length-1;c++){

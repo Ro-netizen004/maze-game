@@ -7,7 +7,7 @@ const entrances = {
 // Attach isolated gardens outside the old perimeter. Interior corridors and
 // gates retain their geometry and world positions; each garden has one entrance.
 export function addRuneClearings(level) {
-  const padding=4, originalGrid=level.grid
+  const padding=5, originalGrid=level.grid
   const rows=originalGrid.length, columns=originalGrid[0].length
   const shift=([r,c])=>[r+padding,c+padding]
   const grid=Array.from({length:rows+padding*2},()=>Array(columns+padding*2).fill(1))

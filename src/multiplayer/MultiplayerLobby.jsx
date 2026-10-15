@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 export default function MultiplayerLobby({ multiplayer,levelIndex,difficulty }) {
-  const [endpoint,setEndpoint]=useState(import.meta.env.VITE_MULTIPLAYER_URL||(import.meta.env.DEV?'ws://127.0.0.1:8787':''))
+  const [endpoint,setEndpoint]=useState(import.meta.env.VITE_MULTIPLAYER_URL||(import.meta.env.DEV?'ws://127.0.0.1:8787':'wss://maze-game-h8ed.onrender.com'))
   const [name,setName]=useState('Explorer')
   const [code,setCode]=useState('')
   const {room,connection,error,id}=multiplayer

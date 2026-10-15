@@ -54,8 +54,10 @@ Settings → Pages, choose **GitHub Actions** as the source. The workflow builds
 with the `/maze-game/` base path; local development uses `/`.
 
 The `github-pages` environment permits deployments only from this branch.
-Stonegate, Amber Halls, and Twilight Labyrinth retain their original layouts and
-progression. Visible maze walls use all three supplied shrub tile variants by
+Stonegate, Amber Halls, and Twilight Labyrinth retain their original progression,
+with four added connecting routes per map, two blind spurs and a slightly wider
+perimeter. `src/mazeRoutes.js` defines the interior links, western flank and
+Moonwell return path. Visible maze walls use all three supplied shrub tile variants by
 LOLIPOP. Each tile meets the floor, fills its two-meter wall footprint, and shares
 geometry/materials across the maze. `export-shrub-tiles.py` rebuilds the optimized
 browser asset from `src/shrub_tiles_pack_3_vars_seamless.glb`.

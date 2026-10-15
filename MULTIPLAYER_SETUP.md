@@ -25,6 +25,10 @@ address in both the website URL and `ws://LAN-IP:8787`.
 ## Connect the GitHub Pages site
 
 GitHub Pages hosts the game files; it cannot run this WebSocket server.
+The configured production default is `wss://maze-game-h8ed.onrender.com`;
+health can be checked at `https://maze-game-h8ed.onrender.com/health`.
+Local development still defaults to `ws://127.0.0.1:8787`. A nonempty
+`VITE_MULTIPLAYER_URL` build variable overrides either default.
 
 1. Deploy this repository as a Node.js web service, with build command `npm ci`
    and start command `npm run server`, or use the included Dockerfile.
