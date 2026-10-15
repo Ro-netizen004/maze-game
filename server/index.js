@@ -48,7 +48,7 @@ export function createMultiplayerServer({port=8787,host='127.0.0.1',allowedOrigi
           if(room)throw new Error('Leave your current room first.')
           if(message.type==='quickJoin') {
             room=[...rooms.values()].find(item=>item.visibility==='public'&&item.phase==='ready'&&item.players.size<4
-              &&item.levelIndex===message.levelIndex&&item.difficulty===message.difficulty)
+              &&item.difficulty===message.difficulty)
           } else if(message.type==='join') room=rooms.get(String(message.code||'').trim().toUpperCase())
           if(message.type==='join'&&!room)throw new Error('Room not found. Check the invite code.')
           if(room)joinRoom(room,client.id,message.name)

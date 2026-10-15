@@ -12,14 +12,19 @@ Vite, and Tailwind. Collect keys, open gates, avoid the guardian, and reach the 
   `RelicModel.jsx` shares GLTF loading, cloned material cleanup and candle flicker.
 - `src/components/` contains the HUD, labeled inventory and menu controls.
 - `src/multiplayer/` handles browser connections, room UI, synchronized avatars,
-  the shared guardian renderer and the team HUD.
+  the shared guardian renderer and the team HUD. `coopMap.js` defines the one
+  fixed 82 × 82 m co-op maze; `coopQuest.js` shares inventory, ritual and respawn
+  rules between client and server.
 - `server/` hosts in-memory rooms and validates shared quest actions, movement,
   guardian behavior, revives and group escape through WebSockets.
 - Root `src/*.test.js` files verify progression, collision, guardian behavior,
   model constraints and persistence with `npm test`.
 
 Collection history is retained after items are used. Inventory derives what is
-still carried from opened seals and completed rituals, preventing relic respawns.
+still carried from opened seals and completed rituals in Solo. Co-op tracks
+personal carriers, explicit deposits and recoverable drops separately from
+discovery history. Its four sequential runes require 16 relics with two carrying
+slots per player. Caught explorers can be rescued or respawn after 15 seconds.
 Generated review screenshots are temporary and should not be committed.
 
 ## Run locally
@@ -62,7 +67,7 @@ LOLIPOP. Each tile meets the floor, fills its two-meter wall footprint, and shar
 geometry/materials across the maze. `export-shrub-tiles.py` rebuilds the optimized
 browser asset from `src/shrub_tiles_pack_3_vars_seamless.glb`.
 
-Each map now includes three side clearings with glowing ritual circles. Stand
+Each Solo map includes three side clearings with glowing ritual circles. Stand
 within three meters and press E (or touch Interact) to activate one. The HUD tracks
 lit runes. Keys and gates still control the exit; in Twilight, Dawn and Moon runes
 also unlock the existing optional shortcut. Added gardens have single access
@@ -71,6 +76,8 @@ paths and do not replace interior maze corridors.
 Lightposts cover more path turns and surround each garden: 15–18 posts on desktop
 and 9 on mobile. Only the nearest five (three on mobile) use actual point lights,
 without extra point-light shadows, so additional lamps stay inexpensive.
+The larger co-op map uses spatial shrub batches that skip distant foliage
+beyond the fog, while retaining instancing and the same nearby appearance.
 
 ## Asset credits
 

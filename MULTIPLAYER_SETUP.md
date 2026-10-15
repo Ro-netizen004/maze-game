@@ -2,7 +2,8 @@
 
 The game offers Solo and 2–4 player co-op. Co-op supports private invite-code
 rooms, a public room browser and quick join (which creates a public room when
-none matches the selected maze and difficulty).
+none matches the selected difficulty). Multiplayer always uses The Keeper’s
+Wilderness, an 82 × 82 metre shared shrub maze with four distant ritual clearings.
 
 ## Run locally
 
@@ -53,16 +54,35 @@ connection; active runs do not accept new players.
 - The server owns the maze seed, quest progress, guardian, timer and blackout.
   Player movement is bounded and collision-checked; interactions require nearby
   players and valid prerequisites. Clients cannot submit arbitrary quest state.
-- Keys and relics enter a shared team inventory. Either player can deliver them.
-  The existing six-relic ritual sequence and deposited models apply to co-op.
+- Each player carries at most two relics personally. The team tracker names the
+  carrier of each active offering. E deposits your matching relics at their rune;
+  a separate E activation requires all four offerings to have been placed.
+- Dawn → Moon → Watcher → Eclipse is a shared sequence, with four relics available
+  together for each active ritual (16 total). Later batches stay hidden. There
+  are no key/seal chores in co-op. All four runes release the Old Road exit.
+- Q drops your first carried item; inventory Drop buttons also work on touch.
+  Catches and disconnects drop everything at the player's last location. Anyone
+  can recover it; already deposited relics remain safe. Repeated pickups do not
+  increase the permanent discovery count.
 - Caught players stay in the world and can be revived by a nearby teammate with
-  E / Use. Revived players have five seconds of catch immunity to get away.
-- Everyone still connected must reach the open exit. If every remaining explorer
-  is caught and nobody can rescue them, the run ends. The host returns the group
-  to a fresh lobby after a result. Host ownership transfers on disconnect.
+  E / Use, or choose Respawn at entrance after a server-timed 15 second wait.
+  Both recovery methods grant five seconds of immunity. Respawns reset local
+  cover, stamina and flashlight state; dropped items remain in the maze.
+- A team wipe leaves the run active so everyone can respawn. Everyone still
+  connected must reach the open exit. The host returns the group to a fresh
+  lobby after victory. Host ownership transfers on disconnect.
+- The co-op guardian patrols all four clearings, hears farther, searches longer,
+  and moves faster than the equivalent Solo preset. Hard chase speed is 5.6 m/s
+  (walking is 4 m/s; sprinting is 6.2 m/s). Sprint drains faster in this map.
 - Opening the pause menu stops your input but does not pause the shared world.
   Multiplayer results do not overwrite Solo best times or unlocks.
 - No voice/text chat or accounts are included in this first version.
+
+Deploy the website **and Render server** from the same updated branch/commit.
+The client rejects old server snapshots that lack the dedicated co-op map ID
+rather than rendering a mismatched maze. Solo's original three maps and six
+relics are unchanged. The expanded co-op layout is fixed, with loops and retained
+dead ends; room seeds do not produce different maps.
 
 ## Verification
 

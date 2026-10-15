@@ -6,6 +6,7 @@ import { graphicsPreset } from './graphics.js'
 import useMultiplayer from './multiplayer/useMultiplayer.js'
 import MultiplayerWorld from './multiplayer/MultiplayerWorld.jsx'
 import CoopHud from './multiplayer/CoopHud.jsx'
+import { coopMap } from './multiplayer/coopMap.js'
 import useQuestProgress from './quest/useQuestProgress.js'
 import ForestMaze from './ForestMaze'
 import Player from './Player'
@@ -32,7 +33,7 @@ export default function App({ guardianConfig = {} }) {
   const [progress, setProgress] = useState(loadProgress)
   const [selectedLevel, setLevelIndex] = useState(0)
   const [mode, setMode] = useState('solo')
-  const multiplayer = useMultiplayer(resetLocalRuntime)
+  const multiplayer = useMultiplayer(resetLocalRuntime,handleCoopLife)
   const room = mode === 'multiplayer' ? multiplayer.room : null
   const isCoop = Boolean(room)
   const levelIndex = room?.levelIndex ?? selectedLevel
@@ -65,7 +66,7 @@ export default function App({ guardianConfig = {} }) {
   const noiseId = useRef(0)
   const difficulty = room?.difficulty ?? progress.difficulty
   const settings = progress.settings
-  const level = useMemo(() => createSeededLevel(levelTemplates[levelIndex], room?.seed ?? `${levelTemplates[levelIndex].id}:${attempt}`), [levelIndex, attempt, room?.seed])
+  const level = useMemo(() => createSeededLevel(mode==='multiplayer'?coopMap:levelTemplates[levelIndex], room?.seed ?? `${levelTemplates[levelIndex].id}:${attempt}`), [mode,levelIndex, attempt, room?.seed])
   const soloQuest = useQuestProgress(level, setNotice)
   const { collectedKeys, collectedOfferings, openedDoors, activatedShrines } = room?.quest ?? soloQuest
   const { resetQuest } = soloQuest
@@ -165,6 +166,12 @@ export default function App({ guardianConfig = {} }) {
     setPaused(false)
     setAttempt(value => value + 1)
     setStatus('ready')
+  }
+  function handleCoopLife(player) {
+    setHidden(false);setShelterRevealed(false);setPaused(false);setFlashlightOn(false)
+    playerPose.current=null
+    if(player?.downed)document.exitPointerLock?.()
+    else {setStamina(100);setFlashlightBattery(100)}
   }
   function chooseLevel(index) {
     if (isCoop || index > progress.unlockedLevel) return
@@ -266,9 +273,12 @@ export default function App({ guardianConfig = {} }) {
           }}
         />}
         <QuestObjects level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} />
-        <OfferingObjects level={level} collectedOfferings={collectedOfferings} openedDoors={openedDoors} activatedShrines={activatedShrines} active={timerActive} reducedMotion={settings.reducedMotion} />
+        <OfferingObjects level={level} coopQuest={room?.quest} collectedOfferings={collectedOfferings} openedDoors={openedDoors} activatedShrines={activatedShrines} active={timerActive} reducedMotion={settings.reducedMotion} />
         <MechanicObjects level={level} triggeredTraps={triggeredTraps} activatedShrines={activatedShrines} />
-        {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}-${room?.seed ?? mode}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
+        {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}-${room?.seed ?? mode}-${localPlayer?.life??0}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
+          coopQuest={room?.quest} onDeposit={id=>action('deposit',id)}
+          onDrop={id=>action('drop',id)}
+          spawnPosition={localPlayer?[localPlayer.x,localPlayer.z]:undefined}
           active={status === 'playing' && !paused && canPlay}
           mobile={isTouch} touchInput={touchInput}
           reducedMotion={settings.reducedMotion}
@@ -290,13 +300,13 @@ export default function App({ guardianConfig = {} }) {
       {(status === 'playing' || status === 'catching') && <GameHud level={level} levelIndex={levelIndex} levelCount={levelTemplates.length}
         collectedOfferings={collectedOfferings} collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={isCoop ? Boolean(localPlayer?.hidden) : hidden} shelterRevealed={isCoop ? Boolean(localPlayer?.exposed) : shelterRevealed}
         elapsed={runElapsed} prompt={status === 'playing' && canPlay ? prompt : null} notice={notice} isTouch={isTouch}
-        flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={room?.guardian.mode ?? guardianAlert} multiplayer={isCoop} activatedShrines={activatedShrines} />}
+        flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={room?.guardian.mode ?? guardianAlert} multiplayer={isCoop} coopQuest={room?.quest} playerId={multiplayer.id} onDrop={id=>action('drop',id)} activatedShrines={activatedShrines} />}
       {status==='playing' && (runBlackout.phase==='flickering' || runBlackout.phase==='dark') && <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-sm font-bold text-amber-200" role="status">Lightposts {runBlackout.phase==='flickering'?'flickering':'off'} · {blackoutRemaining(runBlackout)}s · Watch where you aim your flashlight</div>}
       {status === 'playing' && !paused && <button className="absolute right-4 top-24 z-20 rounded-lg border border-white/30 bg-slate-950/80 px-4 py-2 font-semibold text-white" onClick={pauseGame}>Pause</button>}
       {status === 'playing' && !paused && canPlay && isTouch && <MobileControls inputRef={touchInput}
         flashlightOn={flashlightOn} onToggleFlashlight={toggleFlashlight} />}
       {status === 'catching' && <div className="caught-vignette pointer-events-none absolute inset-0" aria-hidden="true" />}
-      {isCoop && status==='playing' && <CoopHud multiplayer={multiplayer} onLeave={restart} />}
+      {isCoop && status==='playing' && <CoopHud multiplayer={multiplayer} level={level} onLeave={restart} />}
       {paused && status === 'playing' && <PauseMenu settings={settings} multiplayer={isCoop}
         onSettings={next => updateProgress(current => ({ ...current, settings: next }))}
         onReset={resetProgress} onResume={resume} onMenu={restart} />}

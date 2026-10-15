@@ -1,5 +1,7 @@
 import { randomBytes } from 'node:crypto'
-import { levelTemplates, cellPosition, doorPosition } from '../src/levels.js'
+import { cellPosition, doorPosition } from '../src/levels.js'
+import { coopMap } from '../src/multiplayer/coopMap.js'
+import { CARRY_LIMIT, RESPAWN_SECONDS, carriedRelics, currentRitual } from '../src/multiplayer/coopQuest.js'
 import { createSeededLevel, canOpenDoor, hasLineOfSight } from '../src/levelRuntime.js'
 import { canActivateShrine, canCollectOffering } from '../src/quest/objectives.js'
 import { movePlayer } from '../src/collision.js'
@@ -10,11 +12,11 @@ import { createBlackoutState, advanceBlackout } from '../src/blackout.js'
 
 export const MAX_PLAYERS = 4
 const distance = (a,b) => Math.hypot(a.x-b.x,a.z-b.z)
-const emptyQuest = () => ({collectedKeys:[],collectedOfferings:[],openedDoors:[],activatedShrines:[]})
+const emptyQuest = () => ({collectedKeys:[],collectedOfferings:[],openedDoors:[],activatedShrines:[],carriers:{},depositedOfferings:[],droppedOfferings:{}})
 
 export function createRoom(ownerId, name, options = {}) {
   const id = randomBytes(3).toString('hex').toUpperCase()
-  const levelIndex = Number.isInteger(options.levelIndex) && levelTemplates[options.levelIndex] ? options.levelIndex : 0
+  const levelIndex = 0 // Multiplayer always uses the dedicated wilderness.
   const difficulty = ['easy','normal','hard'].includes(options.difficulty) ? options.difficulty : 'normal'
   const room = {id, ownerId, visibility:options.visibility==='public'?'public':'private',levelIndex,difficulty,
     phase:'ready',round:0,seed:`${id}:0`,players:new Map(),quest:emptyQuest(),elapsed:0,blackout:createBlackoutState()}
@@ -24,7 +26,7 @@ export function createRoom(ownerId, name, options = {}) {
 }
 
 function initializeWorld(room) {
-  room.level = createSeededLevel(levelTemplates[room.levelIndex],room.seed)
+  room.level = createSeededLevel(coopMap,room.seed)
   const [x,z] = cellPosition(room.level,room.level.monster[0])
   room.guardian = {x,z,yaw:Math.PI,mode:'patrol',moving:false,patrol:1,waypoint:null,states:new Map()}
 }
@@ -35,7 +37,7 @@ export function joinRoom(room,id,name) {
   const [x,z] = cellPosition(room.level,room.level.start)
   room.players.set(id,{id,name:String(name||'Explorer').trim().slice(0,20)||'Explorer',x,z,y:0,yaw:0,
     moving:false,sprinting:false,hidden:false,flashlightOn:true,direction:[0,0,1],downed:false,escaped:false,
-    immunity:0,exposed:false,lastPose:0,noise:null})
+    immunity:0,exposed:false,lastPose:0,noise:null,respawnRemaining:0,life:0})
 }
 
 export function startRoom(room,actorId) {
@@ -55,6 +57,8 @@ export function resetRoom(room,actorId) {
 }
 
 export function leaveRoom(room,id) {
+  const player=room.players.get(id)
+  if(player)dropRelics(room,player)
   room.players.delete(id)
   room.guardian.states.delete(id)
   if(room.ownerId===id) room.ownerId=room.players.keys().next().value||null
@@ -65,7 +69,18 @@ function finishRoom(room) {
   if(room.phase!=='playing' || !room.players.size) return
   const players=[...room.players.values()]
   if(players.every(player=>player.escaped)) room.phase='won'
-  else if(players.every(player=>player.escaped||player.downed)) room.phase='lost'
+  // A full team wipe remains recoverable through the respawn countdown.
+}
+
+function dropRelics(room,player,itemId) {
+  let changed=false
+  for(const item of carriedRelics(room.level,room.quest,player.id)) {
+    if(itemId&&item.id!==itemId)continue
+    room.quest.droppedOfferings[item.id]=worldCell(room.level,player.x,player.z)
+    delete room.quest.carriers[item.id]
+    changed=true
+  }
+  return changed
 }
 
 export function updatePose(room,id,pose,now=Date.now()) {
@@ -98,7 +113,15 @@ function near(room,player,cell,range=1.9) {
 
 export function applyAction(room,actorId,action) {
   const player=room.players.get(actorId),q=room.quest,level=room.level
-  if(room.phase!=='playing'||!player||player.downed||player.escaped) return false
+  if(room.phase!=='playing'||!player||player.escaped) return false
+  if(action.type==='respawn') {
+    if(!player.downed||player.respawnRemaining>0)return false
+    const [x,z]=cellPosition(level,level.start)
+    Object.assign(player,{x,z,y:0,yaw:0,downed:false,hidden:false,exposed:false,immunity:5,noise:null,flashlightOn:false,lastPose:Date.now(),life:player.life+1})
+    room.guardian.states.delete(player.id)
+    return true
+  }
+  if(player.downed)return false
   const add=(items,id)=>{if(items.includes(id))return false;items.push(id);return true}
   if(action.type==='escape') {
     if(!q.openedDoors.includes('exit')||!near(room,player,level.end,1.3))return false
@@ -107,16 +130,30 @@ export function applyAction(room,actorId,action) {
   if(action.type==='revive') {
     const target=room.players.get(action.id)
     if(!target?.downed||distance(player,target)>1.9||!near(room,player,worldCell(level,target.x,target.z),2.2))return false
-    target.downed=false;target.immunity=5;return true
+    target.downed=false;target.hidden=false;target.exposed=false;target.immunity=5;target.respawnRemaining=0;target.life++
+    room.guardian.states.delete(target.id);return true
   }
   if(player.hidden)return false
+  if(action.type==='drop')return dropRelics(room,player,action.id)
+  if(action.type==='deposit') {
+    const shrine=level.shrines.find(item=>item.id===action.id)
+    if(!shrine||currentRitual(level,q)?.id!==shrine.id||!near(room,player,shrine.cell,3.2))return false
+    let changed=false
+    for(const item of carriedRelics(level,q,player.id).filter(item=>item.rune===shrine.id)) {
+      q.depositedOfferings.push(item.id);delete q.carriers[item.id];changed=true
+    }
+    return changed
+  }
   if(action.type==='key') {
     const key=level.keys.find(item=>item.id===action.id)
     return Boolean(key&&near(room,player,key.cell)&&add(q.collectedKeys,key.id))
   }
   if(action.type==='offering') {
     const item=level.offerings.find(item=>item.id===action.id)
-    return Boolean(item&&near(room,player,item.cell)&&canCollectOffering(item,q.openedDoors,q.activatedShrines,q.collectedOfferings)&&add(q.collectedOfferings,item.id))
+    if(!item||q.carriers[item.id]||q.depositedOfferings.includes(item.id)||carriedRelics(level,q,actorId).length>=CARRY_LIMIT
+      ||!near(room,player,q.droppedOfferings[item.id]||item.cell)||!canCollectOffering(item,q.openedDoors,q.activatedShrines))return false
+    q.carriers[item.id]=actorId;delete q.droppedOfferings[item.id];add(q.collectedOfferings,item.id)
+    return true
   }
   if(action.type==='door') {
     const door=level.doors.find(item=>item.id===action.id)
@@ -126,7 +163,7 @@ export function applyAction(room,actorId,action) {
   }
   if(action.type==='shrine') {
     const shrine=level.shrines.find(item=>item.id===action.id)
-    return Boolean(shrine&&near(room,player,shrine.cell,3.2)&&canActivateShrine(shrine,q.openedDoors,q.activatedShrines,q.collectedOfferings)&&add(q.activatedShrines,shrine.id))
+    return Boolean(shrine&&currentRitual(level,q)?.id===shrine.id&&near(room,player,shrine.cell,3.2)&&canActivateShrine(shrine,q.openedDoors,q.activatedShrines,q.depositedOfferings)&&add(q.activatedShrines,shrine.id))
   }
   return false
 }
@@ -136,10 +173,13 @@ export function tickRoom(room,dt) {
   dt=Math.min(0.1,Math.max(0,dt))
   room.elapsed+=dt*1000
   room.blackout=advanceBlackout(room.blackout,room.elapsed/1000,dt)
-  const g=room.guardian,level=room.level,q=room.quest,config=resolveGuardianDifficulty(room.difficulty)
+  const g=room.guardian,level=room.level,q=room.quest
+  const base=resolveGuardianDifficulty(room.difficulty)
+  const config={...base,patrolSpeed:base.patrolSpeed*1.3,chaseSpeed:Math.min(5.6,base.chaseSpeed*1.2),hearingRange:base.hearingRange+3,searchDuration:base.searchDuration+5}
   const candidates=[]
   for(const player of room.players.values()) {
     player.immunity=Math.max(0,player.immunity-dt)
+    player.respawnRemaining=Math.max(0,player.respawnRemaining-dt)
     if(player.downed||player.escaped)continue
     const exposed=flashlightHitsGuardian({level,openedDoors:q.openedDoors,playerPosition:[player.x,1.6+player.y,player.z],
       playerDirection:player.direction,guardianPosition:[g.x,g.z],flashlightOn:player.flashlightOn,range:config.flashlightRange||14})
@@ -151,7 +191,8 @@ export function tickRoom(room,dt) {
     player.exposed=Boolean(player.hidden&&ai.exposedRemaining>0&&ai.revealedShelterPosition&&Math.hypot(player.x-ai.revealedShelterPosition[0],player.z-ai.revealedShelterPosition[1])<1)
     if(player.immunity===0&&guardianCanCatch({distance:distance(g,player),sameCell:worldCell(level,g.x,g.z).join(',')===worldCell(level,player.x,player.z).join(','),
       hidden:player.hidden,flashlightExposure:exposed,exposedRemaining:ai.exposedRemaining,revealedShelterPosition:ai.revealedShelterPosition,playerPosition:[player.x,player.z]})) {
-      player.downed=true;player.moving=false;player.hidden=false;continue
+      dropRelics(room,player)
+      player.downed=true;player.respawnRemaining=RESPAWN_SECONDS;player.moving=false;player.hidden=false;player.flashlightOn=false;continue
     }
     candidates.push({player,ai,rank:({chase:3,investigate:2,search:1,patrol:0})[ai.mode]})
   }
@@ -163,7 +204,7 @@ export function tickRoom(room,dt) {
   if(!g.waypoint&&target) {
     const path=findPath(level,worldCell(level,g.x,g.z),worldCell(level,...target),q.openedDoors)
     g.waypoint=path.length>1?cellPosition(level,path[1]):path.length===1?target:null
-    if(ai.mode==='patrol'&&path.length<=1){g.patrol=1-g.patrol;g.waypoint=null}
+    if(ai.mode==='patrol'&&path.length<=1){g.patrol=(g.patrol+1)%level.monster.length;g.waypoint=null}
   }
   if(g.waypoint) {
     const dx=g.waypoint[0]-g.x,dz=g.waypoint[1]-g.z,d=Math.hypot(dx,dz)
@@ -181,7 +222,8 @@ export function roomSnapshot(room) {
   const {id,ownerId,visibility,levelIndex,difficulty,phase,seed,round,quest,elapsed,blackout}=room
   const g=room.guardian
   return {id,ownerId,visibility,levelIndex,difficulty,phase,seed,round,quest,elapsed,blackout,
-    players:[...room.players.values()].map(({id,name,x,y,z,yaw,moving,sprinting,hidden,downed,escaped,exposed,immunity})=>({id,name,x,y,z,yaw,moving,sprinting,hidden,downed,escaped,exposed,immunity})),
+    mapId:coopMap.id,carryLimit:CARRY_LIMIT,
+    players:[...room.players.values()].map(({id,name,x,y,z,yaw,moving,sprinting,hidden,downed,escaped,exposed,immunity,respawnRemaining,life})=>({id,name,x,y,z,yaw,moving,sprinting,hidden,downed,escaped,exposed,immunity,respawnRemaining,life})),
     guardian:{x:g.x,z:g.z,yaw:g.yaw,moving:g.moving,mode:g.mode,chasing:g.mode==='chase',attacking:false}}
 }
 

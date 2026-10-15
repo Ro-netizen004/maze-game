@@ -9,6 +9,7 @@ import { worldCell } from './navigation'
 import { canActivateShrine, shrineRequirement } from './quest/objectives.js'
 import { visibleOfferings } from './quest/objectives.js'
 import PlayerAvatar from './PlayerAvatar'
+import { availableRelics, carriedRelics, CARRY_LIMIT, ritualInteraction } from './multiplayer/coopQuest.js'
 
 const eyeHeight = 1.6
 const speed = 4
@@ -19,6 +20,8 @@ export default function Player({
   level, onWin, collectedKeys, openedDoors, activatedShrines = [], touchInput = {},
   collectedOfferings = [], onCollectOffering = () => {},
   teammates = [], playerId = null, onRevive = () => {},
+  coopQuest = null, onDeposit = () => {}, onDrop = () => {},
+  spawnPosition,
   onPose = () => {},
   active = true,
   mobile = false,
@@ -30,6 +33,7 @@ export default function Player({
   onHiddenChange = () => {}, onTriggerTrap = () => {}, onActivateShrine = () => {}, onNoise = () => {},
 }) {
   const { camera, gl } = useThree()
+  const initialPosition=useRef(spawnPosition)
   const state = useRef({
     keys: new Set(), jump: false, interact: false, velocityY: 0, grounded: true,
     stamina: 100, hiddenIn: null, triggeredTraps: new Set(), trapSlow: 0, noiseTimer: 0,
@@ -47,7 +51,7 @@ export default function Player({
   const pose = useRef({ x: 0, y: 0, z: 0, yaw: 0, moving: false, sprinting: false })
 
   useEffect(() => {
-    const [x, z] = cellPosition(level, level.start)
+    const [x, z] = initialPosition.current||cellPosition(level, level.start)
     camera.position.set(x, eyeHeight, z)
     camera.lookAt(x, eyeHeight, z + cellSize)
     const controls = new PointerLockControls(camera, gl.domElement)
@@ -62,6 +66,7 @@ export default function Player({
       player.keys.clear()
       player.jump = false
       player.interact = false
+      player.drop=false
       player.touchInteractHeld = false
     }
     let dragging = false
@@ -85,6 +90,7 @@ export default function Player({
       player.keys.add(event.code)
       if (event.code === 'Space' && !event.repeat) player.jump = true
       if (event.code === 'KeyE' && !event.repeat) player.interact = true
+      if (event.code === 'KeyQ' && !event.repeat) player.drop = true
     }
     const keyUp = (event) => player.keys.delete(event.code)
     canvas.addEventListener('click', lock)
@@ -158,6 +164,11 @@ export default function Player({
     const steps = Math.max(1, Math.ceil(elapsed / (1 / 120)))
     const dt = elapsed / steps
     const player = state.current
+    if(player.drop&&coopQuest&&!player.hiddenIn) {
+      const item=carriedRelics(level,coopQuest,playerId)[0]
+      if(item)onDrop(item.id)
+    }
+    player.drop=false
     const touch = touchInput.current || touchInput
     const input = readInput(player.keys, touch)
     if (mobile) {
@@ -242,11 +253,11 @@ export default function Player({
       }
     }
     if (!interaction && !player.hiddenIn) {
-      for (const offering of visibleOfferings(level, openedDoors, activatedShrines, collectedOfferings)) {
+      for (const offering of coopQuest?availableRelics(level,coopQuest):visibleOfferings(level, openedDoors, activatedShrines, collectedOfferings)) {
         const [x,z] = cellPosition(level, offering.cell)
-        if (collectedOfferings.includes(offering.id) || Math.hypot(camera.position.x-x,camera.position.z-z) >= interactionDistance) continue
-        const available = true
-        interaction = { type: 'offering', id: offering.id, available, label: available ? 'Collect '+offering.name : offering.rune==='watch' ? 'Watcher’s Eye needs Dawn and Moon lit' : offering.name+' needs the '+offering.requiresDoors.join(' and ')+' seal opened' }
+        if (Math.hypot(camera.position.x-x,camera.position.z-z) >= interactionDistance) continue
+        const available = !coopQuest||carriedRelics(level,coopQuest,playerId).length<CARRY_LIMIT
+        interaction = { type: 'offering', id: offering.id, available, label: available ? 'Collect '+offering.name : 'Hands full · deliver or drop a relic (Q)' }
         break
       }
     }
@@ -255,7 +266,7 @@ export default function Player({
         const [doorX, doorZ] = doorPosition(level, door)
         if (openedDoors.includes(door.id) || Math.hypot(camera.position.x - doorX, camera.position.z - doorZ) >= interactionDistance) continue
         const available = canOpenDoor(level, door, collectedKeys, openedDoors, activatedShrines)
-        interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : door.id==='exit' ? 'Exit needs both inner seals and all three runes' : `${door.name} door is locked` }
+        interaction = { type: 'door', id: door.id, available, label: available ? `Open ${door.name} door` : door.id==='exit' ? level.coop?'Exit needs all four runes':'Exit needs both inner seals and all three runes' : `${door.name} door is locked` }
         break
       }
     }
@@ -265,6 +276,7 @@ export default function Player({
         if (!activatedShrines.includes(shrine.id) && Math.hypot(camera.position.x - x, camera.position.z - z) < (shrine.type==='rune'?3:interactionDistance)) {
           const available=canActivateShrine(shrine,openedDoors,activatedShrines,collectedOfferings)
           interaction = { type: 'shrine', id: shrine.id, available, label: available ? shrine.type==='rune'?`Offer both relics · ${shrine.placeName}`:'Activate shrine' : shrineRequirement(level,shrine,openedDoors,activatedShrines,collectedOfferings) }
+          if(coopQuest)interaction={type:'shrine',id:shrine.id,...ritualInteraction(level,coopQuest,playerId,shrine)}
           break
         }
       }
@@ -287,6 +299,7 @@ export default function Player({
         onNoise({ cell: worldCell(level, camera.position.x, camera.position.z), intensity: 6, source: 'door' })
       }
       if (interaction.type === 'shrine' && interaction.available) onActivateShrine(interaction.id)
+      if (interaction.type === 'deposit' && interaction.available) onDeposit(interaction.id)
       if (interaction.type === 'hiding') {
         const spot=level.hidingSpots.find(item=>item.id===interaction.id)
         if(spot.type==='shrub') {

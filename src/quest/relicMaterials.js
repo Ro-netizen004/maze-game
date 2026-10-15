@@ -1,5 +1,5 @@
 // Clone only materials: geometry and textures stay shared by cached GLTF instances.
-export function prepareRelicModel(scene, name) {
+export function prepareRelicModel(scene, name, liquidColor) {
   const model = scene.clone(true)
   const materials = [], flames = []
   model.traverse(node => {
@@ -19,6 +19,13 @@ export function prepareRelicModel(scene, name) {
         clone.emissiveIntensity = 0.25
       }
       materials.push(clone)
+      // The optimized bottle shell is opaque: tint it too so the liquid's
+      // identity remains readable without adding transparency or transmission.
+      if(liquidColor && name==='moon-tear' && !/gold/i.test(material.name)) {
+        clone.color.set(liquidColor)
+        clone.emissive.set(liquidColor)
+        clone.emissiveIntensity=/inside_potion/i.test(material.name)?0.45:0.25
+      }
       return clone
     })
     node.material = Array.isArray(node.material) ? clones : clones[0]

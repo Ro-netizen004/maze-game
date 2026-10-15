@@ -83,6 +83,32 @@ optimized derivative (12,000 triangles). Adaptations: reduced geometry/textures,
 normalized scale and height, self-lit glyphs and activation glow. Original source
 and exporter are preserved in the main branch's history.
 
+## Additional co-op relic models
+
+- **Moon pendant** by **cyrus**, https://skfb.ly/oLLRF — Eclipse Ember.
+  Source: `src/moon_pendant.glb`.
+- **Iluminati Eye Symbol ( free )** by **Lucid Dreams (FAB)**,
+  https://skfb.ly/opyCX — Watcher Ember. Source: `src/iluminati_eye_symbol__free.glb`.
+- **Celtic silver ring** by **Aren Boada**, https://skfb.ly/6YC6Z — Silver Ember.
+  Source: `src/celtic_silver_ring.glb`.
+
+All three are licensed under Creative Commons Attribution 4.0:
+https://creativecommons.org/licenses/by/4.0/. Adaptations: grounded and normalized
+to a 0.55 metre maximum dimension, resized textures to at most 512 pixels,
+reduced dense meshes and oriented the Watcher symbol toward the viewer.
+Browser assets: `public/models/{eclipse-ember,watcher-ember,silver-ember}/`.
+Rebuild with `export-coop-relics.py`. The four cooperative potion liquids reuse
+the credited Gregory Allen Brown bottle with separate runtime colour materials.
+
+## Golden Eye — Millinuim Eye
+
+"Millinuim Eye" (https://skfb.ly/pwHPY) by **Seras** is licensed under
+Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/).
+User-supplied source: `src/millinuim_eye.glb`. Adaptation: normalized to a
+0.56 metre maximum dimension, centered horizontally and grounded for the Golden
+Eye offering. Browser asset: `public/models/golden-eye/golden-eye.glb`.
+Rebuild with `export-golden-eye.py`. Other eye relics retain their existing model.
+
 ## Forest ambience
 
 **Forest jungle nature dark Atmo** by **szegvari (Freesound)**, distributed by

@@ -1,11 +1,14 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
-import { useLoader } from '@react-three/fiber'
+import { useLoader, useFrame } from '@react-three/fiber'
 import { BoxGeometry, Group, InstancedMesh, Object3D } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 
-export default function ShrubWalls({ tiles }) {
+function ShrubChunk({ tiles, center }) {
   const gltf=useLoader(GLTFLoader,`${import.meta.env.BASE_URL}models/shrub-tiles/shrubs.glb`)
   const container=useRef(null)
+  useFrame(({camera})=>{
+    if(container.current&&center)container.current.visible=Math.hypot(camera.position.x-center[0],camera.position.z-center[1])<34
+  })
   const variants=useMemo(()=>['Small','Medium','Large'].map(name=>gltf.scene.getObjectByName('Shrub'+name)),[gltf.scene])
   useLayoutEffect(()=>{
     const parent=container.current, group=new Group(), materials=[]
@@ -51,4 +54,18 @@ export default function ShrubWalls({ tiles }) {
     }
   },[tiles,variants])
   return <group ref={container} />
+}
+
+export default function ShrubWalls({tiles}) {
+  const chunks=useMemo(()=>{
+    if(tiles.length<300)return [{id:'all',tiles,center:null}]
+    const groups=new Map()
+    for(const tile of tiles){
+      const x=Math.floor(tile.position[0]/12),z=Math.floor(tile.position[2]/12),id=`${x}:${z}`
+      if(!groups.has(id))groups.set(id,{id,tiles:[],center:[x*12+6,z*12+6]})
+      groups.get(id).tiles.push(tile)
+    }
+    return [...groups.values()]
+  },[tiles])
+  return <group>{chunks.map(chunk=><ShrubChunk key={chunk.id} tiles={chunk.tiles} center={chunk.center}/>)}</group>
 }

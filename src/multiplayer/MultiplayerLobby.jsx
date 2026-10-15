@@ -1,14 +1,14 @@
 import { useState } from 'react'
 
-export default function MultiplayerLobby({ multiplayer,levelIndex,difficulty }) {
+export default function MultiplayerLobby({ multiplayer,difficulty }) {
   const [endpoint,setEndpoint]=useState(import.meta.env.VITE_MULTIPLAYER_URL||(import.meta.env.DEV?'ws://127.0.0.1:8787':'wss://maze-game-h8ed.onrender.com'))
   const [name,setName]=useState('Explorer')
   const [code,setCode]=useState('')
   const {room,connection,error,id}=multiplayer
   const connected=connection==='connected'
-  const send=(type,extra={})=>multiplayer.send({type,name,levelIndex,difficulty,...extra})
+  const send=(type,extra={})=>multiplayer.send({type,name,difficulty,...extra})
   return <div className="multiplayer-lobby">
-    <p>Explore together with up to 4 players. Relics, seals and runes are shared. Rescue fallen teammates and escape as a group.</p>
+    <p>One shared map: The Keeper’s Wilderness · 82 × 82 metres. Four runes, 16 relics, two carrying slots each. Split up, deliver your offerings and escape together. Rescue teammates or respawn after 15 seconds.</p>
     {!connected && <form onSubmit={event=>{event.preventDefault();multiplayer.connect(endpoint)}}>
       <label htmlFor="server-url">Multiplayer server</label>
       <input id="server-url" value={endpoint} onChange={event=>setEndpoint(event.target.value)} placeholder="wss://your-server.example" required />
@@ -20,7 +20,7 @@ export default function MultiplayerLobby({ multiplayer,levelIndex,difficulty }) 
       <div className="multiplayer-actions"><button onClick={()=>send('create',{visibility:'private'})}>Create private room</button><button onClick={()=>send('create',{visibility:'public'})}>Create public room</button><button onClick={()=>send('quickJoin')}>Quick join public</button></div>
       <form onSubmit={event=>{event.preventDefault();send('join',{code})}}><label htmlFor="room-code">Invite code</label><div className="multiplayer-actions"><input id="room-code" maxLength={6} value={code} onChange={event=>setCode(event.target.value.toUpperCase())} placeholder="ABC123" required /><button>Join room</button></div></form>
       <div className="multiplayer-actions"><h3>Public rooms</h3><button onClick={()=>send('list')}>Refresh rooms</button></div>
-      {multiplayer.rooms.length ? <ul>{multiplayer.rooms.map(item=><li key={item.id}><span>{item.id} · Maze {item.levelIndex+1} · {item.difficulty} · {item.count}/4</span><button onClick={()=>send('join',{code:item.id})}>Join {item.id}</button></li>)}</ul> : <p>No open public rooms. Quick join creates one if needed.</p>}
+      {multiplayer.rooms.length ? <ul>{multiplayer.rooms.map(item=><li key={item.id}><span>{item.id} · Keeper’s Wilderness · {item.difficulty} · {item.count}/4</span><button onClick={()=>send('join',{code:item.id})}>Join {item.id}</button></li>)}</ul> : <p>No open public rooms. Quick join creates one if needed.</p>}
     </>}
     {room && <>
       <h3>{room.visibility==='private'?'Private':'Public'} room · <strong>{room.id}</strong></h3>

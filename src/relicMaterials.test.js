@@ -25,3 +25,23 @@ test('relic instances share geometry and textures but isolate materials and flam
   texture.dispose()
   sourceMaterial.dispose()
 })
+
+test('bottle liquids and shells have isolated colours while gold and sources stay unchanged',()=>{
+  const scene=new Scene(),geometry=new BoxGeometry()
+  const liquid=new MeshStandardMaterial({color:'#3355aa'});liquid.name='Inside_Potion'
+  const glass=new MeshStandardMaterial({color:'#aabbcc'});glass.name='Basic glass'
+  const gold=new MeshStandardMaterial({color:'#cc9922'});gold.name='Fine Gold.001'
+  scene.add(new Mesh(geometry,liquid),new Mesh(geometry,glass),new Mesh(geometry,gold))
+  const colours=['#ffc65c','#79baff','#78e6a0','#bb7aff']
+  const instances=colours.map(colour=>prepareRelicModel(scene,'moon-tear',colour))
+  for(let i=0;i<instances.length;i++){
+    assert.equal('#'+instances[i].materials[0].color.getHexString(),colours[i])
+    assert.equal('#'+instances[i].materials[1].color.getHexString(),colours[i])
+    assert.equal(instances[i].materials[2].color.getHex(),gold.color.getHex())
+    assert.equal(instances[i].model.children[0].geometry,geometry)
+    instances[i].materials.forEach(m=>m.dispose())
+  }
+  assert.equal(liquid.color.getHexString(),'3355aa')
+  assert.equal(glass.color.getHexString(),'aabbcc')
+  geometry.dispose();liquid.dispose();glass.dispose();gold.dispose()
+})

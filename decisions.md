@@ -309,3 +309,57 @@ Add four hand-placed connections per map: two interior hedge cuts, one western f
 ## 39. Hosted multiplayer endpoint
 
 Use the user-provided Render server at wss://maze-game-h8ed.onrender.com as the default production multiplayer endpoint. Keep localhost for development and retain the VITE_MULTIPLAYER_URL override. Verify both the /health response and a WebSocket handshake/room listing using the GitHub Pages origin before configuring the address. Publish client and server layout changes together so both use the same maze routes.
+
+## 40. Larger cooperative delivery quest and recoverable team wipes
+
+Replace the shared co-op backpack with two personal carrying slots and shared
+ritual progress. Use one fixed 41 × 41 cell (82 × 82 metre) shrub maze for every
+multiplayer room, over three times the area of the largest Solo map, with braided
+escape routes, retained dead ends and four widely separated clearings. Preserve
+the original three Solo maps and their progression.
+
+Run Dawn → Moon → Watcher → Eclipse in order. Reveal all four relics of the
+current ritual together, allowing split collection jobs, and hide future batches.
+Reuse the supplied sun, bottle, eyeball and candle models with distinct names
+for 16 total relics. Remove co-op key/seal chores. Players individually deposit
+matching relics with E; anyone may activate once all four are placed. Place each
+deposited model visibly around its rune immediately. Show personal capacity and
+labels plus a team tracker with carrier, deposited, dropped and search states.
+
+Drop carried items on catch/disconnect, and allow voluntary Q or touch-button
+drops. Keep discovery history, ownership, drops and deposits separate so recovery
+never duplicates or loses a required offering. Preserve deposits across catches.
+Provide teammate revival or a server-validated 15-second entrance respawn with
+five seconds of immunity. A full wipe remains recoverable. Reset local cover,
+stamina and flashlight state on revival/respawn without resetting world progress.
+Group escape still requires everyone connected.
+
+Make co-op guardian patrols visit all four clearings, increase hearing/search and
+speed relative to Solo (Hard chase 5.6 m/s), and increase sprint drain. Batch large
+shrub fields spatially and skip distant foliage beyond the fog. Match public
+rooms by difficulty only, show the single map in menus, reject incompatible
+server maps, and deploy server/client together. Meaningful tests cover route
+connectivity, all four deliveries, capacity/ownership, recovery, respawn and
+actual two-client WebSocket synchronization.
+
+## 41. Dedicated Golden Eye model
+
+Use the user-supplied Millinuim Eye by Seras (CC BY 4.0) specifically for Dawn's
+Golden Eye in co-op. Preserve its offering ID, location, inventory slot and
+deposit rules; other eye relics keep the existing eyeball. Normalize and ground
+the model to fit the pedestal and rune, retain the source/exporter, and credit
+Seras in the menu and CREDITS.md. The monster remains AI-controlled; a playable
+monster is deferred.
+
+## 42. Distinct co-op ember props and coloured liquids
+
+Use cyrus's Moon pendant for Eclipse Ember, Lucid Dreams (FAB)'s Iluminati Eye
+Symbol for Watcher Ember and Aren Boada's Celtic silver ring for Silver Ember,
+all CC BY 4.0. Preserve item IDs, locations and quest requirements. Ground/scale
+the models for pedestals and rune deposits, reduce texture/mesh budgets, retain
+sources and exporter and include all three attributions. Keep Sun Ember's sun.
+Give Dawn Dew gold liquid, Moon Tear blue, Watcher's Draught green and Nightfall
+Tears violet using isolated cloned potion materials; retain the shared bottle
+geometry and gold trim, and leave Solo's original Moon Tear unchanged. Tint the
+opaque optimized glass shell to match each liquid so colours remain visible
+without adding transparent surfaces or expensive glass transmission.
