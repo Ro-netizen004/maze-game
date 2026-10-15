@@ -1,6 +1,8 @@
 # Cooperative objective proposal
 
-The current game is single-player. These are proposed objective types, not implemented multiplayer features.
+Solo and an initial networked co-op mode are implemented. See MULTIPLAYER_SETUP.md
+for private/public rooms, server setup, shared rituals, revives and group escape.
+The following are ideas for later quest extensions, rather than all implemented features.
 
 Keep one connected escape chain: clues identify keys/seals; seals awaken the ritual sites; the ritual releases the exit; the group evacuates.
 

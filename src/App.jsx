@@ -3,7 +3,10 @@ import { Canvas } from '@react-three/fiber'
 import ForestAmbience from './ForestAmbience.jsx'
 import GuardianAudio from './GuardianAudio.jsx'
 import { graphicsPreset } from './graphics.js'
-import { canActivateShrine } from './objectives.js'
+import useMultiplayer from './multiplayer/useMultiplayer.js'
+import MultiplayerWorld from './multiplayer/MultiplayerWorld.jsx'
+import CoopHud from './multiplayer/CoopHud.jsx'
+import useQuestProgress from './quest/useQuestProgress.js'
 import ForestMaze from './ForestMaze'
 import Player from './Player'
 import { levelTemplates } from './levels'
@@ -12,8 +15,7 @@ import QuestObjects from './QuestObjects'
 import Monster from './Monster'
 import ForestExit from './ForestExit'
 import Flashlight from './Flashlight'
-import OfferingObjects from './OfferingObjects.jsx'
-import { canCollectOffering } from './offerings.js'
+import OfferingObjects from './quest/OfferingObjects.jsx'
 import MechanicObjects from './MechanicObjects'
 import EnvironmentalDust from './EnvironmentalDust'
 import MazeAtmosphere from './MazeAtmosphere'
@@ -28,14 +30,18 @@ import { createBlackoutState,advanceBlackout,blackoutPower,blackoutRemaining } f
 
 export default function App({ guardianConfig = {} }) {
   const [progress, setProgress] = useState(loadProgress)
-  const [levelIndex, setLevelIndex] = useState(0)
-  const [status, setStatus] = useState('ready')
+  const [selectedLevel, setLevelIndex] = useState(0)
+  const [mode, setMode] = useState('solo')
+  const multiplayer = useMultiplayer(resetLocalRuntime)
+  const room = mode === 'multiplayer' ? multiplayer.room : null
+  const isCoop = Boolean(room)
+  const levelIndex = room?.levelIndex ?? selectedLevel
+  const [soloStatus, setStatus] = useState('ready')
+  const status = room?.phase ?? soloStatus
+  const localPlayer = room?.players.find(player => player.id === multiplayer.id)
+  const canPlay = !localPlayer?.downed && !localPlayer?.escaped
   const [paused, setPaused] = useState(false)
   const [attempt, setAttempt] = useState(0)
-  const [collectedKeys, setCollectedKeys] = useState([])
-  const [collectedOfferings, setCollectedOfferings] = useState([])
-  const [openedDoors, setOpenedDoors] = useState([])
-  const [activatedShrines, setActivatedShrines] = useState([])
   const [triggeredTraps, setTriggeredTraps] = useState([])
   const [prompt, setPrompt] = useState(null)
   const [stamina, setStamina] = useState(100)
@@ -52,13 +58,24 @@ export default function App({ guardianConfig = {} }) {
   const ambienceAudio = useRef(null)
   const guardianAudio=useRef(null)
   const playerNoise = useRef(null)
+  const playerPose = useRef(null)
   const touchInput = useRef({ forward: 0, right: 0, jump: false, sprint: false, interact: false, lookX: 0, lookY: 0 })
   const elapsedRef = useRef(0)
   const timerNow = useRef(null)
   const noiseId = useRef(0)
-  const difficulty = progress.difficulty
+  const difficulty = room?.difficulty ?? progress.difficulty
   const settings = progress.settings
-  const level = useMemo(() => createSeededLevel(levelTemplates[levelIndex], `${levelTemplates[levelIndex].id}:${attempt}`), [levelIndex, attempt])
+  const level = useMemo(() => createSeededLevel(levelTemplates[levelIndex], room?.seed ?? `${levelTemplates[levelIndex].id}:${attempt}`), [levelIndex, attempt, room?.seed])
+  const soloQuest = useQuestProgress(level, setNotice)
+  const { collectedKeys, collectedOfferings, openedDoors, activatedShrines } = room?.quest ?? soloQuest
+  const { resetQuest } = soloQuest
+  const action = (type,id) => multiplayer.send({type:'action',action:{type,id}})
+  const collectKey = isCoop ? id=>action('key',id) : soloQuest.collectKey
+  const collectOffering = isCoop ? id=>action('offering',id) : soloQuest.collectOffering
+  const activateShrine = isCoop ? id=>action('shrine',id) : soloQuest.activateShrine
+  const openDoor = isCoop ? id=>action('door',id) : soloQuest.openDoor
+  const runElapsed = room?.elapsed ?? elapsed
+  const runBlackout = room?.blackout ?? blackout
   const graphics = graphicsPreset(settings.graphicsQuality,isTouch)
   const timerActive = status === 'playing' && !paused
 
@@ -125,24 +142,13 @@ export default function App({ guardianConfig = {} }) {
     const timer = setTimeout(() => setNotice(null), 3500)
     return () => clearTimeout(timer)
   }, [notice])
-  function collectKey(id) {
-    if (collectedKeys.includes(id)) return
-    const key = level.keys.find(item => item.id === id)
-    setCollectedKeys(items => items.includes(id) ? items : [...items, id])
-    setNotice({ name: key.name, color: key.color })
-  }
-  function collectOffering(id) {
-    const offering = level.offerings.find(item => item.id === id)
-    if (!offering || collectedOfferings.includes(id) || !canCollectOffering(offering,openedDoors,activatedShrines,collectedOfferings)) return
-    setCollectedOfferings(items => items.includes(id) ? items : [...items,id])
-    setNotice({ name: offering.name, color: offering.color, message: offering.clue })
-  }
   function restart() {
+    if (isCoop) multiplayer.send({type: ['won','lost'].includes(room.phase) && room.ownerId===multiplayer.id ? 'reset' : 'leave'})
+    resetLocalRuntime()
+  }
+  function resetLocalRuntime() {
+    resetQuest()
     setNotice(null)
-    setCollectedKeys([])
-    setCollectedOfferings([])
-    setOpenedDoors([])
-    setActivatedShrines([])
     setTriggeredTraps([])
     setPrompt(null)
     setStamina(100)
@@ -160,14 +166,8 @@ export default function App({ guardianConfig = {} }) {
     setAttempt(value => value + 1)
     setStatus('ready')
   }
-  function activateShrine(id) {
-    const shrine = level.shrines.find(item=>item.id===id)
-    if (!shrine || activatedShrines.includes(id) || !canActivateShrine(shrine,openedDoors,activatedShrines,collectedOfferings)) return
-    setActivatedShrines(items=>items.includes(id)?items:[...items,id])
-    setNotice({name:shrine.name,color:shrine.color,message:`${shrine.name} is lit — both relics placed on the rune.`})
-  }
   function chooseLevel(index) {
-    if (index > progress.unlockedLevel) return
+    if (isCoop || index > progress.unlockedLevel) return
     setLevelIndex(index)
     restart()
   }
@@ -181,6 +181,7 @@ export default function App({ guardianConfig = {} }) {
     setProgress(current => typeof updater === 'function' ? updater(current) : updater)
   }
   function handleWin() {
+    if (isCoop) { action('escape'); return }
     const now = performance.now()
     const finalTime = advanceTimer(elapsedRef.current, timerNow.current, now, timerActive)
     elapsedRef.current = finalTime
@@ -209,6 +210,10 @@ export default function App({ guardianConfig = {} }) {
       ambienceAudio.current.play().catch(()=>{})
     }
     setPaused(false)
+    if (mode==='multiplayer') {
+      if (room?.ownerId===multiplayer.id) multiplayer.send({type:'start'})
+      return
+    }
     setStatus('playing')
     captureMouse()
   }
@@ -229,17 +234,17 @@ export default function App({ guardianConfig = {} }) {
     <div className={`relative h-screen w-full ${status === 'catching' ? 'guardian-caught' : ''}`}>
       <ForestAmbience audioRef={ambienceAudio} active={timerActive} enabled={settings.ambienceEnabled} volume={settings.ambienceVolume} />
       <GuardianAudio controllerRef={guardianAudio} active={timerActive} enabled={settings.ambienceEnabled} volume={settings.ambienceVolume} proximity={guardianProximity} />
-      <Canvas shadows={graphics.shadows} dpr={graphics.dpr} frameloop={timerActive || status === 'catching' ? 'always' : 'demand'}
+      <Canvas shadows={graphics.shadows} dpr={graphics.dpr} frameloop={timerActive || status === 'catching' || (isCoop && status==='playing') ? 'always' : 'demand'}
         gl={{ antialias: !isTouch, powerPreference: isTouch ? 'low-power' : 'high-performance' }}
         camera={{ position: [-6, 1.6, -8], fov: 75, near: 0.03 }}>
         <color attach="background" args={[activatedShrines.length ? '#101d29' : '#0b1821']} />
         <fog attach="fog" args={['#203536', 4, 18 + activatedShrines.length * (level.mechanics.shrineVisibilityBoost || 0)]} />
         <hemisphereLight args={['#91afc2', '#26372f', 0.48]} />
-        <MazeAtmosphere level={level} mobile={isTouch} shadowSize={graphics.shadowSize} power={blackoutPower(blackout)} />
+        <MazeAtmosphere level={level} mobile={isTouch} shadowSize={graphics.shadowSize} power={blackoutPower(runBlackout)} />
         <EnvironmentalDust mobile={isTouch || settings.graphicsQuality === 'performance'} reducedMotion={settings.reducedMotion} active={timerActive} flashlightOn={flashlightOn && flashlightBattery > 0} />
         <ForestMaze level={level} mobile={isTouch || settings.graphicsQuality === 'performance'} mist={settings.graphicsQuality !== 'performance'} reducedMotion={settings.reducedMotion} />
         <ForestExit level={level} />
-        <Monster
+        {!isCoop && <Monster
           key={`monster-${levelIndex}-${attempt}`}
           level={level}
           openedDoors={openedDoors}
@@ -259,42 +264,46 @@ export default function App({ guardianConfig = {} }) {
             setNotice(null)
             setStatus(current => current === 'catching' ? 'lost' : current)
           }}
-        />
+        />}
         <QuestObjects level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} />
         <OfferingObjects level={level} collectedOfferings={collectedOfferings} openedDoors={openedDoors} activatedShrines={activatedShrines} active={timerActive} reducedMotion={settings.reducedMotion} />
         <MechanicObjects level={level} triggeredTraps={triggeredTraps} activatedShrines={activatedShrines} />
-        {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
-          active={status === 'playing' && !paused}
+        {(status === 'ready' || status === 'playing' || status === 'catching') && <Player key={`${levelIndex}-${attempt}-${room?.seed ?? mode}`} level={level} collectedKeys={collectedKeys} openedDoors={openedDoors}
+          active={status === 'playing' && !paused && canPlay}
           mobile={isTouch} touchInput={touchInput}
           reducedMotion={settings.reducedMotion}
           lookSensitivity={settings.lookSensitivity} invertY={settings.invertY}
-          onPointerUnlock={handlePointerUnlock}
+          onPointerUnlock={handlePointerUnlock} onPose={pose=>{playerPose.current=pose}}
+          teammates={room?.players ?? []} playerId={multiplayer.id} onRevive={id=>action('revive',id)}
           activatedShrines={activatedShrines} collectedOfferings={collectedOfferings} onCollectOffering={collectOffering} onCollectKey={collectKey}
           onPromptChange={setPrompt} onStaminaChange={setStamina} onHiddenChange={setHidden}
           onNoise={noise => { playerNoise.current = { ...noise, id: ++noiseId.current } }}
           onTriggerTrap={id => setTriggeredTraps(items => items.includes(id) ? items : [...items, id])}
           onActivateShrine={activateShrine}
-          onOpenDoor={id => setOpenedDoors(items => items.includes(id) ? items : [...items, id])}
+          onOpenDoor={openDoor}
           onWin={handleWin} />}
+        {isCoop && <MultiplayerWorld multiplayer={multiplayer} hidden={hidden} flashlightOn={flashlightOn && flashlightBattery>0} onProximityChange={setGuardianProximity} playerPose={playerPose} paused={paused} />}
         <Flashlight intensity={settings.flashlightIntensity} battery={flashlightBattery} on={flashlightOn}
           mobile={isTouch} reducedMotion={settings.reducedMotion} active={timerActive} />
       </Canvas>
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.22) 100%)' }} />
       {(status === 'playing' || status === 'catching') && <GameHud level={level} levelIndex={levelIndex} levelCount={levelTemplates.length}
-        collectedOfferings={collectedOfferings} collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={hidden} shelterRevealed={shelterRevealed}
-        elapsed={elapsed} prompt={status === 'playing' ? prompt : null} notice={notice} isTouch={isTouch}
-        flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={guardianAlert} activatedShrines={activatedShrines} />}
-      {status==='playing' && (blackout.phase==='flickering' || blackout.phase==='dark') && <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-sm font-bold text-amber-200" role="status">Lightposts {blackout.phase==='flickering'?'flickering':'off'} · {blackoutRemaining(blackout)}s · Watch where you aim your flashlight</div>}
+        collectedOfferings={collectedOfferings} collectedKeys={collectedKeys} openedDoors={openedDoors} stamina={stamina} hidden={isCoop ? Boolean(localPlayer?.hidden) : hidden} shelterRevealed={isCoop ? Boolean(localPlayer?.exposed) : shelterRevealed}
+        elapsed={runElapsed} prompt={status === 'playing' && canPlay ? prompt : null} notice={notice} isTouch={isTouch}
+        flashlightBattery={flashlightBattery} flashlightOn={flashlightOn} guardianAlert={room?.guardian.mode ?? guardianAlert} multiplayer={isCoop} activatedShrines={activatedShrines} />}
+      {status==='playing' && (runBlackout.phase==='flickering' || runBlackout.phase==='dark') && <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded bg-slate-950/90 px-4 py-2 text-sm font-bold text-amber-200" role="status">Lightposts {runBlackout.phase==='flickering'?'flickering':'off'} · {blackoutRemaining(runBlackout)}s · Watch where you aim your flashlight</div>}
       {status === 'playing' && !paused && <button className="absolute right-4 top-24 z-20 rounded-lg border border-white/30 bg-slate-950/80 px-4 py-2 font-semibold text-white" onClick={pauseGame}>Pause</button>}
-      {status === 'playing' && !paused && isTouch && <MobileControls inputRef={touchInput}
+      {status === 'playing' && !paused && canPlay && isTouch && <MobileControls inputRef={touchInput}
         flashlightOn={flashlightOn} onToggleFlashlight={toggleFlashlight} />}
       {status === 'catching' && <div className="caught-vignette pointer-events-none absolute inset-0" aria-hidden="true" />}
-      {paused && status === 'playing' && <PauseMenu settings={settings}
+      {isCoop && status==='playing' && <CoopHud multiplayer={multiplayer} onLeave={restart} />}
+      {paused && status === 'playing' && <PauseMenu settings={settings} multiplayer={isCoop}
         onSettings={next => updateProgress(current => ({ ...current, settings: next }))}
         onReset={resetProgress} onResume={resume} onMenu={restart} />}
-      {status !== 'playing' && status !== 'catching' && <StartResultOverlay status={status} level={level}
+      {status !== 'playing' && status !== 'catching' && <StartResultOverlay status={status} level={level} mode={mode} multiplayer={multiplayer}
+        onMode={value=>{if(value===mode)return;multiplayer.disconnect();restart();setMode(value)}}
         levelIndex={levelIndex} levels={levelTemplates} unlockedLevel={progress.unlockedLevel}
-        difficulty={difficulty} bestTimes={progress.bestTimes} elapsed={elapsed}
+        difficulty={difficulty} bestTimes={progress.bestTimes} elapsed={runElapsed}
         onDifficulty={value => updateProgress(current => ({ ...current, difficulty: value }))}
         settings={settings} onSettings={next => updateProgress(current => ({ ...current, settings: next }))} onReset={resetProgress}
         onChooseLevel={chooseLevel} onStart={startGame}

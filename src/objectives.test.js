@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { levels } from './levels.js'
 import { canOpenDoor, isLevelSolvable } from './levelRuntime.js'
-import { canActivateShrine, nextObjective, shrineRequirement } from './objectives.js'
+import { canActivateShrine, nextObjective, shrineRequirement } from './quest/objectives.js'
 
 test('each ritual requires its offering and candle, and the exit waits for all rituals',()=>{
   for(const level of levels) {

@@ -3,6 +3,25 @@
 A first-person nighttime forest maze built with React, Three.js, React Three Fiber,
 Vite, and Tailwind. Collect keys, open gates, avoid the guardian, and reach the exit.
 
+## Code organization
+
+- `src/App.jsx` composes the run, rendering, audio and menus.
+- `src/quest/` owns ritual definitions, progression rules, generated offering
+  locations, carried/deposited inventory selectors and the quest state hook.
+- `src/quest/OfferingObjects.jsx` renders trail collectibles and deposited items;
+  `RelicModel.jsx` shares GLTF loading, cloned material cleanup and candle flicker.
+- `src/components/` contains the HUD, labeled inventory and menu controls.
+- `src/multiplayer/` handles browser connections, room UI, synchronized avatars,
+  the shared guardian renderer and the team HUD.
+- `server/` hosts in-memory rooms and validates shared quest actions, movement,
+  guardian behavior, revives and group escape through WebSockets.
+- Root `src/*.test.js` files verify progression, collision, guardian behavior,
+  model constraints and persistence with `npm test`.
+
+Collection history is retained after items are used. Inventory derives what is
+still carried from opened seals and completed rituals, preventing relic respawns.
+Generated review screenshots are temporary and should not be committed.
+
 ## Run locally
 
 Use Node.js 24 and npm:
@@ -24,8 +43,9 @@ npm test
 npm run build
 ```
 
-The production site is in `dist`. No backend is required for the current
-single-player game. The blocky avatar is prepared for future multiplayer work.
+The production site is in `dist`. Solo needs no backend. Multiplayer uses the
+separate WebSocket service started with `npm run server`; see
+[MULTIPLAYER_SETUP.md](MULTIPLAYER_SETUP.md) for local and hosted setup.
 
 ## GitHub Pages
 

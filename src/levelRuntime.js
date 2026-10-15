@@ -1,4 +1,4 @@
-import { canActivateShrine, canCollectOffering } from './objectives.js'
+import { canActivateShrine, canCollectOffering } from './quest/objectives.js'
 const cellId = cell => cell.join(',')
 
 export function hashSeed(seed) {

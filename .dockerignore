@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.tools
+*.jpg
+src/**/*.glb
+src/**/*.blend
+src/**/textures
+public
+.env
+.env.*

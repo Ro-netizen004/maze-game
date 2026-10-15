@@ -1,6 +1,7 @@
-import { reachableCells } from './levelRuntime.js'
-import { getLandmarks } from './landmarks.js'
-import { findPath } from './navigation.js'
+import { ritualDefinitions } from './questDefinitions.js'
+import { reachableCells } from '../levelRuntime.js'
+import { getLandmarks } from '../landmarks.js'
+import { findPath } from '../navigation.js'
 
 export { canCollectOffering } from './objectives.js'
 
@@ -11,12 +12,7 @@ export function addOfferings(level) {
     ...Object.values(level.keySpawnPools).flat(), ...level.doors.map(item => item.cell),
     ...level.hidingSpots.map(item => item.cell), ...level.traps.map(item => item.cell),
     ...landmarks.map(item => item.cell)].map(cell => cell.join(',')))
-  const definitions = [
-    { id: 'sun-ember', name: 'Sun Ember', rune: 'dawn', color: '#ffbd65', requiresDoors: ['ruby'], requiresShrines: [], clue: 'Carry the Sun Ember to Dawn in Sunwell Clearing.' },
-    { id: 'moon-tear', name: 'Moon Tear', rune: 'moon', color: '#b9a5ff', requiresDoors: ['ruby', 'sapphire'], requiresShrines: ['dawn'], clue: 'Carry the Moon Tear to Moon in Moonwell Clearing.' },
-    { id: 'watcher-eye', name: 'Watcher’s Eye', rune: 'watch', color: '#74d4ca', requiresDoors: ['ruby', 'sapphire'], requiresShrines: ['dawn', 'moon'], clue: 'Dawn and Moon have released the Watcher’s Eye. Return it to the Watcher’s Court.' },
-  ]
-  const sequence = definitions.flatMap(definition => [
+  const sequence = ritualDefinitions.flatMap(definition => [
     { ...definition, model: definition.id, clue: definition.name+' collected. Find its ritual candle next.' },
     { ...definition, id: definition.rune+'-candle', model: 'ritual-candle',
       name: (definition.rune==='watch'?'Watcher':definition.rune==='dawn'?'Dawn':'Moon')+' Candle',

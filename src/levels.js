@@ -1,7 +1,7 @@
 import { canOpenDoor as canOpenRuntimeDoor, createSeededLevel } from './levelRuntime.js'
 import { addHedgeHiding } from './hedgeHiding.js'
 import { addRuneClearings } from './runeClearings.js'
-import { addOfferings } from './offerings.js'
+import { addOfferings } from './quest/offerings.js'
 import { namePlaces } from './placeNames.js'
 
 export const cellSize = 2

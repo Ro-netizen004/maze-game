@@ -1,8 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { levels } from './levels.js'
-import { carriedQuestItems, depositedOfferings } from './questInventory.js'
-import { visibleOfferings, nextObjective } from './objectives.js'
+import { carriedQuestItems, depositedOfferings } from './quest/questInventory.js'
+import { visibleOfferings, nextObjective } from './quest/objectives.js'
 
 test('only carried items appear; opened seals consume keys without losing collection history',()=>{
   const level=levels[0]

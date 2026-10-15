@@ -1,6 +1,6 @@
 import QuestInventory from './QuestInventory.jsx'
 import { formatTime } from '../runTimer'
-import { nextObjective } from '../objectives.js'
+import { nextObjective } from '../quest/objectives.js'
 import { FLASHLIGHT_LOW_THRESHOLD, flashlightBatteryStatus } from '../flashlightBattery'
 
 function KeyIcon() {
@@ -10,7 +10,7 @@ function KeyIcon() {
 export default function GameHud({
   level, levelIndex, levelCount, collectedKeys, openedDoors, stamina, hidden, elapsed, prompt, notice, isTouch,
   flashlightBattery, flashlightOn, guardianAlert, activatedShrines = [],
-  shelterRevealed = false, collectedOfferings = [],
+  shelterRevealed = false, collectedOfferings = [], multiplayer = false,
 }) {
   const required = level.mechanics.requiredDoors || []
   const openedRequired = required.filter(id => openedDoors.includes(id)).length
@@ -37,7 +37,7 @@ export default function GameHud({
         </div>
       </div>
     </div>
-    <QuestInventory level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} collectedOfferings={collectedOfferings} activatedShrines={activatedShrines} isTouch={isTouch} />
+    <QuestInventory level={level} collectedKeys={collectedKeys} openedDoors={openedDoors} collectedOfferings={collectedOfferings} activatedShrines={activatedShrines} isTouch={isTouch} multiplayer={multiplayer} />
     {prompt && <div className="pointer-events-none absolute bottom-32 left-1/2 -translate-x-1/2 rounded-xl bg-slate-950/90 px-5 py-3 text-center text-white shadow-lg">
       {!isTouch && <span className="mr-3 inline-block rounded border border-white/40 px-2 py-1 font-bold">E</span>}
       <span className={prompt.available === false ? 'text-slate-400' : 'font-bold'}>{prompt.label}</span>

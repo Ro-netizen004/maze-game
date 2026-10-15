@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { levels } from './levels.js'
 import { isLevelSolvable, reachableCells } from './levelRuntime.js'
-import { visibleOfferings } from './objectives.js'
+import { visibleOfferings } from './quest/objectives.js'
 
 test('only the next relic is visible, even if both seals are opened early',()=>{
   for(const level of levels) {

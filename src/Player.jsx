@@ -6,8 +6,8 @@ import { cellSize, cellPosition, doorPosition, canOpenDoor } from './levels'
 import { movePlayer } from './collision'
 import { readInput } from './input'
 import { worldCell } from './navigation'
-import { canActivateShrine, shrineRequirement } from './objectives.js'
-import { visibleOfferings } from './objectives.js'
+import { canActivateShrine, shrineRequirement } from './quest/objectives.js'
+import { visibleOfferings } from './quest/objectives.js'
 import PlayerAvatar from './PlayerAvatar'
 
 const eyeHeight = 1.6
@@ -18,6 +18,8 @@ const interactionDistance = 1.45
 export default function Player({
   level, onWin, collectedKeys, openedDoors, activatedShrines = [], touchInput = {},
   collectedOfferings = [], onCollectOffering = () => {},
+  teammates = [], playerId = null, onRevive = () => {},
+  onPose = () => {},
   active = true,
   mobile = false,
   reducedMotion = false,
@@ -219,6 +221,8 @@ export default function Player({
     pose.current.yaw = Math.atan2(forward.current.x, forward.current.z)
     pose.current.moving = moving && !player.hiddenIn
     pose.current.sprinting = sprinting
+    pose.current.hidden = Boolean(player.hiddenIn)
+    onPose(pose.current)
     const [endX, endZ] = cellPosition(level, level.end)
     let nearby = null
     let interaction = null
@@ -227,6 +231,13 @@ export default function Player({
       if (!collectedKeys.includes(key.id) && Math.hypot(camera.position.x - keyX, camera.position.z - keyZ) < interactionDistance) {
         nearby = key.id
         interaction = { type: 'key', id: key.id, label: `Pick up ${key.name} key` }
+        break
+      }
+    }
+    if (!interaction && !player.hiddenIn) {
+      for (const teammate of teammates) {
+        if (teammate.id===playerId || !teammate.downed || Math.hypot(camera.position.x-teammate.x,camera.position.z-teammate.z)>=1.7) continue
+        interaction={type:'revive',id:teammate.id,label:'Revive '+teammate.name}
         break
       }
     }
@@ -268,6 +279,7 @@ export default function Player({
       }
     }
     if (interaction && player.interact) {
+      if (interaction.type === 'revive') onRevive(interaction.id)
       if (interaction.type === 'key') { onCollectKey(interaction.id); nearby = null }
       if (interaction.type === 'offering' && interaction.available) onCollectOffering(interaction.id)
       if (interaction.type === 'door' && interaction.available) {
